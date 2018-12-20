@@ -2,6 +2,14 @@ module parser
 !    use printing
     implicit none
 
+        interface
+            subroutine gen_uuid(uuid) bind(c)
+                use, intrinsic :: iso_c_binding, only: c_char
+                implicit none
+                character(kind=c_char) :: uuid
+            end subroutine gen_uuid
+        end interface
+
     contains
 
         subroutine get_opts(sys, run)
@@ -19,6 +27,9 @@ module parser
             character(len=255) :: tmp_arg
 
             ! Initialize
+            call gen_uuid(run%uuid)
+            ! [TODO] solve this
+            run%uuid = trim(run%uuid(1:36))
             run%config%filename = ''
             run%output_file = ''
 
@@ -72,7 +83,7 @@ module parser
             use const, only: sp, dp, config_unit
             use system, only: sys_t, run_t, cc_t, config_t
 
-            use printing, only: abort_cc
+            use printing, only: io, abort_cc
 
             type(sys_t), intent(inout) :: sys
             type(run_t), intent(inout) :: run
@@ -262,6 +273,9 @@ module parser
                     case ('output_bin')
                         run%bin_file = val
 
+                    case ('ext_cor_file')
+                        run%ext_cor_file = val
+
                     end select
                 endif
 
@@ -278,6 +292,10 @@ module parser
             sys%act_unocc_a = act_unocc
             sys%act_unocc_b = act_unocc + sys%occ_a - sys%occ_b
 
+            if (trim(run%label) /= '' .and. trim(run%bin_file) == '') then
+                run%bin_file = 'tvec_'//trim(run%label)//'.bin'
+            endif
+
             ! Error checks
             if (nocc_spin == -1 .or. nunocc_spin == -1) then
                 call abort_cc('CONFIGURATION ERROR: nel and nvir keywords must be given.')
@@ -291,7 +309,7 @@ module parser
 
             inquire(file=trim(run%bin_file), exist=t_exists)
             if (t_exists .and. .not. run%restart) &
-                call abort_cc('CONFIGURATION ERROR: '//trim(run%bin_file)//' already exists')
+                write(io, '(a)') 'WARNING: '//trim(run%bin_file)//' already exists'
 
 
         end subroutine get_config
@@ -323,7 +341,7 @@ module parser
             run%label = ''
             run%onebody_file = 'onebody.inp'
             run%twobody_file = 'twobody.inp'
-            run%bin_file = 'output.bin'
+            run%bin_file = 'tvec_'//trim(run%uuid)//'.bin'
             run%calc_type = 'CCSD'
 
             ! CC

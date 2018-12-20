@@ -20,9 +20,7 @@ program main
     ! Initialize printing
     call init_print(run)
 
-
-
-    call print_header()
+    call print_header(run%uuid)
     if (run%config%echo) call print_config(run%config)
 
     call load_ints(sys, run)

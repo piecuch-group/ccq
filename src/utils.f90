@@ -199,13 +199,13 @@ contains
 
     end subroutine antisym_t
 
-    subroutine open_t4_files(sys, restart)
+    subroutine open_t4_files(sys, run)
 
         use const, only: dp, ta, tb, tc, td, te
-        use system, only: sys_t
+        use system, only: sys_t, run_t
 
-        type(sys_t) :: sys
-        logical, intent(in) :: restart
+        type(sys_t), intent(in) :: sys
+        type(run_t), intent(in) :: run
         real(dp), allocatable :: t(:)
         integer :: k1, k2, k3, k4
 
@@ -215,40 +215,40 @@ contains
         K4 = sys%orbs-sys%occ_b
 
 
-        open(ta, file='t4a.bin', status='unknown', form='unformatted')
-        if (.not. restart) then
+        open(ta, file=trim(run%bin_file)//'_4a.bin', status='unknown', form='unformatted')
+        if (.not. run%restart) then
             allocate(t(k1**4*k3**4))
             t = 0.0_dp
             write(ta) t
             deallocate(t)
         endif
 
-        open(tb, file='t4b.bin', status='unknown', form='unformatted')
-        if (.not. restart) then
+        open(tb, file=trim(run%bin_file)//'_4b.bin', status='unknown', form='unformatted')
+        if (.not. run%restart) then
             allocate(t(k1**3*k2*k3**3*k4))
             t = 0.0_dp
             write(tb) t
             deallocate(t)
         endif
 
-        open(tc, file='t4c.bin', status='unknown', form='unformatted')
-        if (.not. restart) then
+        open(tc, file=trim(run%bin_file)//'_4c.bin', status='unknown', form='unformatted')
+        if (.not. run%restart) then
             allocate(t(k1**2*k2**2*k3**2*k4**2))
             t = 0.0_dp
             write(tc) t
             deallocate(t)
         endif
 
-        open(td, file='t4d.bin', status='unknown', form='unformatted')
-        if (.not. restart) then
+        open(td, file=trim(run%bin_file)//'_4d.bin', status='unknown', form='unformatted')
+        if (.not. run%restart) then
             allocate(t(k2**3*k1*k4**3*k3))
             t = 0.0_dp
             write(td) t
             deallocate(t)
         endif
 
-        open(te, file='t4e.bin', status='unknown', form='unformatted')
-        if (.not. restart) then
+        open(te, file=trim(run%bin_file)//'_4e.bin', status='unknown', form='unformatted')
+        if (.not. run%restart) then
             allocate(t(k2**4*k4**4))
             t = 0.0_dp
             write(te) t

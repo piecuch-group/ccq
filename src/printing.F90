@@ -28,20 +28,15 @@ contains
 
     end subroutine close_print
 
-    subroutine print_header()
+    subroutine print_header(uuid)
 
         character(len=255) :: hostname
         character(len=255) :: cmd
-        character(len=37) :: uuid
-        integer(kind=4) :: stat
+        character(len=255) :: cwd
+        character(len=255) :: user
+        character(len=37), intent(in) :: uuid
+        character(len=30) :: date
 
-        interface
-            subroutine gen_uuid(uuid) bind(c)
-                use, intrinsic :: iso_c_binding, only: c_char
-                implicit none
-                character(kind=c_char) :: uuid
-            end subroutine gen_uuid
-        end interface
 
         write(io,'(a)') 'ccq Coupled-Cluster Program'
         write(io,'(a/)') '==========================='
@@ -86,11 +81,16 @@ contains
 
         write(io,'(/a)') 'Host information'
         write(io,'(a)') '----------------'
-        stat = hostnm(hostname)
+        call hostnm(hostname)
         call get_command(cmd)
+        call getcwd(cwd)
+        call get_environment_variable("USER", user)
+        call fdate(date)
         write(io,'(2x,a20,1x,a)') 'Hostname', trim(hostname)
         write(io,'(2x,a20,1x,a)') 'Command', trim(cmd)
-        call gen_uuid(uuid)
+        write(io,'(2x,a20,1x,a)') 'Working dir', trim(cwd)
+        write(io,'(2x,a20,1x,a)') 'User', trim(user)
+        write(io,'(2x,a20,1x,a)') 'Date', trim(date)
         write(io,'(2x,a20,1x,a/)') 'UUID', trim(uuid(1:36))
 
         call flush(io)
@@ -210,8 +210,7 @@ contains
         call cpu_time(cputime)
         nsec=cputime - prev_time
         nmin=int(nsec) / 60
-        nsec=nsec-real(nmin, dp)*60.0d0
-        nsec=nsec-real(nmin, dp)*60.0d0
+        nsec=nsec-real(nmin, dp)*60.0_dp
 
         write(io,'(2x,i4,3(f15.10),i5,'' min'',f5.1,'' s'')') iter,ecor,energy_diff, res,nmin,nsec
 

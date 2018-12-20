@@ -70,7 +70,10 @@ module system
         integer :: diis_space
         logical :: restart
         integer :: max_iter
+
+        ! Calculation ID
         character(len=255) :: label
+        character(len=37) :: uuid
 
         ! Coupled-cluster level information
         integer :: act_ind_t
@@ -86,6 +89,7 @@ module system
         ! I/O information
         type(config_t) :: config
         logical :: keep_bin
+        character(len=255) :: ext_cor_file
         character(len=255) :: output_file
         character(len=255) :: onebody_file
         character(len=255) :: twobody_file
