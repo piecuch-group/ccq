@@ -269,6 +269,8 @@ module parser
 
                     case ('keep_bin')
                         read(val, *) run%keep_bin
+                    case ('output_log')
+                        run%output_file = val
 
                     case ('output_bin')
                         run%bin_file = val
@@ -292,7 +294,7 @@ module parser
             sys%act_unocc_a = act_unocc
             sys%act_unocc_b = act_unocc + sys%occ_a - sys%occ_b
 
-            if (trim(run%label) /= '' .and. trim(run%bin_file) == '') then
+            if (trim(run%label) /= '') then
                 run%bin_file = 'tvec_'//trim(run%label)//'.bin'
             endif
 
@@ -368,17 +370,21 @@ module parser
             associate(filename=>config%filename,lines=>config%lines,file_size=>config%file_size)
 
                 inquire(file=trim(filename), exist=t_exists)
-                if (.not. t_exists) call abort_cc('CONFIGURATION ERROR: configuration file not found')
+                if (.not. t_exists) &
+                    call abort_cc('CONFIGURATION ERROR: configuration file not found')
 
                 open(unit=config_unit,file=trim(filename),status='old')
 
                 do
                     read(config_unit, '(a)', iostat=ios) line
                     if (ios == -1) exit
-                    if (ios /= 0) call abort_cc("CONFIGURATION ERROR: could not read configuration file")
+                    if (ios /= 0) &
+                        call abort_cc("CONFIGURATION ERROR: could not read configuration file")
 
                     ! Load config file into memory
                     file_size = file_size + 1
+                    if (file_size > size(config%lines,1)) &
+                        call abort_cc("CONFIGURATION ERROR: configuration file too large")
                     lines(file_size) = line
                 enddo
 

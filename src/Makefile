@@ -1,12 +1,14 @@
-FC := gfortran
-FFLAGS := -O3 -fdefault-integer-8 -m64 -I${MKLROOT}/include -ffree-line-length-none -ffixed-line-length-132 -mtune=native
-FFLAGS_DEBUG := -O0 -fcheck=all -fdefault-integer-8 -m64 -I${MKLROOT}/include -fbacktrace -g -mtune=native -ffixed-line-length-132 -ffree-line-length-none
-LDFLAGS := -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_gf_ilp64.a ${MKLROOT}/lib/intel64/libmkl_gnu_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -lgomp -lpthread -lm -ldl -luuid
+#FC := gfortran
+#FFLAGS := -O3 -fdefault-integer-8 -m64 -I${MKLROOT}/include -ffree-line-length-none -ffixed-line-length-132 -mtune=native
+#FFLAGS_DEBUG := -O0 -fcheck=all -fdefault-integer-8 -m64 -I${MKLROOT}/include -fbacktrace -g -mtune=native -ffixed-line-length-132 -ffree-line-length-none
+#LDFLAGS := -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_gf_ilp64.a ${MKLROOT}/lib/intel64/libmkl_gnu_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -lgomp -lpthread -lm -ldl -luuid
 
-@LIOMP := /opt/intel/compilers_and_libraries_2017.4.196/linux/compiler/lib/intel64_lin/libiomp5.a
-@FC := ifort
-@FFLAGS := -O3 -i8 -I${MKLROOT}/include -132  -xCORE-AVX512
-@LDFLAGS := -static-intel -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_ilp64.a ${MKLROOT}/lib/intel64/libmkl_intel_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group ${LIOMP} -lpthread -lm -ldl -luuid
+LIOMP := /opt/intel/compilers_and_libraries_2017.4.196/linux/compiler/lib/intel64_lin/libiomp5.a
+FC := ifort
+#FFLAGS := -O3 -i8 -I${MKLROOT}/include -132  -xCORE-AVX512
+FFLAGS := -O3 -i8 -I${MKLROOT}/include -132  -xCORE-AVX2
+FFLAGS_DEBUG := -O0 -g -traceback -i8 -I${MKLROOT}/include -132  -xCORE-AVX2
+LDFLAGS := -static-intel -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_ilp64.a ${MKLROOT}/lib/intel64/libmkl_intel_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group ${LIOMP} -lpthread -lm -ldl -luuid
 
 CC := gcc
 
@@ -67,7 +69,11 @@ update_cc.o: cc/antisym.o
 # Cluster analysis
 ext_cor/cluster_analysis.o: ext_cor/process_ci.o ext_cor/symmetry.o ext_cor/sys_data.o ext_cor/utilities.o
 
-ext_cor/process_ci.o: printing.o
+ext_cor/directed_t4_analysis.o: ext_cor/sys_data.o ext_cor/ext_cor_types.o
+
+ext_cor/hmatrix.o: ext_cor/ext_cor_types.o determinant.o
+
+ext_cor/process_ci.o: printing.o ext_cor/directed_t4_analysis.o ext_cor/symmetry.o ext_cor/hmatrix.o determinant.o
 
 ext_cor/utilities.o: ext_cor/sys_data.o
 
@@ -88,5 +94,5 @@ clean:
 	@echo Cleaning...
 	rm -f *.a
 	rm -f *.mod */*.mod
-	rm -f $(cc_OBJS) $(main_OBJS) $(ext_cor_OBJS) $(PROGRAM)
+	rm -f $(cc_OBJS) $(main_OBJS) $(ext_cor_OBJS) $(PROGRAM) gen_uuid.o
 	@echo Done.

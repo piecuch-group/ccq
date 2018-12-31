@@ -98,7 +98,7 @@ contains
     end subroutine read_sym
 
     function is_sym(ex_orbs, norbs)
-        integer, intent(in) :: ex_orbs(100)
+        integer, intent(in) :: ex_orbs(8)
         integer, intent(in) :: norbs
         integer :: tmp_sym(8)
         integer :: test_ag = 1

@@ -12,6 +12,15 @@ module system
         real(dp), allocatable :: t2_mc(:)
     end type acc_t
 
+    type ext_cor_t
+        integer, allocatable :: twobody_confs(:,:)
+        real(dp), allocatable :: twobody_proj(:)
+
+        real(dp), allocatable :: t2a(:,:,:,:)
+        real(dp), allocatable :: t2b(:,:,:,:)
+        real(dp), allocatable :: t2c(:,:,:,:)
+    end type ext_cor_t
+
     type ints_t
         real(dp), allocatable :: f_a(:,:)
         real(dp), allocatable :: f_b(:,:)
@@ -47,9 +56,11 @@ module system
         integer :: t_size
         integer :: pos(20)
 
-
         ! ACC data
         type(acc_t) :: acc
+
+        ! Externally corrected data
+        type(ext_cor_t) :: ext_cor
 
         ! Correlation energy
         real(dp) :: en_cor
@@ -57,7 +68,7 @@ module system
 
     type config_t
         character(len=255) :: filename
-        character(len=line_len) :: lines(100)
+        character(len=line_len) :: lines(200)
         integer :: file_size = 0
 
         logical :: echo = .false.

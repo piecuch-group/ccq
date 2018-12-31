@@ -189,13 +189,13 @@ contains
         call t3c_antisym(sys%froz,sys%occ_a,sys%occ_b,sys%orbs,cc%t_vec(cc%pos(8)))
         call t3d_antisym(sys%froz,sys%occ_a,sys%occ_b,sys%orbs,cc%t_vec(cc%pos(9)))
 
-        if (lvl_q) then
-            call t4a_antisym(sys%froz,sys%occ_a,sys%occ_b,sys%orbs)
-            call t4b_antisym(sys%froz,sys%occ_a,sys%occ_b,sys%orbs)
-            call t4c_antisym(sys%froz,sys%occ_a,sys%occ_b,sys%orbs)
-            call t4d_antisym(sys%froz,sys%occ_a,sys%occ_b,sys%orbs)
-            call t4e_antisym(sys%froz,sys%occ_a,sys%occ_b,sys%orbs)
-        endif
+        !if (lvl_q) then
+        !    call t4a_antisym(sys%froz,sys%occ_a,sys%occ_b,sys%orbs)
+        !    call t4b_antisym(sys%froz,sys%occ_a,sys%occ_b,sys%orbs)
+        !    call t4c_antisym(sys%froz,sys%occ_a,sys%occ_b,sys%orbs)
+        !    call t4d_antisym(sys%froz,sys%occ_a,sys%occ_b,sys%orbs)
+        !    call t4e_antisym(sys%froz,sys%occ_a,sys%occ_b,sys%orbs)
+        !endif
 
     end subroutine antisym_t
 

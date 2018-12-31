@@ -8,7 +8,7 @@ contains
 
         use, intrinsic :: iso_fortran_env, only: output_unit
         use const, only: dp, t_unit, t_vecs_unit, t_unit
-        use cluster_analysis, only: cluster_analysis_driver
+        use cluster_analysis, only: cluster_analysis_driver_opt
         use diis, only: calc_diis, write_t_vecs, init_t_vecs
         use printing, only: io, print_header, print_date, print_iter_head, print_iteration, abort_cc, print_summary
         use system, only: sys_t, run_t, cc_t
@@ -38,8 +38,8 @@ contains
         call init_t_vec(cc, run%restart)
 
         if (run%ext_cor) then
-            call cluster_analysis_driver(sys, run, cc)
-            call antisym_t(sys, cc, run%lvl_q)
+            call cluster_analysis_driver_opt(sys, run, cc)
+            !call antisym_t(sys, cc, run%lvl_q)
             e_cor_new = calculate_energy(sys, cc)
             write(io, '(2x,a27,2x,f16.10/)') 'External correlation energy', e_cor_new
         else

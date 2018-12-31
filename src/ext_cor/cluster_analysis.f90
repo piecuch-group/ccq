@@ -6,6 +6,174 @@ module cluster_analysis
 
 contains
 
+    subroutine cluster_analysis_driver_opt(sys, run, cc)
+
+        use const, only: dp
+        use ext_cor_types, only: c_vec_t
+        use hmatrix, only: ext_cor_update_t2_cluster
+        use process_ci, only: find_fciqmc_c3, get_ext_cor_4, antisymmetrize
+        use printing, only: io
+        use system, only: sys_t, run_t, cc_t
+        use symmetry, only: read_sym
+        use sys_data
+
+        type(sys_t), intent(in) :: sys
+        type(run_t), intent(in) :: run
+        type(cc_t), intent(inout) :: cc
+        type(c_vec_t) :: c_vec
+
+        real(kind=8), allocatable :: t2_aa(:,:,:,:)
+        real(kind=8), allocatable :: t2_ab(:,:,:,:)
+        real(kind=8), allocatable :: t2_bb(:,:,:,:)
+
+        real(kind=8), allocatable :: t3_aaa(:,:,:,:,:,:)
+        real(kind=8), allocatable :: t3_aab(:,:,:,:,:,:)
+        real(kind=8), allocatable :: t3_abb(:,:,:,:,:,:)
+        real(kind=8), allocatable :: t3_bbb(:,:,:,:,:,:)
+
+        integer, allocatable :: twobody_confs(:,:)
+        real(dp), allocatable :: twobody_proj(:)
+
+        real(dp) :: coef_norm
+
+        logical :: print_doubles = .true.
+        logical :: jun_moe = .false.
+        logical :: closed_shell = .false.
+        logical :: config_debug = .false.
+        logical :: from_moe = .false.
+        logical :: rm_dscnctd = .false.
+        integer :: i_err
+
+        call read_sym('sym.out', sys%orbs)
+        !if (sys%occ_a == sys%occ_b) closed_shell = .true.
+        froz = sys%froz
+        occ_a = sys%occ_a
+        occ_b = sys%occ_b
+        nele = occ_a + occ_b
+        total = sys%orbs
+        unocc = total * 2 - nele
+        nsorb = (total * 2) - (froz * 2)
+        nocc_a = sys%occ_a - sys%froz
+        nocc_b = sys%occ_b - sys%froz
+        nunocc_a = sys%orbs - sys%occ_a
+        nunocc_b = sys%orbs - sys%occ_b
+        ntotal = cc%t_size
+        ntotal_moe = cc%t_size
+        i_t1a = cc%pos(1)
+        i_t1b = cc%pos(2)
+        i_t2a = cc%pos(3)
+        i_t2b = cc%pos(4)
+        i_t2c = cc%pos(5)
+        i_t3a = cc%pos(6)
+        i_t3b = cc%pos(7)
+        i_t3c = cc%pos(8)
+        i_t3d = cc%pos(9)
+
+        write(io, '(a)') 'Cluster analysis'
+        write(io, '(a)') '----------------'
+        write(io, '(2x,a)') '=> Allocating arrays'
+
+        allocate(c_vec%c1_a(occ_a+1:total,froz+1:occ_a))
+        allocate(c_vec%c1_b(occ_b+1:total,froz+1:occ_b), stat=i_err)
+
+        allocate(c_vec%c2_aa(occ_a+1:total,occ_a+1:total,froz+1:occ_a,froz+1:occ_a))
+        allocate(c_vec%c2_ab(occ_a+1:total,occ_b+1:total,froz+1:occ_a,froz+1:occ_b))
+        allocate(c_vec%c2_bb(occ_b+1:total,occ_b+1:total,froz+1:occ_b,froz+1:occ_b))
+
+        allocate(c_vec%c3_aaa(occ_a+1:total,occ_a+1:total,occ_a+1:total, &
+            froz+1:occ_a,froz+1:occ_a,froz+1:occ_a))
+        allocate(c_vec%c3_aab(occ_a+1:total,occ_a+1:total,occ_b+1:total, &
+            froz+1:occ_a,froz+1:occ_a,froz+1:occ_b))
+        allocate(c_vec%c3_abb(occ_a+1:total,occ_b+1:total,occ_b+1:total, &
+            froz+1:occ_a,froz+1:occ_b,froz+1:occ_b))
+        allocate(c_vec%c3_bbb(occ_b+1:total,occ_b+1:total,occ_b+1:total, &
+            froz+1:occ_b,froz+1:occ_b,froz+1:occ_b))
+
+
+        allocate(t2_aa(occ_a+1:total,occ_a+1:total,froz+1:occ_a,froz+1:occ_a))
+        allocate(t2_ab(occ_a+1:total,occ_b+1:total,froz+1:occ_a,froz+1:occ_b))
+        allocate(t2_bb(occ_b+1:total,occ_b+1:total,froz+1:occ_b,froz+1:occ_b))
+
+        allocate(t3_aaa(occ_a+1:total,occ_a+1:total,occ_a+1:total, &
+            froz+1:occ_a,froz+1:occ_a,froz+1:occ_a))
+        allocate(t3_aab(occ_a+1:total,occ_a+1:total,occ_b+1:total, &
+            froz+1:occ_a,froz+1:occ_a,froz+1:occ_b))
+        allocate(t3_abb(occ_a+1:total,occ_b+1:total,occ_b+1:total, &
+            froz+1:occ_a,froz+1:occ_b,froz+1:occ_b))
+        allocate(t3_bbb(occ_b+1:total,occ_b+1:total,occ_b+1:total, &
+            froz+1:occ_b,froz+1:occ_b,froz+1:occ_b))
+
+
+        write(io, '(2x,a)') '=> Up to C3'
+        write(io, '(4x,a)') '=> Initializing arrays'
+        c_vec%c1_a = 0.0d0
+        c_vec%c1_b = 0.0d0
+        c_vec%c2_aa = 0.0d0
+        c_vec%c2_ab = 0.0d0
+        c_vec%c2_bb = 0.0d0
+        c_vec%c3_aaa = 0.0d0
+        c_vec%c3_aab = 0.0d0
+        c_vec%c3_abb = 0.0d0
+        c_vec%c3_bbb = 0.0d0
+
+        t2_aa = 0.0d0
+        t2_ab = 0.0d0
+        t2_bb = 0.0d0
+        t3_aaa = 0.0d0
+        t3_aab = 0.0d0
+        t3_abb = 0.0d0
+        t3_bbb = 0.0d0
+
+        write(io, '(4x,a)') "=> Reading and decoding FCIQMC vector configurations on:"
+        write(io, '(6x,a)') trim(run%ext_cor_file)
+        call find_fciqmc_c3(run%ext_cor_file, config_debug, &
+            c_vec%c1_a, c_vec%c1_b, c_vec%c2_aa, c_vec%c2_ab, c_vec%c2_bb, &
+            c_vec%c3_aaa, c_vec%c3_aab, c_vec%c3_abb, c_vec%c3_bbb, coef_norm)
+
+        write(io, '(4x,a)') "=> Starting cluster analysis"
+        call analyze_t3(from_moe, closed_shell, rm_dscnctd, &
+            c_vec%c1_a, c_vec%c1_b, c_vec%c2_aa, c_vec%c2_ab, c_vec%c2_bb, &
+            c_vec%c3_aaa, c_vec%c3_aab, c_vec%c3_abb, c_vec%c3_bbb, &
+            t2_aa, t2_ab, t2_bb, &
+            t3_aaa, t3_aab, t3_abb, t3_bbb)
+        call antisymmetrize(t2_aa, t2_ab, t2_bb, &
+            t3_aaa, t3_aab, t3_abb, t3_bbb)
+
+        write(io, '(4x,a/)') "=> Writing amplitudes"
+        call write_t3(cc, print_doubles, c_vec%c1_a, c_vec%c1_b, &
+            t2_aa, t2_ab, t2_bb, &
+            t3_aaa, t3_aab, t3_abb, t3_bbb)
+
+        deallocate(t2_aa)
+        deallocate(t2_ab)
+        deallocate(t2_bb)
+
+        deallocate(t3_aaa)
+        deallocate(t3_aab)
+        deallocate(t3_abb)
+        deallocate(t3_bbb)
+
+        write(io, '(2x,a)') '=> Generating <ijab|[V_N,T4]|0> intermediate'
+        call get_ext_cor_4(run%ext_cor_file, coef_norm, c_vec, sys%ints, cc%ext_cor%twobody_confs, cc%ext_cor%twobody_proj)
+
+        deallocate(c_vec%c1_a)
+        deallocate(c_vec%c1_b)
+
+        deallocate(c_vec%c2_aa)
+        deallocate(c_vec%c2_ab)
+        deallocate(c_vec%c2_bb)
+
+        deallocate(c_vec%c3_aaa)
+        deallocate(c_vec%c3_aab)
+        deallocate(c_vec%c3_abb)
+        deallocate(c_vec%c3_bbb)
+
+        write(io, '(4x,a/)') '=> Writing T2 files'
+        call ext_cor_update_t2_cluster(sys, cc%ext_cor)
+
+
+    end subroutine cluster_analysis_driver_opt
+
     subroutine cluster_analysis_driver(sys, run, cc)
 
         use const, only: dp
@@ -74,6 +242,8 @@ contains
         occ_b = sys%occ_b
         nele = occ_a + occ_b
         total = sys%orbs
+        unocc = total * 2 - nele
+        nsorb = (total * 2) - (froz * 2)
         nocc_a = sys%occ_a - sys%froz
         nocc_b = sys%occ_b - sys%froz
         nunocc_a = sys%orbs - sys%occ_a

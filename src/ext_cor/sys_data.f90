@@ -15,6 +15,7 @@ module sys_data
     integer :: i_t4a, i_t4b, i_t4c, i_t4d, i_t4e
     integer :: ntotal
     ! TO BE FIXED!!!!
+    integer :: nsorb
     integer :: nocc, nunocc, occ
     integer(kind=8) :: ist, ntotal_moe
 

@@ -96,6 +96,9 @@ contains
 
         allocate(v2(n1+1:n3,n1+1:n3,n0+1:n1,n0+1:n1))
         v2=0.0d0
+        if (run%ext_cor) then
+            v2(:,:,:,:) = cc%ext_cor%t2a(:,:,:,:)
+        endif
         call sumx2143(n0,n3,n1,n3,n1,n3,n0,n1,n0,n1,v2,intr,1.000)
 
         call t2a_update(n0,n1,n2,n3,k1,k2,k3,k4,run%lvl_t,run%lvl_q,shift,v2, &
@@ -113,6 +116,9 @@ contains
         !else
             allocate(v2(n2+1:n3,n2+1:n3,n0+1:n2,n0+1:n2))
             v2=0.0d0
+            if (run%ext_cor) then
+                v2(:,:,:,:) = cc%ext_cor%t2c(:,:,:,:)
+            endif
             call sumx2143(n0,n3,n2,n3,n2,n3,n0,n2,n0,n2,v2,intb,1.000)
 
             call t2c_update(n0,n1,n2,n3,k1,k2,k3,k4,run%lvl_t,run%lvl_q,shift,v2, &
@@ -126,6 +132,9 @@ contains
 
         allocate(v2(n2+1:n3,n1+1:n3,n0+1:n2,n0+1:n1))
         v2=0.0d0
+        if (run%ext_cor) then
+            v2(:,:,:,:) = cc%ext_cor%t2b(:,:,:,:)
+        endif
         call sumx2143(n0,n3,n2,n3,n1,n3,n0,n2,n0,n1,v2,intm,1.000)
 
         call t2b_update(n0,n1,n2,n3,k1,k2,k3,k4,run%lvl_t,run%lvl_q,shift,v2, &

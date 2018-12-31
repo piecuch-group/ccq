@@ -10,85 +10,90 @@ module process_ci
 
     implicit none
 
-    ! We need two different ways of computing phase factors
-    abstract interface
-        function i_excitation_sign(excitation_rank, from, to) result(det_sign)
-            integer, intent(in) :: excitation_rank
-            integer, intent(in) :: from(4)
-            integer, intent(in) :: to(4)
-            integer :: det_sign
-        end function i_excitation_sign
 
-        function i_convert_spin(i, spin) result(i_spin)
-            integer, intent(in) :: i
-            integer, intent(in) :: spin
-            integer :: i_spin
-        end function i_convert_spin
-    end interface
-
-    type excit_t
-        real(dp) :: coef
-        integer :: rank_a
-        integer :: rank_b
-        integer :: from_a(4), to_a(4)
-        integer :: from_b(4), to_b(4)
-    end type excit_t
 
 contains
 
-    subroutine decode_determinant(qmc_coef, conf, excitation)
-        integer, intent(in) :: qmc_coef
-        integer, intent(in) :: conf(:)
-        type(excit_t), intent(inout) :: excitation
+    subroutine gen_twobody_confs(confs)
 
+        use combinatorics, only: combinations
+        use symmetry, only: is_sym
 
-        ! These scratch arrays to generate configurations on
-        integer, allocatable :: pos_a(:), pos_b(:)
-        logical :: is_hf = .true.
-        ! alpha and beta index
-        integer :: i, idx
-        integer :: inda, indb
+        integer, allocatable, intent(out) :: confs(:,:)
+        integer, allocatable :: elecs(:), virts(:)
+        integer, allocatable :: combs_elecs(:,:), combs_virts(:,:)
+        integer, allocatable :: tmp_confs(:,:)
 
-        ! Set initial alpha configuration
-        is_hf = .true.
+        integer :: ex_orbs(8)
+        integer :: ind_el, ind_conf
+        integer :: i, j, k, l
+
+        integer :: spin_elecs, spin_virts
+        integer :: n_combs_elecs, n_combs_virts
+
+        ! Get electron combinations
+        allocate(elecs(nele))
         do i=1, nele
-            if (conf(i) /= i) then
-                is_hf = .false.
-                exit
-            endif
+            elecs(i) = i
+        enddo
+        call combinations(elecs, 2, combs_elecs)
+
+        allocate(virts(unocc))
+        do i=1, unocc
+            virts(i) = nele + i
+        enddo
+        call combinations(virts, 2, combs_virts)
+
+        n_combs_elecs = size(combs_elecs, 2)
+        n_combs_virts = size(combs_virts, 2)
+
+        allocate(tmp_confs(nele, n_combs_elecs * n_combs_virts))
+
+        ind_conf = 1
+        do i=1, n_combs_elecs
+            do j=1, n_combs_virts
+
+                ! Check whether spin matches excitation
+                spin_elecs = 0
+                spin_virts = 0
+                do k=1, 2
+                    spin_elecs = spin_elecs + mod(combs_elecs(k,i), 2)
+                    spin_virts = spin_virts + mod(combs_virts(k,j), 2)
+                enddo
+                if (spin_elecs /= spin_virts) cycle
+
+                ! Check symmetry
+                do k=1, 2
+                    ex_orbs(k) = int((combs_elecs(k,i) + 1) / 2)
+                enddo
+                do k=3, 4
+                    ex_orbs(k) = int((combs_virts(k-2,j) + 1) / 2)
+                enddo
+                if (.not. is_sym(ex_orbs, 4)) cycle
+
+                ind_el = 1
+                loop_el: do k=1,nele
+                    do l=1, 2
+                        if (combs_elecs(l,i) == k) cycle loop_el
+                    enddo
+                    tmp_confs(ind_el, ind_conf) = k
+                    ind_el = ind_el + 1
+                enddo loop_el
+                tmp_confs(ind_el, ind_conf) = combs_virts(1,j)
+                tmp_confs(ind_el + 1, ind_conf) = combs_virts(2,j)
+                ind_conf = ind_conf + 1
+            enddo
         enddo
 
-        if (is_hf) then
-            excitation%coef = real(qmc_coef,kind=8)
-            excitation%rank_a = 0
-            excitation%rank_b = 0
-        else
-            allocate(pos_a(occ_a), pos_b(occ_b))
+        allocate(confs(nele, ind_conf-1))
 
-            ! Load orbitals to symmetry testing array
-            ! [TODO] this should be implemented better
-            inda = 1
-            indb = 1
-            do i=1, nele
-                if (mod(conf(i), 2) == 1) then
-                    pos_a(inda) = (conf(i) / 2) + 1
-                    inda = inda + 1
-                else
-                    pos_b(indb) = conf(i) / 2
-                    indb = indb + 1
-                endif
-            enddo
+        confs(:,:) = tmp_confs(:,1:ind_conf-1)
 
-            !if (config_debug) then
-            !call print_conf_occupation(155, pos_a, pos_b, real(line(2), &
-            !kind=8))
-            !endif
+        deallocate(tmp_confs)
 
-            call spin_integrate('q', pos_a, pos_b, real(qmc_coef,kind=8), excitation)
-            deallocate(pos_a, pos_b)
-        endif
 
-    end subroutine decode_determinant
+    end subroutine gen_twobody_confs
+
 
     subroutine find_fciqmc_c3(filename, config_debug, &
             c1_a, c1_b, c2_aa, c2_ab, c2_bb, &
@@ -103,6 +108,8 @@ contains
         !   c*: arrays containing the spin-integrated coefficients based on excitation rank
 
         use const, only: dp
+        use determinant, only: decode_determinant
+        use ext_cor_types, only: excit_t
 
         ! [TODO] make this a type and pass it nicely
         real(kind=8), allocatable, intent(inout) :: c1_a(:,:)
@@ -130,8 +137,6 @@ contains
         integer :: line(2)
         integer :: conf(nele)
         logical :: is_hf = .true.
-
-
 
         ! Run over all alpha combinations
         !if (config_debug) then
@@ -214,6 +219,423 @@ contains
 
     end subroutine find_fciqmc_c3
 
+    subroutine find_disc_t4(cnt_c4, c4_confs, c_vec, ints, twobody_occ, twobody_proj)
+
+        use ext_cor_types, only: c_vec_t
+        use system, only: ints_t
+
+        integer, intent(in) :: cnt_c4
+        integer, intent(in) :: c4_confs(:,:)
+        type(c_vec_t), intent(in) :: c_vec
+        type(ints_t), intent(in) :: ints
+        integer, allocatable, intent(in) :: twobody_occ(:,:)
+        real(dp), allocatable, intent(inout) :: twobody_proj(:)
+
+        integer, allocatable :: elecs(:)
+        integer, parameter :: r = 4
+        integer :: i, j, k, l, m, indx
+        integer :: n_combs
+        integer :: inds_elecs(r), inds_virts(r)
+
+        ! Debug
+        integer :: cnt_eqs = 0
+
+        !n_combs_elecs = ncr(nele, r)
+        !n_combs_virts = ncr(unocc, r)
+
+        ! Set electrons array
+        allocate(elecs(nele))
+        do i=1, nele
+            elecs(i) = i
+        enddo
+
+
+        do i=1, r
+            inds_elecs(i) = i
+        enddo
+
+        !print '(/a/)', 'Start disc'
+        !open(997, file='test_4_deters', status='unknown')
+
+        call loop_virts_4(cnt_c4, c4_confs, c_vec, ints, twobody_occ, twobody_proj, &
+            elecs, inds_elecs, r)
+
+
+        elecs_loop: do
+            do i=r, 1, -1
+                if (inds_elecs(i) /= i + nele - r) exit
+                if (i == 1) exit elecs_loop
+            enddo
+            inds_elecs(i) = inds_elecs(i) + 1
+            do j=i+1, r
+                inds_elecs(j) = inds_elecs(j-1) + 1
+            enddo
+            !print *, 'elecs loop', i
+
+            call loop_virts_4(cnt_c4, c4_confs, c_vec, ints, twobody_occ, twobody_proj, &
+                elecs, inds_elecs, r)
+
+
+        enddo elecs_loop
+
+        !close(997)
+
+        !print '(a,2i12)', 'cnt_eqs, cnt_c4', cnt_eqs, cnt_c4
+        deallocate(elecs)
+
+    end subroutine find_disc_t4
+
+    subroutine loop_virts_4(cnt_c4, c4_confs, c_vec, ints, twobody_occ, twobody_proj, &
+            elecs, inds_elecs, r)
+
+        use ext_cor_types, only: c_vec_t
+        use system, only: ints_t
+
+        integer, intent(in) :: cnt_c4
+        integer, intent(in) :: c4_confs(:,:)
+        type(c_vec_t), intent(in) :: c_vec
+        type(ints_t), intent(in) :: ints
+        integer, allocatable, intent(in) :: twobody_occ(:,:)
+        real(dp), allocatable, intent(inout) :: twobody_proj(:)
+        integer, allocatable, intent(in) :: elecs(:)
+        integer, intent(in) :: inds_elecs(:)
+        integer, intent(in) :: r
+
+        integer, allocatable :: virts(:), tmp_conf(:)
+        integer :: inds_virts(r)
+
+        integer :: i, j
+        logical :: t_spin, t_sym, is_c4, t_exists
+
+        ! Debug
+        integer :: cnt_eqs
+
+        ! Set virtuals array
+        allocate(virts(unocc))
+        do i=1, unocc
+            virts(i) = nele + i
+        enddo
+
+        do i=1, r
+            inds_virts(i) = i
+        enddo
+
+        allocate(tmp_conf(nele))
+
+        ! Check if already exists
+        call elec_virt_to_conf(elecs, inds_elecs, virts, inds_virts, r, tmp_conf)
+        ! Check whether spin matches excitation
+        t_spin = check_spin(elecs, inds_elecs, virts, inds_virts, r)
+        ! Check symmetry
+        t_sym = check_sym(elecs, inds_elecs, virts, inds_virts, r)
+
+        t_exists = check_exists(cnt_c4, c4_confs, tmp_conf)
+        !if (t_exists) cnt_eqs = cnt_eqs + 1
+
+        if (.not. t_exists .and. t_spin .and. t_sym) then
+            ! Contract
+            call contract_t4(0, tmp_conf, 1.0_dp, c_vec, ints, twobody_occ, twobody_proj, is_c4)
+        endif
+
+        virts_loop: do
+            do i=r, 1, -1
+                if (inds_virts(i) /= i + unocc - r) exit
+                if (i == 1) exit virts_loop
+            enddo
+            inds_virts(i) = inds_virts(i) + 1
+            do j=i+1, r
+                inds_virts(j) = inds_virts(j-1) + 1
+            enddo
+
+            call elec_virt_to_conf(elecs, inds_elecs, virts, inds_virts, r, tmp_conf)
+            !print *, tmp_conf
+
+            ! Check whether spin matches excitation
+            t_spin = check_spin(elecs, inds_elecs, virts, inds_virts, r)
+            if (.not. t_spin) cycle virts_loop
+
+            ! Check symmetry
+            t_sym = check_sym(elecs, inds_elecs, virts, inds_virts, r)
+            if (.not. t_sym) cycle virts_loop
+
+            ! Check if already exists
+            t_exists = check_exists(cnt_c4, c4_confs, tmp_conf)
+            !write(997, '(6i4)') tmp_conf
+
+            if (t_exists) cycle virts_loop
+
+            ! Contract
+            call contract_t4(0, tmp_conf, 1.0_dp, c_vec, ints, twobody_occ, twobody_proj, is_c4)
+
+        enddo virts_loop
+
+        deallocate(tmp_conf, virts)
+
+    end subroutine loop_virts_4
+
+    subroutine elec_virt_to_conf(elecs, inds_elecs, virts, inds_virts, r, tmp_conf)
+
+        integer, intent(in) :: elecs(:), virts(:)
+        integer, intent(in) :: inds_elecs(:), inds_virts(:)
+        integer, intent(in) :: r
+        integer, intent(inout) :: tmp_conf(:)
+
+        integer :: ind_el, i, j
+
+
+        ind_el = 1
+        loop_el: do i=1,nele
+            do j=1, r
+                if (elecs(inds_elecs(j)) == i) cycle loop_el
+            enddo
+            tmp_conf(ind_el) = i
+            ind_el = ind_el + 1
+        enddo loop_el
+
+        do i=1, r
+            tmp_conf(ind_el) = virts(inds_virts(i))
+            ind_el = ind_el + 1
+        enddo
+
+
+    end subroutine elec_virt_to_conf
+
+    function check_exists(cnt_c4, c4_confs, tmp_conf) result(res)
+        integer, intent(in) :: cnt_c4
+        integer, intent(in) :: c4_confs(:,:)
+        integer, intent(in) :: tmp_conf(:)
+
+        integer :: i, j
+        logical :: res
+        logical :: tmp_check
+
+        res = .false.
+        do i=1, cnt_c4
+            tmp_check = .true.
+            do j=1, size(tmp_conf)
+                if (tmp_conf(j) /= c4_confs(j,i)) then
+                    tmp_check = .false.
+                    exit
+                endif
+            enddo
+            if (tmp_check) then
+                res = .true.
+                return
+            endif
+        enddo
+
+    end function check_exists
+
+    function check_spin(elecs, inds_elecs, virts, inds_virts, r) result(res)
+
+        integer, intent(in) :: elecs(:), virts(:)
+        integer, intent(in) :: inds_elecs(:), inds_virts(:)
+        integer, intent(in) :: r
+
+        integer :: spin_elecs, spin_virts
+        integer :: i
+
+        logical :: res
+
+        spin_elecs = 0
+        spin_virts = 0
+        do i=1, r
+            spin_elecs = spin_elecs + mod(elecs(inds_elecs(i)), 2)
+            spin_virts = spin_virts + mod(virts(inds_virts(i)), 2)
+        enddo
+
+        if (spin_elecs /= spin_virts) then
+            res = .false.
+        else
+            res = .true.
+        endif
+
+    end function check_spin
+
+    function check_sym(elecs, inds_elecs, virts, inds_virts, r) result(res)
+
+        integer, intent(in) :: elecs(:), virts(:)
+        integer, intent(in) :: inds_elecs(:), inds_virts(:)
+        integer, intent(in) :: r
+
+        integer :: spin_elecs, spin_virts
+        integer :: i
+        integer :: ex_orbs(8)
+
+        logical :: res
+
+        do i=1, r
+            ex_orbs(i) = int((elecs(inds_elecs(i)) + 1) / 2)
+        enddo
+        do i=r+1, 2*r
+            ex_orbs(i) = int((virts(inds_virts(i-r)) + 1) / 2)
+        enddo
+
+        res = is_sym(ex_orbs, 2*r)
+
+    end function check_sym
+
+    subroutine get_ext_cor_4(filename, coef_norm, c_vec, ints, twobody_confs, twobody_proj)
+        use determinant, only: decode_determinant
+        use directed_t4_analysis, only: analyze_t4_aaaa, analyze_t4_aaab, analyze_t4_aabb, &
+            analyze_t4_abbb, analyze_t4_bbbb
+        use hmatrix, only: num_confs_to_occs, update_proj_t2
+        use ext_cor_types, only: c_vec_t, excit_t
+        use printing, only: io
+        use system, only: ints_t
+
+        character(len=*), intent(in) :: filename
+        real(dp), intent(in) :: coef_norm
+        type(c_vec_t), intent(in) :: c_vec
+        type(ints_t), intent(in) :: ints
+        integer, allocatable, intent(out) :: twobody_confs(:,:)
+        real(dp), allocatable, intent(out) :: twobody_proj(:)
+
+        integer, parameter :: init_c4 = 100000
+        integer, allocatable :: c4_confs(:,:)
+        integer, allocatable :: twobody_occ(:,:)
+
+        integer :: nconf
+        integer :: line(2), c4_coef
+        integer :: c4_conf(nele)
+        integer :: cnt_c4 = 0
+        integer :: ios
+        logical :: is_c4
+
+        allocate(c4_confs(nele, init_c4))
+
+        write(io, '(4x,a)') '=> Creating twobody configurations'
+        call gen_twobody_confs(twobody_confs)
+        nconf = size(twobody_confs, 2)
+        call num_confs_to_occs(twobody_confs, nconf, nsorb, nele, twobody_occ)
+
+        allocate(twobody_proj(nconf))
+        twobody_proj = 0.0_dp
+
+        ! Run over all alpha combinations
+        open(unit=105, file=trim(filename), status='old')
+
+        write(io, '(4x,a)') '=> Starting loop over stochastic quadruply excited determinants'
+        do
+            read(105, *, iostat=ios) line, c4_conf
+            if (ios /= 0) exit
+
+            c4_coef = line(2)
+
+            call contract_t4(c4_coef, c4_conf, coef_norm, c_vec, ints, twobody_occ, twobody_proj, is_c4)
+            if (is_c4) then
+                cnt_c4 = cnt_c4 + 1
+                c4_confs(:,cnt_c4) = c4_conf
+            endif
+        enddo
+
+        close(105)
+
+        write(io, '(4x,a)') '=> Starting loop over disconnected quadruply excited determinants'
+        call find_disc_t4(cnt_c4, c4_confs, c_vec, ints, twobody_occ, twobody_proj)
+
+    end subroutine get_ext_cor_4
+
+    !subroutine contract_t4(filename, coef_norm, c_vec, ints, twobody_confs, twobody_proj)
+    subroutine contract_t4(c4_coef, c4_conf, coef_norm, c_vec, ints, twobody_occ, twobody_proj, is_c4)
+
+        use determinant, only: decode_determinant
+        use directed_t4_analysis, only: analyze_t4_aaaa, analyze_t4_aaab, analyze_t4_aabb, &
+            analyze_t4_abbb, analyze_t4_bbbb
+        use hmatrix, only: update_proj_t2
+        use ext_cor_types, only: c_vec_t, excit_t
+        use system, only: ints_t
+
+        integer, intent(in) :: c4_coef
+        integer, intent(in) :: c4_conf(:)
+        real(dp), intent(in) :: coef_norm
+        type(c_vec_t), intent(in) :: c_vec
+        type(ints_t), intent(in) :: ints
+        integer, allocatable, intent(in) :: twobody_occ(:,:)
+        real(dp), allocatable, intent(inout) :: twobody_proj(:)
+        logical, intent(inout) :: is_c4
+
+        integer :: nconf
+
+        integer :: ios
+        type(excit_t) :: excitation
+        integer :: to(4), from(4)
+        integer :: excit_rank
+        real(dp) :: renorm_coef
+        real(dp) :: t4
+        !real(dp) :: coef_sign
+
+
+        !print '(6i4)', c4_conf
+        !print '(i4)', c4_coef
+        call decode_determinant(c4_coef, c4_conf, excitation)
+        nconf = size(twobody_occ, 2)
+
+        associate(excit_rank_a=>excitation%rank_a, coef=>excitation%coef, &
+                to_a=>excitation%to_a, to_b=>excitation%to_b, &
+                from_a=>excitation%from_a, from_b=>excitation%from_b)
+
+            !coef_sign = coef / real(c4_coef, dp)
+            !coef_sign = 1.0_dp
+
+            excit_rank = excit_rank_a + excitation%rank_b
+            if (excit_rank == 4) then
+
+                is_c4 = .true.
+
+                renorm_coef =  coef / coef_norm
+                if (excit_rank_a == 4) then
+                    to = to_a
+                    from = from_a
+                    call analyze_t4_aaaa(c_vec, from, to, renorm_coef, t4)
+
+                elseif (excit_rank_a == 3) then
+                    to(1:3) = to_a(1:3)
+                    from(1:3) = from_a(1:3)
+                    to(4) = to_b(1)
+                    from(4) = from_b(1)
+                    call analyze_t4_aaab(c_vec, from, to, renorm_coef, t4)
+
+                elseif (excit_rank_a == 2) then
+                    to(1:2) = to_a(1:2)
+                    from(1:2) = from_a(1:2)
+                    to(3:4) = to_b(1:2)
+                    from(3:4) = from_b(1:2)
+                    call analyze_t4_aabb(c_vec, from, to, renorm_coef, t4)
+
+                elseif (excit_rank_a == 1) then
+                    to(1) = to_a(1)
+                    from(1) = from_a(1)
+                    to(2:4) = to_b(1:3)
+                    from(2:4) = from_b(1:3)
+                    call analyze_t4_abbb(c_vec, from, to, renorm_coef, t4)
+
+                elseif (excit_rank_a == 0) then
+                    to = to_b
+                    from = from_b
+                    call analyze_t4_bbbb(c_vec, from, to, renorm_coef, t4)
+
+                endif
+
+                t4 = t4 * excitation%excit_sign
+                !print *, renorm_coef, t4
+
+                if (t4 /= 0.0_dp) then
+
+                    call update_proj_t2(nele, nsorb, ints, &
+                        nconf, twobody_occ, &
+                        c4_conf, t4, &
+                        twobody_proj)
+                endif
+
+            else
+                is_c4 = .false.
+            endif
+
+        end associate
+
+    end subroutine contract_t4
+
     subroutine find_fciqmc_c4_aaaa(filename, config_debug, coef_norm, c4_aaaa)
 
         ! Translate configurations to excitations for FCIQMC coefficients
@@ -223,6 +645,9 @@ contains
         !   config_debug: if true, write configurations in occupation form
         ! In/Out:
         !   c*: arrays containing the spin-integrated coefficients based on excitation rank
+
+        use determinant, only: decode_determinant
+        use ext_cor_types, only: excit_t
 
         ! [TODO] make this a type and pass it nicely
         real(kind=8), allocatable, intent(inout) :: c4_aaaa(:,:,:,:,:,:,:,:)
@@ -282,6 +707,8 @@ contains
         !   c*: arrays containing the spin-integrated coefficients based on excitation rank
 
         ! [TODO] make this a type and pass it nicely
+        use determinant, only: decode_determinant
+        use ext_cor_types, only: excit_t
         real(kind=8), allocatable, intent(inout) :: c4_aaab(:,:,:,:,:,:,:,:)
         real(dp), intent(in) :: coef_norm
 
@@ -339,6 +766,8 @@ contains
         !   c*: arrays containing the spin-integrated coefficients based on excitation rank
 
         ! [TODO] make this a type and pass it nicely
+        use determinant, only: decode_determinant
+        use ext_cor_types, only: excit_t
         real(kind=8), allocatable, intent(inout) :: c4_aabb(:,:,:,:,:,:,:,:)
         real(dp), intent(in) :: coef_norm
 
@@ -395,6 +824,8 @@ contains
         !   c*: arrays containing the spin-integrated coefficients based on excitation rank
 
         ! [TODO] make this a type and pass it nicely
+        use determinant, only: decode_determinant
+        use ext_cor_types, only: excit_t
         real(kind=8), allocatable, intent(inout) :: c4_abbb(:,:,:,:,:,:,:,:)
         real(dp), intent(in) :: coef_norm
 
@@ -451,6 +882,8 @@ contains
         !   c*: arrays containing the spin-integrated coefficients based on excitation rank
 
         ! [TODO] make this a type and pass it nicely
+        use determinant, only: decode_determinant
+        use ext_cor_types, only: excit_t
         real(kind=8), allocatable, intent(inout) :: c4_bbbb(:,:,:,:,:,:,:,:)
         real(dp), intent(in) :: coef_norm
 
@@ -496,638 +929,213 @@ contains
 
     end subroutine find_fciqmc_c4_bbbb
 
-    subroutine spin_integrate(read_type, pos_a, pos_b, coef, excitation)
 
-        ! Fill in spin-integrated CI coefficient arrays
+    subroutine antisymmetrize(c2_aa, c2_ab, c2_bb, &
+            c3_aaa, c3_aab, c3_abb, c3_bbb)
+
+        ! Antisymmetrize arrays
         !
-        ! In:
-        !   read_type: type of occupation representation. Depends on the type of CI.
-        !   pos_a: alpha occupied orbitals
-        !   pos_b: beta occupied orbitals
-        !   coef: CI coefficient
         ! In/Out:
-        !   c*: arrays containing the spin-integrated coefficients based on excitation rank
-        use const, only: dp
+        !   c*: CI or CC arrays
 
-        character(len=*), intent(in) :: read_type
-        real(dp), intent(in) :: coef
-        integer, allocatable, intent(in) :: pos_a(:), pos_b(:)
-        type(excit_t), intent(inout) :: excitation
+        real(kind=8), allocatable, intent(inout) :: c2_aa(:,:,:,:)
+        real(kind=8), allocatable, intent(inout) :: c2_ab(:,:,:,:)
+        real(kind=8), allocatable, intent(inout) :: c2_bb(:,:,:,:)
 
-        integer :: i, j, w
-        integer :: excit_rank, excit_rank_a, excit_rank_b
-        integer :: from_a(4), to_a(4)
-        integer :: from_b(4), to_b(4)
-        integer :: from_spin(4), to_spin(4)
+        real(kind=8), allocatable, intent(inout) :: c3_aaa(:,:,:,:,:,:)
+        real(kind=8), allocatable, intent(inout) :: c3_aab(:,:,:,:,:,:)
+        real(kind=8), allocatable, intent(inout) :: c3_abb(:,:,:,:,:,:)
+        real(kind=8), allocatable, intent(inout) :: c3_bbb(:,:,:,:,:,:)
 
-        procedure(i_excitation_sign), pointer :: excitation_sign_ptr => null()
-        procedure(i_convert_spin), pointer :: convert_spin_ptr => null()
-
-        ! Select the right phase factor function for a given the CI type
-        select case (read_type)
-        case ('g')
-            excitation_sign_ptr => excitation_sign_gam
-            convert_spin_ptr => convert_spin_gam
-
-        case ('q')
-            excitation_sign_ptr => excitation_sign_qmc
-            convert_spin_ptr => convert_spin_qmc
-        end select
-
-
-        ! Get alpha excitation
-        call find_excitation(pos_a, occ_a, excit_rank_a, from_a, to_a)
-        ! Get beta excitation
-        call find_excitation(pos_b, occ_b, excit_rank_b, from_b, to_b)
-
-        excitation%from_a = from_a
-        excitation%from_b = from_b
-        excitation%to_a = to_a
-        excitation%to_b = to_b
-        excitation%rank_a = excit_rank_a
-        excitation%rank_b = excit_rank_b
-
-        ! WARNING: Remember that a < b < c < ..., i < j < k < ...
-        ! e.g.  c2_aa(a,b,i,j)
-
-        excit_rank = excit_rank_a + excit_rank_b
-        select case (excit_rank)
-        ! convert_spin_ptr options: 1 -> alpha from, 2 -> beta from, 3 -> alpha to, 4 -> beta to
-    case (1)
-        if (excit_rank_a == 1) then
-            from_spin(1) = convert_spin_ptr(from_a(1), 1)
-            to_spin(1) = convert_spin_ptr(to_a(1), 3)
-            excitation%coef = &
-                coef * excitation_sign_ptr(excit_rank, from_spin, to_spin)
-        else
-            from_spin(1) = convert_spin_ptr(from_b(1), 2)
-            to_spin(1) = convert_spin_ptr(to_b(1), 4)
-            excitation%coef = &
-                coef * excitation_sign_ptr(excit_rank, from_spin, to_spin)
-        endif
-
-    case (2)
-        if (excit_rank_a == 2) then
-
-            from_spin(1) = convert_spin_ptr(from_a(1), 1)
-            from_spin(2) = convert_spin_ptr(from_a(2), 1)
-            to_spin(1) = convert_spin_ptr(to_a(1), 3)
-            to_spin(2) = convert_spin_ptr(to_a(2), 3)
-
-            excitation%coef = &
-                coef * excitation_sign_ptr(excit_rank, from_spin, to_spin)
-        elseif (excit_rank_a == 1) then
-            from_spin(1) = convert_spin_ptr(from_a(1), 1)
-            from_spin(2) = convert_spin_ptr(from_b(1), 2)
-            to_spin(1) = convert_spin_ptr(to_a(1), 3)
-            to_spin(2) = convert_spin_ptr(to_b(1), 4)
-            excitation%coef = &
-                coef * excitation_sign_ptr(excit_rank, from_spin, to_spin)
-        else
-            from_spin(1) = convert_spin_ptr(from_b(1), 2)
-            from_spin(2) = convert_spin_ptr(from_b(2), 2)
-            to_spin(1) = convert_spin_ptr(to_b(1), 4)
-            to_spin(2) = convert_spin_ptr(to_b(2), 4)
-            excitation%coef = &
-                coef * excitation_sign_ptr(excit_rank, from_spin, to_spin)
-        endif
-
-    case(3)
-        if (excit_rank_a == 3) then
-            from_spin(1) = convert_spin_ptr(from_a(1), 1)
-            from_spin(2) = convert_spin_ptr(from_a(2), 1)
-            from_spin(3) = convert_spin_ptr(from_a(3), 1)
-            to_spin(1) = convert_spin_ptr(to_a(1), 3)
-            to_spin(2) = convert_spin_ptr(to_a(2), 3)
-            to_spin(3) = convert_spin_ptr(to_a(3), 3)
-            excitation%coef = &
-                coef * excitation_sign_ptr(excit_rank, from_spin, to_spin)
-        elseif (excit_rank_a == 2) then
-            from_spin(1) = convert_spin_ptr(from_a(1), 1)
-            from_spin(2) = convert_spin_ptr(from_a(2), 1)
-            from_spin(3) = convert_spin_ptr(from_b(1), 2)
-            to_spin(1) = convert_spin_ptr(to_a(1), 3)
-            to_spin(2) = convert_spin_ptr(to_a(2), 3)
-            to_spin(3) = convert_spin_ptr(to_b(1), 4)
-            excitation%coef = &
-                coef * excitation_sign_ptr(excit_rank, from_spin, to_spin)
-        elseif (excit_rank_a == 1) then
-            from_spin(1) = convert_spin_ptr(from_a(1), 1)
-            from_spin(2) = convert_spin_ptr(from_b(1), 2)
-            from_spin(3) = convert_spin_ptr(from_b(2), 2)
-            to_spin(1) = convert_spin_ptr(to_a(1), 3)
-            to_spin(2) = convert_spin_ptr(to_b(1), 4)
-            to_spin(3) = convert_spin_ptr(to_b(2), 4)
-            excitation%coef = &
-                coef * excitation_sign_ptr(excit_rank, from_spin, to_spin)
-        else
-            from_spin(1) = convert_spin_ptr(from_b(1), 2)
-            from_spin(2) = convert_spin_ptr(from_b(2), 2)
-            from_spin(3) = convert_spin_ptr(from_b(3), 2)
-            to_spin(1) = convert_spin_ptr(to_b(1), 4)
-            to_spin(2) = convert_spin_ptr(to_b(2), 4)
-            to_spin(3) = convert_spin_ptr(to_b(3), 4)
-            excitation%coef = &
-                coef * excitation_sign_ptr(excit_rank, from_spin, to_spin)
-        endif
-
-    case(4)
-        if (excit_rank_a == 4) then
-            from_spin(1) = convert_spin_ptr(from_a(1), 1)
-            from_spin(2) = convert_spin_ptr(from_a(2), 1)
-            from_spin(3) = convert_spin_ptr(from_a(3), 1)
-            from_spin(4) = convert_spin_ptr(from_a(4), 1)
-            to_spin(1) = convert_spin_ptr(to_a(1), 3)
-            to_spin(2) = convert_spin_ptr(to_a(2), 3)
-            to_spin(3) = convert_spin_ptr(to_a(3), 3)
-            to_spin(4) = convert_spin_ptr(to_a(4), 3)
-            excitation%coef = &
-                coef * excitation_sign_ptr(excit_rank, from_spin, to_spin)
-        elseif (excit_rank_a == 3) then
-            from_spin(1) = convert_spin_ptr(from_a(1), 1)
-            from_spin(2) = convert_spin_ptr(from_a(2), 1)
-            from_spin(3) = convert_spin_ptr(from_a(3), 1)
-            from_spin(4) = convert_spin_ptr(from_b(1), 2)
-            to_spin(1) = convert_spin_ptr(to_a(1), 3)
-            to_spin(2) = convert_spin_ptr(to_a(2), 3)
-            to_spin(3) = convert_spin_ptr(to_a(3), 3)
-            to_spin(4) = convert_spin_ptr(to_b(1), 4)
-            excitation%coef = &
-                coef * excitation_sign_ptr(excit_rank, from_spin, to_spin)
-        elseif (excit_rank_a == 2) then
-            from_spin(1) = convert_spin_ptr(from_a(1), 1)
-            from_spin(2) = convert_spin_ptr(from_a(2), 1)
-            from_spin(3) = convert_spin_ptr(from_b(1), 2)
-            from_spin(4) = convert_spin_ptr(from_b(2), 2)
-            to_spin(1) = convert_spin_ptr(to_a(1), 3)
-            to_spin(2) = convert_spin_ptr(to_a(2), 3)
-            to_spin(3) = convert_spin_ptr(to_b(1), 4)
-            to_spin(4) = convert_spin_ptr(to_b(2), 4)
-            excitation%coef = &
-                coef * excitation_sign_ptr(excit_rank, from_spin, to_spin)
-
-        elseif (excit_rank_a == 1) then
-            from_spin(1) = convert_spin_ptr(from_a(1), 1)
-            from_spin(2) = convert_spin_ptr(from_b(1), 2)
-            from_spin(3) = convert_spin_ptr(from_b(2), 2)
-            from_spin(4) = convert_spin_ptr(from_b(3), 2)
-            to_spin(1) = convert_spin_ptr(to_a(1), 3)
-            to_spin(2) = convert_spin_ptr(to_b(1), 4)
-            to_spin(3) = convert_spin_ptr(to_b(2), 4)
-            to_spin(4) = convert_spin_ptr(to_b(3), 4)
-            excitation%coef = &
-                coef * excitation_sign_ptr(excit_rank, from_spin, to_spin)
-        else
-            from_spin(1) = convert_spin_ptr(from_b(1), 2)
-            from_spin(2) = convert_spin_ptr(from_b(2), 2)
-            from_spin(3) = convert_spin_ptr(from_b(3), 2)
-            from_spin(4) = convert_spin_ptr(from_b(4), 2)
-            to_spin(1) = convert_spin_ptr(to_b(1), 4)
-            to_spin(2) = convert_spin_ptr(to_b(2), 4)
-            to_spin(3) = convert_spin_ptr(to_b(3), 4)
-            to_spin(4) = convert_spin_ptr(to_b(4), 4)
-            excitation%coef = &
-                coef * excitation_sign_ptr(excit_rank, from_spin, to_spin)
-        endif
-
-    end select
-
-end subroutine spin_integrate
-
-subroutine antisymmetrize(c2_aa, c2_ab, c2_bb, &
-        c3_aaa, c3_aab, c3_abb, c3_bbb)
-
-    ! Antisymmetrize arrays
-    !
-    ! In/Out:
-    !   c*: CI or CC arrays
-
-    real(kind=8), allocatable, intent(inout) :: c2_aa(:,:,:,:)
-    real(kind=8), allocatable, intent(inout) :: c2_ab(:,:,:,:)
-    real(kind=8), allocatable, intent(inout) :: c2_bb(:,:,:,:)
-
-    real(kind=8), allocatable, intent(inout) :: c3_aaa(:,:,:,:,:,:)
-    real(kind=8), allocatable, intent(inout) :: c3_aab(:,:,:,:,:,:)
-    real(kind=8), allocatable, intent(inout) :: c3_abb(:,:,:,:,:,:)
-    real(kind=8), allocatable, intent(inout) :: c3_bbb(:,:,:,:,:,:)
-
-    integer :: a, b, c
-    integer :: i, j, k
-    do i=froz+1, occ_a
-        do j=i+1, occ_a
-            do a=occ_a+1, total
-                do b=a+1, total
-                    c2_aa(a,b,j,i)=-c2_aa(a,b,i,j) !(ij)
-                    c2_aa(b,a,i,j)=-c2_aa(a,b,i,j) !(ab)
-                    c2_aa(b,a,j,i)=c2_aa(a,b,i,j) !(ab)(ij)
-                enddo
-            enddo
-        enddo
-    enddo
-
-    do i=froz+1, occ_b
-        do j=i+1, occ_b
-            do a=occ_b+1, total
-                do b=a+1, total
-                    c2_bb(a,b,j,i)=-c2_bb(a,b,i,j) !(ij)
-                    c2_bb(b,a,i,j)=-c2_bb(a,b,i,j) !(ab)
-                    c2_bb(b,a,j,i)=c2_bb(a,b,i,j) !(ab)(ij)
-                enddo
-            enddo
-        enddo
-    enddo
-
-    do i=froz+1, occ_a
-        do j=i+1, occ_a
-            do k=j+1, occ_a
+        integer :: a, b, c
+        integer :: i, j, k
+        do i=froz+1, occ_a
+            do j=i+1, occ_a
                 do a=occ_a+1, total
                     do b=a+1, total
-                        do c=b+1, total
-                            c3_aaa(a,b,c,j,i,k)=-c3_aaa(a,b,c,i,j,k) !(ij)
-                            c3_aaa(a,b,c,k,j,i)=-c3_aaa(a,b,c,i,j,k) !(ik)
-                            c3_aaa(a,b,c,i,k,j)=-c3_aaa(a,b,c,i,j,k) !(jk)
-                            c3_aaa(a,b,c,j,k,i)=c3_aaa(a,b,c,i,j,k) !(ijk)
-                            c3_aaa(a,b,c,k,i,j)=c3_aaa(a,b,c,i,j,k) !(ikj)
-                            c3_aaa(b,a,c,i,j,k)=-c3_aaa(a,b,c,i,j,k) !(ab)
-                            c3_aaa(b,a,c,j,i,k)=c3_aaa(a,b,c,i,j,k) !(ab)(ij)
-                            c3_aaa(b,a,c,k,j,i)=c3_aaa(a,b,c,i,j,k) !(ab)(ik)
-                            c3_aaa(b,a,c,i,k,j)=c3_aaa(a,b,c,i,j,k) !(ab)(jk)
-                            c3_aaa(b,a,c,j,k,i)=-c3_aaa(a,b,c,i,j,k) !(ab)(ijk)
-                            c3_aaa(b,a,c,k,i,j)=-c3_aaa(a,b,c,i,j,k) !(ab)(ikj)
-                            c3_aaa(c,b,a,i,j,k)=-c3_aaa(a,b,c,i,j,k) !(ac)
-                            c3_aaa(c,b,a,j,i,k)=c3_aaa(a,b,c,i,j,k) !(ac)(ij)
-                            c3_aaa(c,b,a,k,j,i)=c3_aaa(a,b,c,i,j,k) !(ac)(ik)
-                            c3_aaa(c,b,a,i,k,j)=c3_aaa(a,b,c,i,j,k) !(ac)(jk)
-                            c3_aaa(c,b,a,j,k,i)=-c3_aaa(a,b,c,i,j,k) !(ac)(ijk)
-                            c3_aaa(c,b,a,k,i,j)=-c3_aaa(a,b,c,i,j,k) !(ac)(ikj)
-                            c3_aaa(a,c,b,i,j,k)=-c3_aaa(a,b,c,i,j,k) !(bc)
-                            c3_aaa(a,c,b,j,i,k)=c3_aaa(a,b,c,i,j,k) !(bc)(ij)
-                            c3_aaa(a,c,b,k,j,i)=c3_aaa(a,b,c,i,j,k) !(bc)(ik)
-                            c3_aaa(a,c,b,i,k,j)=c3_aaa(a,b,c,i,j,k) !(bc)(jk)
-                            c3_aaa(a,c,b,j,k,i)=-c3_aaa(a,b,c,i,j,k) !(bc)(ijk)
-                            c3_aaa(a,c,b,k,i,j)=-c3_aaa(a,b,c,i,j,k) !(bc)(ikj)
-                            c3_aaa(b,c,a,i,j,k)=c3_aaa(a,b,c,i,j,k) !(abc)
-                            c3_aaa(b,c,a,j,i,k)=-c3_aaa(a,b,c,i,j,k) !(abc)(ij)
-                            c3_aaa(b,c,a,k,j,i)=-c3_aaa(a,b,c,i,j,k) !(abc)(ik)
-                            c3_aaa(b,c,a,i,k,j)=-c3_aaa(a,b,c,i,j,k) !(abc)(jk)
-                            c3_aaa(b,c,a,j,k,i)=c3_aaa(a,b,c,i,j,k) !(abc)(ijk)
-                            c3_aaa(b,c,a,k,i,j)=c3_aaa(a,b,c,i,j,k) !(abc)(ikj)
-                            c3_aaa(c,a,b,i,j,k)=c3_aaa(a,b,c,i,j,k) !(acb)
-                            c3_aaa(c,a,b,j,i,k)=-c3_aaa(a,b,c,i,j,k) !(acb)(ij)
-                            c3_aaa(c,a,b,k,j,i)=-c3_aaa(a,b,c,i,j,k) !(acb)(ik)
-                            c3_aaa(c,a,b,i,k,j)=-c3_aaa(a,b,c,i,j,k) !(acb)(jk)
-                            c3_aaa(c,a,b,j,k,i)=c3_aaa(a,b,c,i,j,k) !(acb)(ijk)
-                            c3_aaa(c,a,b,k,i,j)=c3_aaa(a,b,c,i,j,k) !(acb)(ikj)
-                        enddo
+                        c2_aa(a,b,j,i)=-c2_aa(a,b,i,j) !(ij)
+                        c2_aa(b,a,i,j)=-c2_aa(a,b,i,j) !(ab)
+                        c2_aa(b,a,j,i)=c2_aa(a,b,i,j) !(ab)(ij)
                     enddo
                 enddo
             enddo
         enddo
-    enddo
 
-    do i=froz+1, occ_a
-        do j=i+1, occ_a
-            do k=froz+1, occ_b
-                do a=occ_a+1, total
-                    do b=a+1, total
-                        do c=occ_b+1, total
-                            c3_aab(a,b,c,j,i,k)=-c3_aab(a,b,c,i,j,k) !(ij)
-                            c3_aab(b,a,c,i,j,k)=-c3_aab(a,b,c,i,j,k) !(ab)
-                            c3_aab(b,a,c,j,i,k)=c3_aab(a,b,c,i,j,k) !(ab)(ij)
-                        enddo
-                    enddo
-                enddo
-            enddo
-        enddo
-    enddo
-
-    do i=froz+1, occ_a
-        do j=froz+1, occ_b
-            do k=j+1, occ_b
-                do a=occ_a+1, total
-                    do b=occ_b+1, total
-                        do c=b+1, total
-                            c3_abb(a,b,c,i,k,j)=-c3_abb(a,b,c,i,j,k) !(jk)
-                            c3_abb(a,c,b,i,j,k)=-c3_abb(a,b,c,i,j,k) !(bc)
-                            c3_abb(a,c,b,i,k,j)=c3_abb(a,b,c,i,j,k) !(bc)(jk)
-                        enddo
-                    enddo
-                enddo
-            enddo
-        enddo
-    enddo
-
-    do i=froz+1, occ_b
-        do j=i+1, occ_b
-            do k=j+1, occ_b
+        do i=froz+1, occ_b
+            do j=i+1, occ_b
                 do a=occ_b+1, total
                     do b=a+1, total
-                        do c=b+1, total
-                            c3_bbb(a,b,c,j,i,k)=-c3_bbb(a,b,c,i,j,k) !(ij)
-                            c3_bbb(a,b,c,k,j,i)=-c3_bbb(a,b,c,i,j,k) !(ik)
-                            c3_bbb(a,b,c,i,k,j)=-c3_bbb(a,b,c,i,j,k) !(jk)
-                            c3_bbb(a,b,c,j,k,i)=c3_bbb(a,b,c,i,j,k) !(ijk)
-                            c3_bbb(a,b,c,k,i,j)=c3_bbb(a,b,c,i,j,k) !(ikj)
-                            c3_bbb(b,a,c,i,j,k)=-c3_bbb(a,b,c,i,j,k) !(ab)
-                            c3_bbb(b,a,c,j,i,k)=c3_bbb(a,b,c,i,j,k) !(ab)(ij)
-                            c3_bbb(b,a,c,k,j,i)=c3_bbb(a,b,c,i,j,k) !(ab)(ik)
-                            c3_bbb(b,a,c,i,k,j)=c3_bbb(a,b,c,i,j,k) !(ab)(jk)
-                            c3_bbb(b,a,c,j,k,i)=-c3_bbb(a,b,c,i,j,k) !(ab)(ijk)
-                            c3_bbb(b,a,c,k,i,j)=-c3_bbb(a,b,c,i,j,k) !(ab)(ikj)
-                            c3_bbb(c,b,a,i,j,k)=-c3_bbb(a,b,c,i,j,k) !(ac)
-                            c3_bbb(c,b,a,j,i,k)=c3_bbb(a,b,c,i,j,k) !(ac)(ij)
-                            c3_bbb(c,b,a,k,j,i)=c3_bbb(a,b,c,i,j,k) !(ac)(ik)
-                            c3_bbb(c,b,a,i,k,j)=c3_bbb(a,b,c,i,j,k) !(ac)(jk)
-                            c3_bbb(c,b,a,j,k,i)=-c3_bbb(a,b,c,i,j,k) !(ac)(ijk)
-                            c3_bbb(c,b,a,k,i,j)=-c3_bbb(a,b,c,i,j,k) !(ac)(ikj)
-                            c3_bbb(a,c,b,i,j,k)=-c3_bbb(a,b,c,i,j,k) !(bc)
-                            c3_bbb(a,c,b,j,i,k)=c3_bbb(a,b,c,i,j,k) !(bc)(ij)
-                            c3_bbb(a,c,b,k,j,i)=c3_bbb(a,b,c,i,j,k) !(bc)(ik)
-                            c3_bbb(a,c,b,i,k,j)=c3_bbb(a,b,c,i,j,k) !(bc)(jk)
-                            c3_bbb(a,c,b,j,k,i)=-c3_bbb(a,b,c,i,j,k) !(bc)(ijk)
-                            c3_bbb(a,c,b,k,i,j)=-c3_bbb(a,b,c,i,j,k) !(bc)(ikj)
-                            c3_bbb(b,c,a,i,j,k)=c3_bbb(a,b,c,i,j,k) !(abc)
-                            c3_bbb(b,c,a,j,i,k)=-c3_bbb(a,b,c,i,j,k) !(abc)(ij)
-                            c3_bbb(b,c,a,k,j,i)=-c3_bbb(a,b,c,i,j,k) !(abc)(ik)
-                            c3_bbb(b,c,a,i,k,j)=-c3_bbb(a,b,c,i,j,k) !(abc)(jk)
-                            c3_bbb(b,c,a,j,k,i)=c3_bbb(a,b,c,i,j,k) !(abc)(ijk)
-                            c3_bbb(b,c,a,k,i,j)=c3_bbb(a,b,c,i,j,k) !(abc)(ikj)
-                            c3_bbb(c,a,b,i,j,k)=c3_bbb(a,b,c,i,j,k) !(acb)
-                            c3_bbb(c,a,b,j,i,k)=-c3_bbb(a,b,c,i,j,k) !(acb)(ij)
-                            c3_bbb(c,a,b,k,j,i)=-c3_bbb(a,b,c,i,j,k) !(acb)(ik)
-                            c3_bbb(c,a,b,i,k,j)=-c3_bbb(a,b,c,i,j,k) !(acb)(jk)
-                            c3_bbb(c,a,b,j,k,i)=c3_bbb(a,b,c,i,j,k) !(acb)(ijk)
-                            c3_bbb(c,a,b,k,i,j)=c3_bbb(a,b,c,i,j,k) !(acb)(ikj)
+                        c2_bb(a,b,j,i)=-c2_bb(a,b,i,j) !(ij)
+                        c2_bb(b,a,i,j)=-c2_bb(a,b,i,j) !(ab)
+                        c2_bb(b,a,j,i)=c2_bb(a,b,i,j) !(ab)(ij)
+                    enddo
+                enddo
+            enddo
+        enddo
+
+        do i=froz+1, occ_a
+            do j=i+1, occ_a
+                do k=j+1, occ_a
+                    do a=occ_a+1, total
+                        do b=a+1, total
+                            do c=b+1, total
+                                c3_aaa(a,b,c,j,i,k)=-c3_aaa(a,b,c,i,j,k) !(ij)
+                                c3_aaa(a,b,c,k,j,i)=-c3_aaa(a,b,c,i,j,k) !(ik)
+                                c3_aaa(a,b,c,i,k,j)=-c3_aaa(a,b,c,i,j,k) !(jk)
+                                c3_aaa(a,b,c,j,k,i)=c3_aaa(a,b,c,i,j,k) !(ijk)
+                                c3_aaa(a,b,c,k,i,j)=c3_aaa(a,b,c,i,j,k) !(ikj)
+                                c3_aaa(b,a,c,i,j,k)=-c3_aaa(a,b,c,i,j,k) !(ab)
+                                c3_aaa(b,a,c,j,i,k)=c3_aaa(a,b,c,i,j,k) !(ab)(ij)
+                                c3_aaa(b,a,c,k,j,i)=c3_aaa(a,b,c,i,j,k) !(ab)(ik)
+                                c3_aaa(b,a,c,i,k,j)=c3_aaa(a,b,c,i,j,k) !(ab)(jk)
+                                c3_aaa(b,a,c,j,k,i)=-c3_aaa(a,b,c,i,j,k) !(ab)(ijk)
+                                c3_aaa(b,a,c,k,i,j)=-c3_aaa(a,b,c,i,j,k) !(ab)(ikj)
+                                c3_aaa(c,b,a,i,j,k)=-c3_aaa(a,b,c,i,j,k) !(ac)
+                                c3_aaa(c,b,a,j,i,k)=c3_aaa(a,b,c,i,j,k) !(ac)(ij)
+                                c3_aaa(c,b,a,k,j,i)=c3_aaa(a,b,c,i,j,k) !(ac)(ik)
+                                c3_aaa(c,b,a,i,k,j)=c3_aaa(a,b,c,i,j,k) !(ac)(jk)
+                                c3_aaa(c,b,a,j,k,i)=-c3_aaa(a,b,c,i,j,k) !(ac)(ijk)
+                                c3_aaa(c,b,a,k,i,j)=-c3_aaa(a,b,c,i,j,k) !(ac)(ikj)
+                                c3_aaa(a,c,b,i,j,k)=-c3_aaa(a,b,c,i,j,k) !(bc)
+                                c3_aaa(a,c,b,j,i,k)=c3_aaa(a,b,c,i,j,k) !(bc)(ij)
+                                c3_aaa(a,c,b,k,j,i)=c3_aaa(a,b,c,i,j,k) !(bc)(ik)
+                                c3_aaa(a,c,b,i,k,j)=c3_aaa(a,b,c,i,j,k) !(bc)(jk)
+                                c3_aaa(a,c,b,j,k,i)=-c3_aaa(a,b,c,i,j,k) !(bc)(ijk)
+                                c3_aaa(a,c,b,k,i,j)=-c3_aaa(a,b,c,i,j,k) !(bc)(ikj)
+                                c3_aaa(b,c,a,i,j,k)=c3_aaa(a,b,c,i,j,k) !(abc)
+                                c3_aaa(b,c,a,j,i,k)=-c3_aaa(a,b,c,i,j,k) !(abc)(ij)
+                                c3_aaa(b,c,a,k,j,i)=-c3_aaa(a,b,c,i,j,k) !(abc)(ik)
+                                c3_aaa(b,c,a,i,k,j)=-c3_aaa(a,b,c,i,j,k) !(abc)(jk)
+                                c3_aaa(b,c,a,j,k,i)=c3_aaa(a,b,c,i,j,k) !(abc)(ijk)
+                                c3_aaa(b,c,a,k,i,j)=c3_aaa(a,b,c,i,j,k) !(abc)(ikj)
+                                c3_aaa(c,a,b,i,j,k)=c3_aaa(a,b,c,i,j,k) !(acb)
+                                c3_aaa(c,a,b,j,i,k)=-c3_aaa(a,b,c,i,j,k) !(acb)(ij)
+                                c3_aaa(c,a,b,k,j,i)=-c3_aaa(a,b,c,i,j,k) !(acb)(ik)
+                                c3_aaa(c,a,b,i,k,j)=-c3_aaa(a,b,c,i,j,k) !(acb)(jk)
+                                c3_aaa(c,a,b,j,k,i)=c3_aaa(a,b,c,i,j,k) !(acb)(ijk)
+                                c3_aaa(c,a,b,k,i,j)=c3_aaa(a,b,c,i,j,k) !(acb)(ikj)
+                            enddo
                         enddo
                     enddo
                 enddo
             enddo
         enddo
-    enddo
 
-end subroutine antisymmetrize
+        do i=froz+1, occ_a
+            do j=i+1, occ_a
+                do k=froz+1, occ_b
+                    do a=occ_a+1, total
+                        do b=a+1, total
+                            do c=occ_b+1, total
+                                c3_aab(a,b,c,j,i,k)=-c3_aab(a,b,c,i,j,k) !(ij)
+                                c3_aab(b,a,c,i,j,k)=-c3_aab(a,b,c,i,j,k) !(ab)
+                                c3_aab(b,a,c,j,i,k)=c3_aab(a,b,c,i,j,k) !(ab)(ij)
+                            enddo
+                        enddo
+                    enddo
+                enddo
+            enddo
+        enddo
 
-subroutine find_excitation(pos, pos_len, excit_rank, &
-        from, to)
+        do i=froz+1, occ_a
+            do j=froz+1, occ_b
+                do k=j+1, occ_b
+                    do a=occ_a+1, total
+                        do b=occ_b+1, total
+                            do c=b+1, total
+                                c3_abb(a,b,c,i,k,j)=-c3_abb(a,b,c,i,j,k) !(jk)
+                                c3_abb(a,c,b,i,j,k)=-c3_abb(a,b,c,i,j,k) !(bc)
+                                c3_abb(a,c,b,i,k,j)=c3_abb(a,b,c,i,j,k) !(bc)(jk)
+                            enddo
+                        enddo
+                    enddo
+                enddo
+            enddo
+        enddo
 
-    ! Find excitation for an occupation number representation
-    !
-    ! In:
-    !   pos: occupied orbitals
-    !   pos_len: number of orbitals
-    !   excit_rank: excitation rank
-    ! In/Out:
-    !   from: orbitals exciting from
-    !   to: orbitals exciting to
+        do i=froz+1, occ_b
+            do j=i+1, occ_b
+                do k=j+1, occ_b
+                    do a=occ_b+1, total
+                        do b=a+1, total
+                            do c=b+1, total
+                                c3_bbb(a,b,c,j,i,k)=-c3_bbb(a,b,c,i,j,k) !(ij)
+                                c3_bbb(a,b,c,k,j,i)=-c3_bbb(a,b,c,i,j,k) !(ik)
+                                c3_bbb(a,b,c,i,k,j)=-c3_bbb(a,b,c,i,j,k) !(jk)
+                                c3_bbb(a,b,c,j,k,i)=c3_bbb(a,b,c,i,j,k) !(ijk)
+                                c3_bbb(a,b,c,k,i,j)=c3_bbb(a,b,c,i,j,k) !(ikj)
+                                c3_bbb(b,a,c,i,j,k)=-c3_bbb(a,b,c,i,j,k) !(ab)
+                                c3_bbb(b,a,c,j,i,k)=c3_bbb(a,b,c,i,j,k) !(ab)(ij)
+                                c3_bbb(b,a,c,k,j,i)=c3_bbb(a,b,c,i,j,k) !(ab)(ik)
+                                c3_bbb(b,a,c,i,k,j)=c3_bbb(a,b,c,i,j,k) !(ab)(jk)
+                                c3_bbb(b,a,c,j,k,i)=-c3_bbb(a,b,c,i,j,k) !(ab)(ijk)
+                                c3_bbb(b,a,c,k,i,j)=-c3_bbb(a,b,c,i,j,k) !(ab)(ikj)
+                                c3_bbb(c,b,a,i,j,k)=-c3_bbb(a,b,c,i,j,k) !(ac)
+                                c3_bbb(c,b,a,j,i,k)=c3_bbb(a,b,c,i,j,k) !(ac)(ij)
+                                c3_bbb(c,b,a,k,j,i)=c3_bbb(a,b,c,i,j,k) !(ac)(ik)
+                                c3_bbb(c,b,a,i,k,j)=c3_bbb(a,b,c,i,j,k) !(ac)(jk)
+                                c3_bbb(c,b,a,j,k,i)=-c3_bbb(a,b,c,i,j,k) !(ac)(ijk)
+                                c3_bbb(c,b,a,k,i,j)=-c3_bbb(a,b,c,i,j,k) !(ac)(ikj)
+                                c3_bbb(a,c,b,i,j,k)=-c3_bbb(a,b,c,i,j,k) !(bc)
+                                c3_bbb(a,c,b,j,i,k)=c3_bbb(a,b,c,i,j,k) !(bc)(ij)
+                                c3_bbb(a,c,b,k,j,i)=c3_bbb(a,b,c,i,j,k) !(bc)(ik)
+                                c3_bbb(a,c,b,i,k,j)=c3_bbb(a,b,c,i,j,k) !(bc)(jk)
+                                c3_bbb(a,c,b,j,k,i)=-c3_bbb(a,b,c,i,j,k) !(bc)(ijk)
+                                c3_bbb(a,c,b,k,i,j)=-c3_bbb(a,b,c,i,j,k) !(bc)(ikj)
+                                c3_bbb(b,c,a,i,j,k)=c3_bbb(a,b,c,i,j,k) !(abc)
+                                c3_bbb(b,c,a,j,i,k)=-c3_bbb(a,b,c,i,j,k) !(abc)(ij)
+                                c3_bbb(b,c,a,k,j,i)=-c3_bbb(a,b,c,i,j,k) !(abc)(ik)
+                                c3_bbb(b,c,a,i,k,j)=-c3_bbb(a,b,c,i,j,k) !(abc)(jk)
+                                c3_bbb(b,c,a,j,k,i)=c3_bbb(a,b,c,i,j,k) !(abc)(ijk)
+                                c3_bbb(b,c,a,k,i,j)=c3_bbb(a,b,c,i,j,k) !(abc)(ikj)
+                                c3_bbb(c,a,b,i,j,k)=c3_bbb(a,b,c,i,j,k) !(acb)
+                                c3_bbb(c,a,b,j,i,k)=-c3_bbb(a,b,c,i,j,k) !(acb)(ij)
+                                c3_bbb(c,a,b,k,j,i)=-c3_bbb(a,b,c,i,j,k) !(acb)(ik)
+                                c3_bbb(c,a,b,i,k,j)=-c3_bbb(a,b,c,i,j,k) !(acb)(jk)
+                                c3_bbb(c,a,b,j,k,i)=c3_bbb(a,b,c,i,j,k) !(acb)(ijk)
+                                c3_bbb(c,a,b,k,i,j)=c3_bbb(a,b,c,i,j,k) !(acb)(ikj)
+                            enddo
+                        enddo
+                    enddo
+                enddo
+            enddo
+        enddo
 
-    integer, allocatable, intent(in) :: pos(:)
-    integer, intent(in) :: pos_len
+    end subroutine antisymmetrize
 
-    integer, intent(inout) :: excit_rank
-    integer, intent(inout) :: from(4), to(4)
 
-    integer :: i, j, w
-    logical :: found_unexcit
 
-    ! Find orbitals where electrons are excited into
-    excit_rank = 0
-    do i=1, pos_len
-        if (pos(i) > pos_len) then
-            excit_rank = excit_rank + 1
-            to(excit_rank) = pos(i)
-        endif
-    enddo
 
-    ! Find orbitals where electrons are excited from
-    if (excit_rank > 0) then
-        w = 1
-        do j=1, pos_len
-            found_unexcit = .false.
-            do i=1, pos_len - excit_rank
-                if (pos(i) == j) then
-                    found_unexcit = .true.
-                    exit
+    subroutine advance_elec(elec_pos, nele)
+
+        ! Calculate a determinant configuration.
+        ! Taken from GAMESS aldeci.src ADVANC
+        !
+        ! In:
+        !   nele: number of electrons
+        ! In/Out:
+        !   elec_pos: spin-orbital configuration
+
+        integer, intent(in) :: nele
+        integer, allocatable, intent(inout) :: elec_pos(:)
+        integer :: i, j
+
+        if (elec_pos(nele) == total) then
+            do i=nele-1, 1, -1
+                if (elec_pos(i+1) - elec_pos(i) > 1) then
+                    elec_pos(i) = elec_pos(i) + 1
+                    ! Shift inside the gap
+                    do j=i+1, nele
+                        elec_pos(j) = elec_pos(j-1) + 1
+                    enddo
+
+                    return
                 endif
             enddo
+        endif
 
-            if (.not. found_unexcit) then
-                from(w) = j
-                w = w + 1
-            endif
+        elec_pos(nele) = elec_pos(nele) + 1
+    end subroutine advance_elec
 
-        enddo
-    endif
-
-end subroutine find_excitation
-
-function excitation_sign_gam(excitation_rank, from, to) result(det_sign)
-
-    ! Find phase factor of GAMESS determinants. These determinants are
-    ! given such that all alpha electrons are given first and
-    ! beta electrons, second.
-    !
-    ! In:
-    !   excitation_rank: rank of the excited determinant
-    !   from: orbitals exciting from
-    !   to: orbitals exciting to
-    ! Out:
-    !   det_sign: phase factor
-
-    integer, intent(in) :: excitation_rank
-    integer, intent(in) :: from(4)
-    integer, intent(in) :: to(4)
-    integer :: temp_ref(120)
-
-    integer :: det_sign
-    integer :: i, idx
-    integer :: occ_sum
-
-    ! Create reference determinant
-    temp_ref = 0
-    do i=1, occ_a
-        temp_ref(i) = 1
-    enddo
-
-    do i=total+1, total+occ_b
-        temp_ref(i) = 1
-    enddo
-
-    ! Occupied permutation counter
-    occ_sum = 0
-
-    ! Loop over all excitations
-    do idx=1, excitation_rank
-        do i=1, from(idx) - 1
-            if (temp_ref(i) == 1) then
-                occ_sum = occ_sum + 1
-            endif
-        enddo
-
-        temp_ref(from(idx)) = 0
-
-        do i=1, to(idx) - 1
-            if (temp_ref(i) == 1) then
-                occ_sum = occ_sum + 1
-            endif
-        enddo
-
-        temp_ref(to(idx)) = 1
-    enddo
-
-    det_sign = (-1) ** occ_sum
-
-end function excitation_sign_gam
-
-function excitation_sign_qmc(excitation_rank, from, to) result(det_sign)
-
-    ! Find phase factor of FCIQMC determinants. These determinants are
-    ! given such that odd numbers contain alpha electrons and even numbers
-    ! contain beta electrons.
-    !
-    ! In:
-    !   excitation_rank: rank of the excited determinant
-    !   from: orbitals exciting from
-    !   to: orbitals exciting to
-    ! Out:
-    !   det_sign: phase factor
-
-    integer, intent(in) :: excitation_rank
-    integer, intent(in) :: from(4)
-    integer, intent(in) :: to(4)
-    integer :: temp_ref(250)
-
-    integer :: det_sign
-    integer :: i, idx
-    integer :: occ_sum
-
-    ! Create reference determinant
-    temp_ref = 0
-    do i=1, nele
-        temp_ref(i) = 1
-    enddo
-
-    ! Occupied permutation counter
-    occ_sum = 0
-
-    ! Loop over all excitations
-    do idx=1, excitation_rank
-        do i=1, from(idx) - 1
-            if (temp_ref(i) == 1) then
-                occ_sum = occ_sum + 1
-            endif
-        enddo
-
-        temp_ref(from(idx)) = 0
-
-        do i=1, to(idx) - 1
-            if (temp_ref(i) == 1) then
-                occ_sum = occ_sum + 1
-            endif
-        enddo
-
-        temp_ref(to(idx)) = 1
-    enddo
-
-    det_sign = (-1) ** occ_sum
-
-end function excitation_sign_qmc
-
-
-subroutine advance_elec(elec_pos, nele)
-
-    ! Calculate a determinant configuration.
-    ! Taken from GAMESS aldeci.src ADVANC
-    !
-    ! In:
-    !   nele: number of electrons
-    ! In/Out:
-    !   elec_pos: spin-orbital configuration
-
-    integer, intent(in) :: nele
-    integer, allocatable, intent(inout) :: elec_pos(:)
-    integer :: i, j
-
-    if (elec_pos(nele) == total) then
-        do i=nele-1, 1, -1
-            if (elec_pos(i+1) - elec_pos(i) > 1) then
-                elec_pos(i) = elec_pos(i) + 1
-                ! Shift inside the gap
-                do j=i+1, nele
-                    elec_pos(j) = elec_pos(j-1) + 1
-                enddo
-
-                return
-            endif
-        enddo
-    endif
-
-    elec_pos(nele) = elec_pos(nele) + 1
-end subroutine advance_elec
-
-function convert_spin_gam(i, spin) result(i_spin)
-
-    ! Convert the spin representation of GAMESS type configurations,
-    ! where alpha electrons come first and beta, second.
-    !
-    ! In:
-    !   i: orbital number
-    !   spin: spin/orbital type type. Explanation below
-    ! Out:
-    !   i_spin: occupation number representation of the GAMESS form
-    !       (i.e. alpha first, beta second)
-
-    integer, intent(in) :: i
-    integer, intent(in) :: spin
-
-    integer :: i_spin
-
-    if (spin == 1) then
-        ! Alpha case, from
-        i_spin = i
-    elseif (spin == 2) then
-        ! Beta case from
-        i_spin = i + total
-    elseif (spin == 3) then
-        ! Alpha case to
-        i_spin = i
-    elseif (spin == 4) then
-        ! Beta case to
-        i_spin = i + total
-    endif
-
-end function convert_spin_gam
-
-function convert_spin_qmc(i, spin) result(i_spin)
-
-    ! Convert the spin representation of FCIQMC type configurations,
-    ! where alpha electrons are odd and beta are even.
-    !
-    ! In:
-    !   i: orbital number
-    !   spin: spin/orbital type type. Explanation below
-    ! Out:
-    !   i_spin: occupation number representation of the FCIQMC form
-    !       (i.e. alpha odd, beta even)
-
-    integer, intent(in) :: i
-    integer, intent(in) :: spin
-
-    integer :: i_spin
-
-    if (spin == 1) then
-        ! Alpha case, from
-        i_spin = 2 * (i - 1) + 1
-    elseif (spin == 2) then
-        ! Beta case from
-        i_spin = 2 * i
-    elseif (spin == 3) then
-        ! Alpha case to
-        i_spin = 2 * (i - 1) + 1
-    elseif (spin == 4) then
-        ! Beta case to
-        i_spin = 2 * i
-    endif
-
-end function convert_spin_qmc
 
 end module process_ci
