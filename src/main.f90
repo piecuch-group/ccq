@@ -1,11 +1,9 @@
 program main
 
-    use const, only: t_unit
-    use integrals, only: load_ints, unload_ints
+    use calc_driver, only: run_calcs
     use system, only: sys_t, run_t, cc_t, ints_t
     use parser, only: get_opts, get_config
-    use printing, only: init_print, print_header, print_calc_params, print_config, close_print
-    use solver, only: solve_cc
+    use printing, only: init_print, print_header, print_config, close_print
 
     implicit none
 
@@ -23,18 +21,9 @@ program main
     call print_header(run%uuid)
     if (run%config%echo) call print_config(run%config)
 
-    call load_ints(sys, run)
-    call print_calc_params(sys, run, cc)
+    ! Run calculations
+    call run_calcs(sys, run, cc)
 
-
-    ! Store T vector in binary file
-
-    ! Solve coupled cluster
-    call solve_cc(sys, run, cc)
-
-
-
-    call unload_ints(sys)
 
     call close_print()
 

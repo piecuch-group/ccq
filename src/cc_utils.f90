@@ -1,9 +1,8 @@
-module utils
+module cc_utils
 
     implicit none
 
 contains
-
     subroutine count_t_spaces(froz, occ_a, occ_b, orbs, actocc, actunocc, &
             t_trunc, t_order, t_pos, t_size)
 
@@ -257,4 +256,4 @@ contains
 
     end subroutine open_t4_files
 
-end module utils
+end module cc_utils

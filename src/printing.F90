@@ -111,6 +111,8 @@ contains
         if (trim(run%label) /= '') then
             write(io,'(2x,a27,2x,a)') 'Label', trim(run%label)
         endif
+        write(io,'(2x,a27,2x,i16)') 'Number of electrons', sys%nel
+        write(io,'(2x,a27,2x,i16)') 'Number of virtuals', sys%nvirt
         write(io,'(2x,a27,2x,i16)') 'Frozen orbitals', sys%froz
         write(io,'(2x,a27,2x,i16)') 'Occupied orbitals (alpha)',sys%occ_a
         write(io,'(2x,a27,2x,i16)') 'Occupied orbitals (beta)', sys%occ_b
@@ -131,11 +133,15 @@ contains
         write(io,'(2x,a27,2x,i16)') 'Max. iterations', run%max_iter
         write(io,'(2x,a27,2x,i16)') 'DIIS space', run%diis_space
         write(io,'(2x,a27,2x,l16)') 'Restart', run%restart
-        write(io,'(2x,a27,2x,l16)') 'Externally corrected', run%ext_cor
         write(io,'(2x,a27,2x,f16.4/)') 'Shift energy', run%shift
 
         write(io,'(2x,a27,2x,i16)') 'Active triples indices', run%act_ind_t
         write(io,'(2x,a27,2x,i16/)') 'Active quadruples indices', run%act_ind_q
+
+        if (run%ext_cor) then
+            write(io,'(2x,a)') 'External correction parameters:'
+            write(io,'(2x,a27,2x,l16/)') 'Use singles and doubles', run%ext_cor_sd
+        endif
 
 
         write(io,'(2x,a)') 'ACC parameters:'
@@ -186,6 +192,8 @@ contains
     end subroutine print_date
 
     subroutine print_iter_head()
+
+        ! Print the iteration table header
 
         write(io,'(/2x,a4,3(a15),a16)') 'It.',  'E (Corr)', 'dE', 'Residuum', 'CPU Time'
         write(io,'(2x,65("-"))')

@@ -1,6 +1,8 @@
 module system
 
     use const, only: dp, sp, line_len
+    use basis_types, only: basis_t
+    use ext_cor_types, only: ext_cor_t
 
     type acc_t
         real(sp) :: t2t2_t2(5)
@@ -11,15 +13,6 @@ module system
 
         real(dp), allocatable :: t2_mc(:)
     end type acc_t
-
-    type ext_cor_t
-        integer, allocatable :: twobody_confs(:,:)
-        real(dp), allocatable :: twobody_proj(:)
-
-        real(dp), allocatable :: t2a(:,:,:,:)
-        real(dp), allocatable :: t2b(:,:,:,:)
-        real(dp), allocatable :: t2c(:,:,:,:)
-    end type ext_cor_t
 
     type ints_t
         real(dp), allocatable :: f_a(:,:)
@@ -37,6 +30,15 @@ module system
         integer :: orbs
         integer :: mult
 
+        ! Spin orbital molecular information
+        integer :: nel
+        integer :: nvirt
+        integer :: nalpha
+        integer :: nbeta
+        integer :: nvirt_alpha
+        integer :: nvirt_beta
+        type(basis_t) :: basis
+
         ! Active partitioning
         integer :: act_occ_a
         integer :: act_occ_b
@@ -46,8 +48,10 @@ module system
         ! Integrals
         type(ints_t) :: ints
 
+        ! Initial energies
         real(dp) :: en_repul
         real(dp) :: en_ref
+
     end type sys_t
 
     type cc_t
@@ -81,6 +85,7 @@ module system
         integer :: diis_space
         logical :: restart
         integer :: max_iter
+        logical :: rhf
 
         ! Calculation ID
         character(len=255) :: label
@@ -91,8 +96,10 @@ module system
         integer :: act_ind_q
         character(len=20) :: calc_type
         logical :: ext_cor
+        ! Use singles and doubles
+        logical :: ext_cor_sd
 
-        ! Compat layer
+        ! Compatibility layer
         character(len=6) :: lvl
         logical :: lvl_t
         logical :: lvl_q

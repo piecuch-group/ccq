@@ -124,6 +124,8 @@ module parser
                 ! Skip comments
                 indx = scan(line, '#') + scan(line, '!')
                 if (indx /= 0) cycle
+                ! Skip empty lines
+                if (trim(line) == '') cycle
 
                 indx = scan(line, '=')
                 if (indx == 0 ) then
@@ -191,9 +193,17 @@ module parser
                         if (ios /= 0) call abort_cc('CONFIGURATION ERROR: lvl_q must logical')
 
                     ! Run configuration options
+                    case ('rhf')
+                        read(val, *, iostat=ios) run%rhf
+                        if (ios /= 0) call abort_cc('CONFIGURATION ERROR: rhf must logical')
+
                     case ('ext_cor')
                         read(val, *, iostat=ios) run%ext_cor
                         if (ios /= 0) call abort_cc('CONFIGURATION ERROR: ext_cor must logical')
+
+                    case ('ext_cor_sd')
+                        read(val, *, iostat=ios) run%ext_cor_sd
+                        if (ios /= 0) call abort_cc('CONFIGURATION ERROR: ext_cor_sd must logical')
 
                     case ('shift')
                         read(val, *) run%shift
@@ -294,9 +304,10 @@ module parser
             sys%act_unocc_a = act_unocc
             sys%act_unocc_b = act_unocc + sys%occ_a - sys%occ_b
 
-            if (trim(run%label) /= '') then
-                run%bin_file = 'tvec_'//trim(run%label)//'.bin'
-            endif
+            sys%nel = sys%occ_a + sys%occ_b
+            sys%basis%nbasis = 2 * sys%orbs
+            sys%nvirt = sys%basis%nbasis - sys%nel
+
 
             ! Error checks
             if (nocc_spin == -1 .or. nunocc_spin == -1) then
@@ -308,6 +319,16 @@ module parser
 
             inquire(file=trim(run%twobody_file), exist=t_exists)
             if (.not. t_exists) call abort_cc('CONFIGURATION ERROR: Twobody integral file not found')
+            if (run%restart) then
+                if (trim(run%bin_file) == 'tvec_'//trim(run%uuid)//'.bin') &
+                    call abort_cc('CONFIGURATION ERROR: Restart requires setting output_bin to the output file')
+            endif
+
+            if (trim(run%label) /= '') then
+                if (run%restart) &
+                    call abort_cc('CONFIGURATION ERROR: Restart requires setting output_bin')
+                run%bin_file = 'tvec_'//trim(run%label)//'.bin'
+            endif
 
             inquire(file=trim(run%bin_file), exist=t_exists)
             if (t_exists .and. .not. run%restart) &
@@ -329,12 +350,12 @@ module parser
             sys%mult = 0
 
             ! Run
+            run%rhf = .false.
             run%act_ind_t = 0
             run%act_ind_q = 0
             run%keep_bin = .true.
             run%lvl_t = .false.
             run%lvl_q = .false.
-            run%ext_cor = .false.
             run%shift = 0.0_dp
             run%restart = .false.
             run%diis_space = 5
@@ -345,6 +366,9 @@ module parser
             run%twobody_file = 'twobody.inp'
             run%bin_file = 'tvec_'//trim(run%uuid)//'.bin'
             run%calc_type = 'CCSD'
+            ! Externally corrected
+            run%ext_cor = .false.
+            run%ext_cor_sd = .true.
 
             ! CC
             cc%acc%t2t2_t2 = 1.0_sp

@@ -12,14 +12,14 @@ module symmetry
 
 contains
 
-
     subroutine read_sym(filename, orbs)
 
         ! Read symmetry file and choose character tables
         ! In:
         !   filename: file containing molecular orbital symmetries
 
-        use, intrinsic :: iso_fortran_env, only: error_unit
+        use const, only: sym_unit
+        use printing, only: abort_cc
         integer, intent(in) :: orbs
         character(len=*), intent(in) :: filename
 
@@ -34,8 +34,7 @@ contains
 
         inquire(file=filename, exist=t_exists)
         if (.not. t_exists) then
-            write(error_unit, '(3a)') 'Symmetry file, ', trim(filename),', does not exist.'
-            call exit(1)
+            call abort_cc('Symmetry file, '//trim(filename)//', does not exist.')
         endif
 
         char_tables = reshape(&
@@ -63,9 +62,9 @@ contains
         group_dims = (/1, 2, 4, 8/)
 
 
-        open(unit=105,file=filename,status="old")
+        open(sym_unit,file=filename,status="old")
 
-        read(105, *) i_sym_char
+        read(sym_unit, *) i_sym_char
 
         select case (i_sym_char)
         case (1)
@@ -81,19 +80,19 @@ contains
             pg_sym_name = "D2H"
 
         case default
-            write(error_unit, '(a)') 'Point-group symmetry not supported'
-            call exit(1)
+            call abort_cc('Point-group symmetry not supported')
+
         end select
 
         group_dim = group_dims(i_sym_char)
         char_table = char_tables(:,:,i_sym_char)
 
         do i=1, orbs
-            read(105, *) sym_irrep
+            read(sym_unit, *) sym_irrep
             mo_sym(i) = sym_irrep
         enddo
 
-        close(105)
+        close(sym_unit)
 
     end subroutine read_sym
 

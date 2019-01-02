@@ -109,11 +109,11 @@ contains
             t2_mc(1),t2_mc(k2b-k2a+1),t2_mc(k2c-k2a+1))
         deallocate(v2)
 
-        !if(n2 == n1)then
-        !    do i=k2a,k2b-1
-        !        t(i+k2c-k2a)=t(i)
-        !    enddo
-        !else
+        if(run%rhf)then
+            do i=k2a,k2b-1
+                t(i+k2c-k2a)=t(i)
+            enddo
+        else
             allocate(v2(n2+1:n3,n2+1:n3,n0+1:n2,n0+1:n2))
             v2=0.0d0
             if (run%ext_cor) then
@@ -128,7 +128,7 @@ contains
                 t(k1a),t(k1b),t(k2a),t(k2b),t(k2c),t(k3a),t(k3b),t(k3c),t(k3d), &
                 t2_mc(1),t2_mc(k2b-k2a+1),t2_mc(k2c-k2a+1))
             deallocate(v2)
-        !endif
+        endif
 
         allocate(v2(n2+1:n3,n1+1:n3,n0+1:n2,n0+1:n1))
         v2=0.0d0
@@ -155,11 +155,11 @@ contains
         deallocate(v1)
 
 
-        !if(n2 == n1)then
-        !    do i=k1a,k1b-1
-        !        t(i+k1b-k1a)=t(i)
-        !    enddo
-        !else
+        if(run%rhf)then
+            do i=k1a,k1b-1
+                t(i+k1b-k1a)=t(i)
+            enddo
+        else
             allocate(v1(n2+1:n3,n0+1:n2))
             v1=0.0d0
             call sumx12(0,n3,n2,n3,n0,n2,v1,fockb, 1.000)
@@ -168,7 +168,7 @@ contains
                 fockr,fockb,intr,intb,intm,t(k1a),t(k1b),t(k2a),t(k2b),t(k2c), &
                 t(k3a),t(k3b),t(k3c),t(k3d))
             deallocate(v1)
-        !endif
+        endif
 
         if (.not. run%ext_cor) then
             if(run%lvl_t)then
@@ -181,7 +181,7 @@ contains
                     t2diag3,t2diag4,t2diag5,t3diag1,t3diag2,t3diag3,t3diag4,t3diag5)
                 deallocate(v3)
 
-                if(n2 == n1)then
+                if(run%rhf)then
                     do i=k3a,k3b-1
                         t(i+k3d-k3a)=t(i)
                     enddo
@@ -204,7 +204,7 @@ contains
                     t2diag3,t2diag4,t2diag5,t3diag1,t3diag2,t3diag3,t3diag4,t3diag5)
                 deallocate(v3)
 
-                if(n2 == n1)then
+                if(run%rhf)then
                     call tran3bto3c(n0,n1,n2,n3,t(k3b),t(k3c))
                 else
                     allocate(v3(n2+1:n3,n2+1:n3,n1+1:n3,n0+1:n2,n0+1:n2,n0+1:n1))
@@ -234,7 +234,7 @@ contains
                     t(k3a),t(k3b),t(k3c),t(k3d), &
                     iactocca,iactoccb,iactunoa,iactunob,iactindq)
 
-                if(n2 == n1)then
+                if(run%rhf)then
                     call tran4bto4d(n0,n1,n2,n3)
                 else
                     call t4d_update(n0,n1,n2,n3,k1,k2,k3,k4,shift, &
@@ -243,7 +243,7 @@ contains
                         iactocca,iactoccb,iactunoa,iactunob,iactindq)
                 endif
 
-                if(n2 == n1)then
+                if(run%rhf)then
                     allocate(t4ae(k1*k1*k1*k1*k3*k3*k3*k3))
                     rewind(ta)
                     read(ta)t4ae
