@@ -1,3 +1,3 @@
 [submodule "tests"]
 	path = tests
-	url = git@gitlab.msu.edu:deustuaj/ccq_tests.git
+	url = https://gitlab.msu.edu/deustuaj/ccq_tests.git
