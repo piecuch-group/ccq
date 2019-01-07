@@ -14,7 +14,7 @@ ext_cor_OBJS := $(ext_cor_SRCS:.f90=.o)
 PROGRAM := ../bin/ccq
 BIN_DIR := ../bin
 
-TEST_DIR := ''
+TEST_DIR := ../tests
 EXE := $(PWD)/$(PROGRAM)
 
 COMP_HOST := $(shell hostname --fqdn)
@@ -30,8 +30,8 @@ all: $(PROGRAM)
 debug: FFLAGS = $(FFLAGS_DEBUG)
 debug: $(PROGRAM)
 
-test: $(PROGRAM)
-	cd $(TEST_DIR) && rm h8.out && $(EXE) h8.gjf && ./check.sh
+test:
+	cd $(TEST_DIR) && pytest -v
 
 $(PROGRAM): $(cc_OBJS) $(main_OBJS) $(ext_cor_OBJS) gen_uuid.o | $(BIN_DIR)
 	$(FC) $^ -o $@ $(LDFLAGS)

@@ -256,4 +256,29 @@ contains
 
     end subroutine open_t4_files
 
+    subroutine close_t4_files(sys, keep, cc_failed)
+
+        use const, only: dp, ta, tb, tc, td, te
+        use system, only: sys_t, run_t
+
+        type(sys_t), intent(in) :: sys
+        logical, intent(in) :: keep, cc_failed
+
+
+        if (keep .or. cc_failed) then
+            close(ta)
+            close(tb)
+            close(tc)
+            close(td)
+            close(te)
+        else
+            close(ta, status="delete")
+            close(tb, status="delete")
+            close(tc, status="delete")
+            close(td, status="delete")
+            close(te, status="delete")
+        endif
+
+    end subroutine close_t4_files
+
 end module cc_utils

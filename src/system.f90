@@ -107,7 +107,10 @@ module system
         ! I/O information
         type(config_t) :: config
         logical :: keep_bin
+
         character(len=255) :: ext_cor_file
+        character(len=255) :: sym_file
+
         character(len=255) :: output_file
         character(len=255) :: onebody_file
         character(len=255) :: twobody_file

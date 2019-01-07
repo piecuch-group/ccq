@@ -40,7 +40,7 @@ contains
         logical :: rm_dscnctd = .false.
         integer :: i_err
 
-        call read_sym('sym.out', sys%orbs)
+        call read_sym(run%sym_file, sys%orbs)
 
         write(io, '(a)') 'Cluster analysis'
         write(io, '(a)') '----------------'

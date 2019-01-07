@@ -6,7 +6,7 @@ contains
 
     subroutine run_calcs(sys, run, cc)
 
-        use cc_utils, only: open_t4_files
+        use cc_utils, only: open_t4_files, close_t4_files
         use const, only: p, t_unit, t_vecs_unit
         use cluster_analysis, only: cluster_analysis_driver_opt
         use basis_types, only: init_basis_strings, dealloc_basis_t
@@ -39,7 +39,7 @@ contains
         ! Initialize vectors
         call get_t_sizes(sys, cc)
         call init_t_vecs(cc%t_size)
-        !if (run%lvl_q) call open_t4_files(sys, run%restart)
+        if (run%lvl_q) call open_t4_files(sys, run)
         call init_t_vec(run, cc)
 
         ! Run cluster analysis for externally corrected calculations
@@ -61,6 +61,7 @@ contains
         else
             close(t_unit, status='delete')
         endif
+        if (run%lvl_q) call close_t4_files(sys, run%keep_bin, cc_failed)
 
         call print_summary(sys, run, cc)
         call print_date('  ccq finished on:')

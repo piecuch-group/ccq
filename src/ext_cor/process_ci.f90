@@ -44,11 +44,16 @@ contains
         integer :: line(2)
         integer :: occ_list(sys%nel)
 
+        logical :: t_exists
+
         character(len=30) :: deb_fmt
 
         coef_norm = 0.0d0
 
         ! Loop over determinants in the walker file
+        inquire(file=trim(filename), exist=t_exists)
+        if (.not. t_exists) call abort_cc("RUNTIME ERROR: Walker file not found")
+
         open(walk_unit, file=trim(filename), status='old')
         do
             read(walk_unit, *, iostat=ios) line, occ_list
