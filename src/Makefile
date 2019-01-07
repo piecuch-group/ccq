@@ -1,17 +1,4 @@
-FC := gfortran
-FFLAGS := -O3 -fdefault-integer-8 -m64 -I${MKLROOT}/include -ffree-line-length-none -ffixed-line-length-132 -mtune=native
-FFLAGS_DEBUG := -O0 -fcheck=all -fdefault-integer-8 -m64 -I${MKLROOT}/include -fbacktrace -g -mtune=native -ffixed-line-length-132 -ffree-line-length-none -mpopcnt
-LDFLAGS := -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_gf_ilp64.a ${MKLROOT}/lib/intel64/libmkl_gnu_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -lgomp -lpthread -lm -ldl -luuid
-FEATURES := -DUSE_POPCNT
-
-#LIOMP := /opt/intel/compilers_and_libraries_2017.4.196/linux/compiler/lib/intel64_lin/libiomp5.a
-#FC := ifort
-##FFLAGS := -O3 -i8 -I${MKLROOT}/include -132  -xCORE-AVX512
-#FFLAGS := -O3 -i8 -I${MKLROOT}/include -132  -xCORE-AVX2
-#FFLAGS_DEBUG := -O0 -g -traceback -i8 -I${MKLROOT}/include -132  -xCORE-AVX2
-#LDFLAGS := -static-intel -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_ilp64.a ${MKLROOT}/lib/intel64/libmkl_intel_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group ${LIOMP} -lpthread -lm -ldl -luuid
-
-CC := gcc
+include ../config.mk
 
 cc_SRCS := $(wildcard cc/*.f cc/*.f90)
 main_SRCS := $(wildcard *.f *.f90 *.F90)
@@ -25,6 +12,7 @@ main_OBJS := $(main_OBJS:.F90=.o)
 ext_cor_OBJS := $(ext_cor_SRCS:.f90=.o)
 
 PROGRAM := ../bin/ccq
+BIN_DIR := ../bin
 
 TEST_DIR := ''
 EXE := $(PWD)/$(PROGRAM)
@@ -41,20 +29,17 @@ all: $(PROGRAM)
 
 debug: FFLAGS = $(FFLAGS_DEBUG)
 debug: $(PROGRAM)
-#debug: ccq.so
 
 test: $(PROGRAM)
 	cd $(TEST_DIR) && rm h8.out && $(EXE) h8.gjf && ./check.sh
 
-$(PROGRAM): $(cc_OBJS) $(main_OBJS) $(ext_cor_OBJS) gen_uuid.o
+$(PROGRAM): $(cc_OBJS) $(main_OBJS) $(ext_cor_OBJS) gen_uuid.o | $(BIN_DIR)
 	$(FC) $^ -o $@ $(LDFLAGS)
 
 gen_uuid.o: gen_uuid.c
 	$(CC) -c -o $@ $<
 
 # Dependencies
-
-
 cc/antisym.o basis_types.o bit_utils.o checking.o determinants.o dgemm.o diis.o excitations.o integrals.o calc_driver.o main.o parser.o printing.o solve_cc.o system.o update_cc.o cc_utils.o utils.o: const.o
 
 bit_utils.o: bit_table_256.o
@@ -120,6 +105,9 @@ bit_utils.o: bit_utils.F90
 	$(FC) -c $(FFLAGS) -o $@ $<
 
 %.mod: ;
+
+$(BIN_DIR):
+	mkdir -p $@
 
 clean:
 	@echo Cleaning...

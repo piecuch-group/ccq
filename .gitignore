@@ -2,6 +2,7 @@
 bin/
 JOBS/
 *.tar.gz
+/config.mk
 
 # Editors
 tags
