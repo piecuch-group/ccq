@@ -80,7 +80,7 @@ module parser
 
         subroutine get_config(sys, run, cc)
 
-            use const, only: sp, dp, config_unit
+            use const, only: sp, dp, config_unit, line_len
             use system, only: sys_t, run_t, cc_t, config_t
 
             use printing, only: io, abort_cc
@@ -95,9 +95,9 @@ module parser
             logical :: restart
             integer :: itol
 
-            character(len=255) :: line
-            character(len=255) :: option
-            character(len=255) :: val
+            character(len=line_len) :: line
+            character(len=line_len) :: option
+            character(len=line_len) :: val
 
 
             logical :: t_exists
@@ -107,6 +107,7 @@ module parser
 
             call load_config_file(run%config)
             call set_default_options(sys, run, cc)
+            call get_calc_macros(sys, run, cc)
 
 
             ! Default values
@@ -133,11 +134,12 @@ module parser
                     case ('restart', 'rest')
                         run%restart = .true.
 
-                    case ('print_config')
+                    case ('print_config', 'echo')
                         run%config%echo = .true.
 
                     end select
                 else
+
                     option = trim(adjustl(line(1:indx-1)))
                     val = trim(adjustl(line(indx+1:)))
 
@@ -155,138 +157,33 @@ module parser
                     case ('multiplicity', 'mult')
                         read(val, *) sys%mult
 
-                    case ('act_occ')
-                        read(val, *) act_occ
+                    end select
 
-                    case ('act_unocc')
-                        read(val, *) act_unocc
+                    select case (run%calc_type)
+                    case ('CCSD', 'CCSDT', 'CCSDTQ')
+                        call get_run_opts(sys, run, cc, option, val)
 
-                    case ('act_ind_t')
-                        read(val, *) run%act_ind_t
+                    case ('CADFCIQMC', 'DCSD-MC')
+                        call get_run_opts(sys, run, cc, option, val)
+                        call get_ext_cor_opts(sys, run, cc, option, val)
 
-                    case ('act_ind_q')
-                        read(val, *) run%act_ind_q
+                    case ('ACC')
+                        call get_run_opts(sys, run, cc, option, val)
+                        call get_acc_opts(sys, run, cc, option, val)
 
-                    ! ACC options
-                    case ('t2t2_t2')
-                        read(val, *) cc%acc%t2t2_t2
+                    case ('CCSDt')
+                        call get_run_opts(sys, run, cc, option, val)
+                        call get_act_opts(sys, run, cc, option, val)
 
-                    case ('t3_t2')
-                        read(val, *) cc%acc%t3_t2
+                    case ('dev')
+                        call get_run_opts(sys, run, cc, option, val)
+                        call get_ext_cor_opts(sys, run, cc, option, val)
+                        call get_act_opts(sys, run, cc, option, val)
+                        call get_acc_opts(sys, run, cc, option, val)
 
-                    case ('t1t3_t2')
-                        read(val, *) cc%acc%t1t3_t2
+                    case default
+                        call abort_cc('CONFIGURATION ERROR: calc_type not recognized or not found')
 
-                    case ('t2t2_t3')
-                        read(val, *) cc%acc%t2t2_t3
-
-                    case ('t2t3_t3')
-                        read(val, *) cc%acc%t2t3_t3
-
-                    ! Development options
-                    case ('lvl_t')
-                        read(val, *,iostat=ios) run%lvl_t
-                        if (ios /= 0) call abort_cc('CONFIGURATION ERROR: lvl_t must logical')
-
-                    case ('lvl_q')
-                        read(val, *, iostat=ios) run%lvl_q
-                        if (ios /= 0) call abort_cc('CONFIGURATION ERROR: lvl_q must logical')
-
-                    ! Run configuration options
-                    case ('rhf')
-                        read(val, *, iostat=ios) run%rhf
-                        if (ios /= 0) call abort_cc('CONFIGURATION ERROR: rhf must logical')
-
-                    case ('ext_cor')
-                        read(val, *, iostat=ios) run%ext_cor
-                        if (ios /= 0) call abort_cc('CONFIGURATION ERROR: ext_cor must logical')
-
-                    case ('ext_cor_sd')
-                        read(val, *, iostat=ios) run%ext_cor_sd
-                        if (ios /= 0) call abort_cc('CONFIGURATION ERROR: ext_cor_sd must logical')
-
-                    case ('shift')
-                        read(val, *) run%shift
-
-                    case ('max_iterations', 'max_iter')
-                        read(val, *) run%max_iter
-
-                    case ('diis_space', 'diis')
-                        read(val, *) run%diis_space
-
-                    case ('tolerance', 'tol', 'itol')
-                        read(val, '(i10)', iostat=ios) itol
-                        if (ios /= 0) then
-                            read(val, *) run%tol
-                        else
-                            if (itol > 0) print '(a)', 'CONFIGURATION WARNING: tolerance exponent is positive'
-                            run%tol = 1.0_dp ** itol
-                        endif
-
-                    case ('calc_type')
-
-                        select case (val)
-
-                        case ('dev')
-                            run%calc_type = 'dev'
-
-                        case ('CCSD')
-                            run%calc_type = 'CCSD'
-                            sys%act_occ_a = -1
-                            sys%act_occ_b = -1
-                            sys%act_unocc_a= -1
-                            sys%act_unocc_b= -1
-                            run%act_ind_t = 0
-                            run%act_ind_q = 0
-
-                            run%lvl_t = .false.
-                            run%lvl_q = .false.
-
-                        case ('CCSDT')
-                            run%calc_type = 'CCSDT'
-                            sys%act_occ_a = -1
-                            sys%act_occ_b = -1
-                            sys%act_unocc_a= -1
-                            sys%act_unocc_b= -1
-                            run%act_ind_t = 0
-                            run%act_ind_q = 0
-
-                            run%lvl_t = .true.
-                            run%lvl_q = .false.
-
-                        case ('CCSDTQ')
-                            run%calc_type = 'CCSDTQ'
-                            sys%act_occ_a = -1
-                            sys%act_occ_b = -1
-                            sys%act_unocc_a= -1
-                            sys%act_unocc_b= -1
-                            run%act_ind_t = 3
-                            run%act_ind_q = 3
-
-                            run%lvl_t = .true.
-                            run%lvl_q = .true.
-
-                        end select
-
-                    case ('label')
-                        run%label = val
-
-                    case ('onebody')
-                        run%onebody_file = val
-
-                    case ('twobody')
-                        run%twobody_file = val
-
-                    case ('keep_bin')
-                        read(val, *) run%keep_bin
-                    case ('output_log')
-                        run%output_file = val
-
-                    case ('output_bin')
-                        run%bin_file = val
-
-                    case ('ext_cor_file')
-                        run%ext_cor_file = val
 
                     end select
                 endif
@@ -299,10 +196,8 @@ module parser
             sys%occ_a = (nfroz + nocc_spin) / 2
             sys%occ_b = sys%occ_a - (sys%mult - 1) / 2
             sys%orbs = (nfroz + nocc_spin + nunocc_spin) / 2
-            sys%act_occ_a = act_occ + sys%occ_a - sys%occ_b
-            sys%act_occ_b = act_occ
-            sys%act_unocc_a = act_unocc
-            sys%act_unocc_b = act_unocc + sys%occ_a - sys%occ_b
+            sys%act_occ_a = sys%act_occ_b + sys%occ_a - sys%occ_b
+            sys%act_unocc_b = sys%act_unocc_a + sys%occ_a - sys%occ_b
 
             sys%nel = sys%occ_a + sys%occ_b
             sys%basis%nbasis = 2 * sys%orbs
@@ -348,6 +243,8 @@ module parser
 
             ! System
             sys%mult = 0
+            sys%act_occ_b = 0
+            sys%act_unocc_a = 0
 
             ! Run
             run%rhf = .false.
@@ -365,7 +262,7 @@ module parser
             run%onebody_file = 'onebody.inp'
             run%twobody_file = 'twobody.inp'
             run%bin_file = 'tvec_'//trim(run%uuid)//'.bin'
-            run%calc_type = 'CCSD'
+            !run%calc_type = 'CCSD'
             ! Externally corrected
             run%ext_cor = .false.
             run%ext_cor_sd = .true.
@@ -378,6 +275,270 @@ module parser
             cc%acc%t2t3_t3 = 1.0_sp
 
         end subroutine set_default_options
+
+        subroutine get_calc_macros(sys, run, cc)
+
+            use const, only: sp, dp, line_len
+            use system, only: sys_t, run_t, cc_t
+
+            type(sys_t), intent(inout) :: sys
+            type(run_t), intent(inout) :: run
+            type(cc_t), intent(inout) :: cc
+
+            character(len=line_len) :: line
+            character(len=line_len) :: option
+            character(len=line_len) :: val
+
+            integer :: indx, l_indx
+
+            do l_indx=1, run%config%file_size
+                line = run%config%lines(l_indx)
+
+                ! Skip comments
+                indx = scan(line, '#') + scan(line, '!')
+                if (indx /= 0) cycle
+                ! Skip empty lines
+                if (trim(line) == '') cycle
+                ! Skip lines without equal sign
+                indx = scan(line, '=')
+                if (indx == 0 ) cycle
+
+                option = trim(adjustl(line(1:indx-1)))
+                val = trim(adjustl(line(indx+1:)))
+
+                select case (option)
+
+                case ('calc_type')
+
+                    select case (val)
+
+                    case ('dev')
+                        run%calc_type = 'dev'
+
+                    case ('CADFCIQMC')
+                        run%calc_type = 'CADFCIQMC'
+                        run%act_ind_t = 0
+                        run%act_ind_q = 0
+
+                        run%ext_cor = .true.
+                        run%lvl_t = .true.
+                        run%lvl_q = .false.
+
+                    case ('DCSD-MC')
+                        run%calc_type = 'DCSD-MC'
+                        run%act_ind_t = 0
+                        run%act_ind_q = 0
+
+                        cc%acc%t2t2_t2 = (/1.0_sp, 0.0_sp, 0.5_sp, 0.5_sp, 0.0_sp/)
+                        run%ext_cor = .true.
+                        run%lvl_t = .true.
+                        run%lvl_q = .false.
+
+                    case ('CCSD')
+                        run%calc_type = 'CCSD'
+                        run%act_ind_t = 0
+                        run%act_ind_q = 0
+
+                        run%lvl_t = .false.
+                        run%lvl_q = .false.
+
+                    case ('CCSDt')
+                        run%calc_type = 'CCSDt'
+                        sys%act_occ_a = -1
+                        sys%act_occ_b = -1
+                        sys%act_unocc_a= -1
+                        sys%act_unocc_b= -1
+                        run%act_ind_t = 0
+                        run%act_ind_q = 0
+
+                        run%lvl_t = .true.
+                        run%lvl_q = .false.
+
+                    case ('CCSDT')
+                        run%calc_type = 'CCSDT'
+                        run%act_ind_t = 0
+                        run%act_ind_q = 0
+
+                        run%lvl_t = .true.
+                        run%lvl_q = .false.
+
+                    case ('CCSDTQ')
+                        run%calc_type = 'CCSDTQ'
+                        run%act_ind_t = 0
+                        run%act_ind_q = 0
+
+                        run%lvl_t = .true.
+                        run%lvl_q = .true.
+
+                    end select
+                end select
+
+            enddo
+
+        end subroutine get_calc_macros
+
+        subroutine get_acc_opts(sys, run, cc, option, val)
+            use const, only: sp, dp
+            use printing, only: abort_cc
+            use system, only: sys_t, run_t, cc_t
+
+            type(sys_t), intent(inout) :: sys
+            type(run_t), intent(inout) :: run
+            type(cc_t), intent(inout) :: cc
+            character(len=*), intent(in) :: option
+            character(len=*), intent(in) :: val
+
+            integer :: ios
+
+            ! ACC options
+            select case (option)
+            case ('t2t2_t2')
+                read(val, *) cc%acc%t2t2_t2
+
+            case ('t3_t2')
+                read(val, *) cc%acc%t3_t2
+
+            case ('t1t3_t2')
+                read(val, *) cc%acc%t1t3_t2
+
+            case ('t2t2_t3')
+                read(val, *) cc%acc%t2t2_t3
+
+            case ('t2t3_t3')
+                read(val, *) cc%acc%t2t3_t3
+            end select
+
+        end subroutine get_acc_opts
+
+        subroutine get_act_opts(sys, run, cc, option, val)
+            use const, only: sp, dp
+            use printing, only: abort_cc
+            use system, only: sys_t, run_t, cc_t
+
+            type(sys_t), intent(inout) :: sys
+            type(run_t), intent(inout) :: run
+            type(cc_t), intent(inout) :: cc
+            character(len=*), intent(in) :: option
+            character(len=*), intent(in) :: val
+
+            integer :: ios
+
+            ! [TODO] by-pass this if full calcs
+            select case (option)
+            case ('act_occ')
+                read(val, *) sys%act_occ_b
+
+            case ('act_unocc')
+                read(val, *) sys%act_unocc_a
+
+            case ('act_ind_t')
+                read(val, *) run%act_ind_t
+
+            case ('act_ind_q')
+                read(val, *) run%act_ind_q
+
+
+            case ('lvl_t')
+                read(val, *,iostat=ios) run%lvl_t
+                if (ios /= 0) call abort_cc('CONFIGURATION ERROR: lvl_t must logical')
+
+            case ('lvl_q')
+                read(val, *, iostat=ios) run%lvl_q
+                if (ios /= 0) call abort_cc('CONFIGURATION ERROR: lvl_q must logical')
+            end select
+
+        end subroutine get_act_opts
+
+        subroutine get_ext_cor_opts(sys, run, cc, option, val)
+            use const, only: sp, dp
+            use printing, only: abort_cc
+            use system, only: sys_t, run_t, cc_t
+
+            type(sys_t), intent(inout) :: sys
+            type(run_t), intent(inout) :: run
+            type(cc_t), intent(inout) :: cc
+            character(len=*), intent(in) :: option
+            character(len=*), intent(in) :: val
+
+            integer :: ios
+
+            ! [TODO] by-pass this if full calcs
+            select case (option)
+            case ('ext_cor')
+                if (run%calc_type == 'dev') then
+                    read(val, *, iostat=ios) run%ext_cor
+                    if (ios /= 0) call abort_cc('CONFIGURATION ERROR: ext_cor must logical')
+                endif
+            case ('ext_cor_file')
+                run%ext_cor_file = val
+            case ('ext_cor_sd')
+                read(val, *, iostat=ios) run%ext_cor_sd
+                if (ios /= 0) call abort_cc('CONFIGURATION ERROR: ext_cor_sd must logical')
+            end select
+
+        end subroutine get_ext_cor_opts
+
+        subroutine get_run_opts(sys, run, cc, option, val)
+
+            use const, only: sp, dp
+            use printing, only: abort_cc
+            use system, only: sys_t, run_t, cc_t
+
+            type(sys_t), intent(inout) :: sys
+            type(run_t), intent(inout) :: run
+            type(cc_t), intent(inout) :: cc
+            character(len=*), intent(in) :: option
+            character(len=*), intent(in) :: val
+
+            integer :: itol
+            integer :: ios
+
+            ! Run configuration options
+            select case (option)
+            case ('rhf')
+                read(val, *, iostat=ios) run%rhf
+                if (ios /= 0) call abort_cc('CONFIGURATION ERROR: rhf must logical')
+
+            case ('shift')
+                read(val, *) run%shift
+
+            case ('max_iterations', 'max_iter')
+                read(val, *) run%max_iter
+
+            case ('diis_space', 'diis')
+                read(val, *) run%diis_space
+
+            case ('tolerance', 'tol', 'itol')
+                read(val, '(i10)', iostat=ios) itol
+                if (ios /= 0) then
+                    read(val, *) run%tol
+                else
+                    if (itol > 0) print '(a)', 'CONFIGURATION WARNING: tolerance exponent is positive'
+                    run%tol = 1.0_dp ** itol
+                endif
+
+
+            case ('label')
+                run%label = val
+
+            case ('onebody')
+                run%onebody_file = val
+
+            case ('twobody')
+                run%twobody_file = val
+
+            case ('keep_bin')
+                read(val, *) run%keep_bin
+            case ('output_log')
+                run%output_file = val
+
+            case ('output_bin')
+                run%bin_file = val
+            end select
+
+
+        end subroutine get_run_opts
+
 
         subroutine load_config_file(config)
 

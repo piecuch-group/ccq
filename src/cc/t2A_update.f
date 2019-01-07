@@ -1947,29 +1947,28 @@ c
 !a!       deallocate(z15)
 !
 !c
-!      if (lvl_q) then
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!       allocate(t4a(n1+1:n3,n1+1:n3,n1+1:n3,n1+1:n3,                !ilias: if no quadruples comment out the following 21 lines
-!     & n0+1:n1,n0+1:n1,n0+1:n1,n0+1:n1))
-!       rewind(ta)
-!       read(ta)t4a
-!       allocate(d1(n0+1:n1,n0+1:n1,n1+1:n3,n1+1:n3))
-!       call reorder2143(n0,n3,n0,n3,n0,n3,n0,n3,
-!     & n0,n1,n0,n1,n1,n3,n1,n3,intr,d1)
-!       allocate(h2(n0+1:n1,n0+1:n1,n1+1:n3,n1+1:n3,n1+1:n3,n1+1:n3,
-!     & n0+1:n1,n0+1:n1))
-!       call reorder56123478(n1,n3,n1,n3,n1,n3,n1,n3,n0,n1,n0,n1,n0,n1,
-!     & n0,n1,n0,n1,n0,n1,n1,n3,n1,n3,n1,n3,n1,n3,n0,n1,n0,n1,t4a,h2)
-!       allocate(z15(n1+1:n3,n1+1:n3,n0+1:n1,n0+1:n1))
-!       i2=k1*k1*k3*k3
-!       i3=k3*k3*k1*k1
-!       call egemm2(i2,i3,d1,h2,z15)
-!       deallocate(d1)
-!       deallocate(h2)
-!       deallocate(t4a)
-!c
-!       v2a=v2a+0.250*z15
-!       deallocate(z15)
+      if (lvl_q) then
+       allocate(t4a(n1+1:n3,n1+1:n3,n1+1:n3,n1+1:n3,                !ilias: if no quadruples comment out the following 21 lines
+     & n0+1:n1,n0+1:n1,n0+1:n1,n0+1:n1))
+       rewind(ta)
+       read(ta)t4a
+       allocate(d1(n0+1:n1,n0+1:n1,n1+1:n3,n1+1:n3))
+       call reorder2143(n0,n3,n0,n3,n0,n3,n0,n3,
+     & n0,n1,n0,n1,n1,n3,n1,n3,intr,d1)
+       allocate(h2(n0+1:n1,n0+1:n1,n1+1:n3,n1+1:n3,n1+1:n3,n1+1:n3,
+     & n0+1:n1,n0+1:n1))
+       call reorder56123478(n1,n3,n1,n3,n1,n3,n1,n3,n0,n1,n0,n1,n0,n1,
+     & n0,n1,n0,n1,n0,n1,n1,n3,n1,n3,n1,n3,n1,n3,n0,n1,n0,n1,t4a,h2)
+       allocate(z15(n1+1:n3,n1+1:n3,n0+1:n1,n0+1:n1))
+       i2=k1*k1*k3*k3
+       i3=k3*k3*k1*k1
+       call egemm2(i2,i3,d1,h2,z15)
+       deallocate(d1)
+       deallocate(h2)
+       deallocate(t4a)
+c
+       v2a=v2a+0.250*z15
+       deallocate(z15)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !c
 !a!!       allocate(d1(n0+1:n2,n0+1:n1,n2+1:n3,n1+1:n3))
@@ -2029,27 +2028,27 @@ c
 !a!       deallocate(z16)
 !c
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!       allocate(t4b(n2+1:n3,n1+1:n3,n1+1:n3,n1+1:n3,                !ilias: if no quadruples comment out the following 21 lines
-!     & n0+1:n2,n0+1:n1,n0+1:n1,n0+1:n1))
-!       rewind(tb)
-!       read(tb)t4b
-!       allocate(d1(n0+1:n2,n0+1:n1,n2+1:n3,n1+1:n3))
-!       call reorder2143(n0,n3,n0,n3,n0,n3,n0,n3,
-!     & n0,n2,n0,n1,n2,n3,n1,n3,intm,d1)
-!       allocate(h2(n0+1:n2,n0+1:n1,n2+1:n3,n1+1:n3,n1+1:n3,n1+1:n3,
-!     & n0+1:n1,n0+1:n1))
-!       call reorder56123478(n2,n3,n1,n3,n1,n3,n1,n3,n0,n2,n0,n1,n0,n1,
-!     & n0,n1,n0,n2,n0,n1,n2,n3,n1,n3,n1,n3,n1,n3,n0,n1,n0,n1,t4b,h2)
-!       allocate(z16(n1+1:n3,n1+1:n3,n0+1:n1,n0+1:n1))
-!       i2=k1*k1*k3*k3
-!       i3=k3*k4*k1*k2
-!       call egemm2(i2,i3,d1,h2,z16)
-!       deallocate(d1)
-!       deallocate(h2)
-!       deallocate(t4b)
-!c
-!       v2a=v2a+z16
-!       deallocate(z16)
+       allocate(t4b(n2+1:n3,n1+1:n3,n1+1:n3,n1+1:n3,                !ilias: if no quadruples comment out the following 21 lines
+     & n0+1:n2,n0+1:n1,n0+1:n1,n0+1:n1))
+       rewind(tb)
+       read(tb)t4b
+       allocate(d1(n0+1:n2,n0+1:n1,n2+1:n3,n1+1:n3))
+       call reorder2143(n0,n3,n0,n3,n0,n3,n0,n3,
+     & n0,n2,n0,n1,n2,n3,n1,n3,intm,d1)
+       allocate(h2(n0+1:n2,n0+1:n1,n2+1:n3,n1+1:n3,n1+1:n3,n1+1:n3,
+     & n0+1:n1,n0+1:n1))
+       call reorder56123478(n2,n3,n1,n3,n1,n3,n1,n3,n0,n2,n0,n1,n0,n1,
+     & n0,n1,n0,n2,n0,n1,n2,n3,n1,n3,n1,n3,n1,n3,n0,n1,n0,n1,t4b,h2)
+       allocate(z16(n1+1:n3,n1+1:n3,n0+1:n1,n0+1:n1))
+       i2=k1*k1*k3*k3
+       i3=k3*k4*k1*k2
+       call egemm2(i2,i3,d1,h2,z16)
+       deallocate(d1)
+       deallocate(h2)
+       deallocate(t4b)
+c
+       v2a=v2a+z16
+       deallocate(z16)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !c
 !       allocate(d1(n0+1:n2,n0+1:n2,n2+1:n3,n2+1:n3))
@@ -2112,28 +2111,27 @@ c
 !       deallocate(z17)
 !c
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!       allocate(t4c(n2+1:n3,n2+1:n3,n1+1:n3,n1+1:n3,                !ilias: if no quadruples comment out the next 20 lines
-!     & n0+1:n2,n0+1:n2,n0+1:n1,n0+1:n1))
-!       rewind(tc)
-!       read(tc)t4c
-!       allocate(d1(n0+1:n2,n0+1:n2,n2+1:n3,n2+1:n3))
-!       call reorder2143(n0,n3,n0,n3,n0,n3,n0,n3,
-!     & n0,n2,n0,n2,n2,n3,n2,n3,intb,d1)
-!       allocate(h2(n0+1:n2,n0+1:n2,n2+1:n3,n2+1:n3,n1+1:n3,n1+1:n3,
-!     & n0+1:n1,n0+1:n1))
-!       call reorder56123478(n2,n3,n2,n3,n1,n3,n1,n3,n0,n2,n0,n2,n0,n1,
-!     & n0,n1,n0,n2,n0,n2,n2,n3,n2,n3,n1,n3,n1,n3,n0,n1,n0,n1,t4c,h2)
-!       allocate(z17(n1+1:n3,n1+1:n3,n0+1:n1,n0+1:n1))
-!       i2=k1*k1*k3*k3
-!       i3=k4*k4*k2*k2
-!       call egemm2(i2,i3,d1,h2,z17)
-!       deallocate(d1)
-!       deallocate(h2)
-!c
-!       v2a=v2a+0.250*z17
-!       deallocate(z17)
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!      endif
+       allocate(t4c(n2+1:n3,n2+1:n3,n1+1:n3,n1+1:n3,                !ilias: if no quadruples comment out the next 20 lines
+     & n0+1:n2,n0+1:n2,n0+1:n1,n0+1:n1))
+       rewind(tc)
+       read(tc)t4c
+       allocate(d1(n0+1:n2,n0+1:n2,n2+1:n3,n2+1:n3))
+       call reorder2143(n0,n3,n0,n3,n0,n3,n0,n3,
+     & n0,n2,n0,n2,n2,n3,n2,n3,intb,d1)
+       allocate(h2(n0+1:n2,n0+1:n2,n2+1:n3,n2+1:n3,n1+1:n3,n1+1:n3,
+     & n0+1:n1,n0+1:n1))
+       call reorder56123478(n2,n3,n2,n3,n1,n3,n1,n3,n0,n2,n0,n2,n0,n1,
+     & n0,n1,n0,n2,n0,n2,n2,n3,n2,n3,n1,n3,n1,n3,n0,n1,n0,n1,t4c,h2)
+       allocate(z17(n1+1:n3,n1+1:n3,n0+1:n1,n0+1:n1))
+       i2=k1*k1*k3*k3
+       i3=k4*k4*k2*k2
+       call egemm2(i2,i3,d1,h2,z17)
+       deallocate(d1)
+       deallocate(h2)
+c
+       v2a=v2a+0.250*z17
+       deallocate(z17)
+      endif
 
        do i=n0+1,n1-1
        do j=i+1,n1

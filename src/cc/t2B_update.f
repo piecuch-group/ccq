@@ -2954,29 +2954,28 @@ c
 !a!       deallocate(b2)
 !a!       deallocate(z27)
 c
-!      if (lvl_q) then
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!       allocate(t4b(n2+1:n3,n1+1:n3,n1+1:n3,n1+1:n3,                !ilias: if no quadruples comment out the following 21 lines
-!     & n0+1:n2,n0+1:n1,n0+1:n1,n0+1:n1))
-!       rewind(tb)
-!       read(tb)t4b
-!       allocate(d1(n0+1:n1,n0+1:n1,n1+1:n3,n1+1:n3))
-!       call reorder2143(n0,n3,n0,n3,n0,n3,n0,n3,
-!     & n0,n1,n0,n1,n1,n3,n1,n3,intr,d1)
-!       allocate(h2(n0+1:n1,n0+1:n1,n1+1:n3,n1+1:n3,n2+1:n3,n1+1:n3,
-!     & n0+1:n2,n0+1:n1))
-!       call reorder67231458(n2,n3,n1,n3,n1,n3,n1,n3,n0,n2,n0,n1,n0,n1,
-!     & n0,n1,n0,n1,n0,n1,n1,n3,n1,n3,n2,n3,n1,n3,n0,n2,n0,n1,t4b,h2)
-!       allocate(z27(n2+1:n3,n1+1:n3,n0+1:n2,n0+1:n1))
-!       i2=k1*k2*k3*k4
-!       i3=k3*k3*k1*k1
-!       call egemm2(i2,i3,d1,h2,z27)
-!       deallocate(d1)
-!       deallocate(h2)
-!       deallocate(t4b)
-!c
-!       v2b=v2b+0.250*z27
-!       deallocate(z27)
+      if (lvl_q) then
+       allocate(t4b(n2+1:n3,n1+1:n3,n1+1:n3,n1+1:n3,                !ilias: if no quadruples comment out the following 21 lines
+     & n0+1:n2,n0+1:n1,n0+1:n1,n0+1:n1))
+       rewind(tb)
+       read(tb)t4b
+       allocate(d1(n0+1:n1,n0+1:n1,n1+1:n3,n1+1:n3))
+       call reorder2143(n0,n3,n0,n3,n0,n3,n0,n3,
+     & n0,n1,n0,n1,n1,n3,n1,n3,intr,d1)
+       allocate(h2(n0+1:n1,n0+1:n1,n1+1:n3,n1+1:n3,n2+1:n3,n1+1:n3,
+     & n0+1:n2,n0+1:n1))
+       call reorder67231458(n2,n3,n1,n3,n1,n3,n1,n3,n0,n2,n0,n1,n0,n1,
+     & n0,n1,n0,n1,n0,n1,n1,n3,n1,n3,n2,n3,n1,n3,n0,n2,n0,n1,t4b,h2)
+       allocate(z27(n2+1:n3,n1+1:n3,n0+1:n2,n0+1:n1))
+       i2=k1*k2*k3*k4
+       i3=k3*k3*k1*k1
+       call egemm2(i2,i3,d1,h2,z27)
+       deallocate(d1)
+       deallocate(h2)
+       deallocate(t4b)
+c
+       v2b=v2b+0.250*z27
+       deallocate(z27)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c
 !       allocate(d1(n0+1:n2,n0+1:n1,n2+1:n3,n1+1:n3))
@@ -3035,27 +3034,27 @@ c
 !a!       deallocate(b2)
 !a!       deallocate(z28)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!       allocate(t4c(n2+1:n3,n2+1:n3,n1+1:n3,n1+1:n3,                !ilias: if no quadruples comment out the following 21 lines
-!     & n0+1:n2,n0+1:n2,n0+1:n1,n0+1:n1))
-!       rewind(tc)
-!       read(tc)t4c
-!       allocate(d1(n0+1:n2,n0+1:n1,n2+1:n3,n1+1:n3))
-!       call reorder2143(n0,n3,n0,n3,n0,n3,n0,n3,
-!     & n0,n2,n0,n1,n2,n3,n1,n3,intm,d1)
-!       allocate(h2(n0+1:n2,n0+1:n1,n2+1:n3,n1+1:n3,n2+1:n3,n1+1:n3,
-!     & n0+1:n2,n0+1:n1))
-!       call reorder57132468(n2,n3,n2,n3,n1,n3,n1,n3,n0,n2,n0,n2,n0,n1,
-!     & n0,n1,n0,n2,n0,n1,n2,n3,n1,n3,n2,n3,n1,n3,n0,n2,n0,n1,t4c,h2)
-!       allocate(z28(n2+1:n3,n1+1:n3,n0+1:n2,n0+1:n1))
-!       i2=k1*k2*k3*k4
-!       i3=k3*k4*k1*k2
-!       call egemm2(i2,i3,d1,h2,z28)
-!       deallocate(d1)
-!       deallocate(h2)
-!       deallocate(t4c)
-!c
-!       v2b=v2b+z28
-!       deallocate(z28)
+       allocate(t4c(n2+1:n3,n2+1:n3,n1+1:n3,n1+1:n3,                !ilias: if no quadruples comment out the following 21 lines
+     & n0+1:n2,n0+1:n2,n0+1:n1,n0+1:n1))
+       rewind(tc)
+       read(tc)t4c
+       allocate(d1(n0+1:n2,n0+1:n1,n2+1:n3,n1+1:n3))
+       call reorder2143(n0,n3,n0,n3,n0,n3,n0,n3,
+     & n0,n2,n0,n1,n2,n3,n1,n3,intm,d1)
+       allocate(h2(n0+1:n2,n0+1:n1,n2+1:n3,n1+1:n3,n2+1:n3,n1+1:n3,
+     & n0+1:n2,n0+1:n1))
+       call reorder57132468(n2,n3,n2,n3,n1,n3,n1,n3,n0,n2,n0,n2,n0,n1,
+     & n0,n1,n0,n2,n0,n1,n2,n3,n1,n3,n2,n3,n1,n3,n0,n2,n0,n1,t4c,h2)
+       allocate(z28(n2+1:n3,n1+1:n3,n0+1:n2,n0+1:n1))
+       i2=k1*k2*k3*k4
+       i3=k3*k4*k1*k2
+       call egemm2(i2,i3,d1,h2,z28)
+       deallocate(d1)
+       deallocate(h2)
+       deallocate(t4c)
+c
+       v2b=v2b+z28
+       deallocate(z28)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c
 !       allocate(d1(n0+1:n2,n0+1:n2,n2+1:n3,n2+1:n3))
@@ -3114,30 +3113,29 @@ c
 !a!       deallocate(b2)
 !a!       deallocate(z29)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!       allocate(t4d(n2+1:n3,n2+1:n3,n2+1:n3,n1+1:n3,                !ilias: if no quadruples comment out the following 21 lines
-!     & n0+1:n2,n0+1:n2,n0+1:n2,n0+1:n1))
-!       rewind(td)
-!       read(td)t4d
-!       allocate(d1(n0+1:n2,n0+1:n2,n2+1:n3,n2+1:n3))
-!       call reorder2143(n0,n3,n0,n3,n0,n3,n0,n3,
-!     & n0,n2,n0,n2,n2,n3,n2,n3,intb,d1)
-!       allocate(h2(n0+1:n2,n0+1:n2,n2+1:n3,n2+1:n3,n2+1:n3,n1+1:n3,
-!     & n0+1:n2,n0+1:n1))
-!       call reorder56123478(n2,n3,n2,n3,n2,n3,n1,n3,n0,n2,n0,n2,n0,n2,
-!     & n0,n1,n0,n2,n0,n2,n2,n3,n2,n3,n2,n3,n1,n3,n0,n2,n0,n1,t4d,h2)
-!       allocate(z29(n2+1:n3,n1+1:n3,n0+1:n2,n0+1:n1))
-!       i2=k1*k2*k3*k4
-!       i3=k4*k4*k2*k2
-!       call egemm2(i2,i3,d1,h2,z29)
-!       deallocate(d1)
-!       deallocate(h2)
-!       deallocate(t4d)
-!c
-!       v2b=v2b+0.250*z29
-!       deallocate(z29)
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+       allocate(t4d(n2+1:n3,n2+1:n3,n2+1:n3,n1+1:n3,                !ilias: if no quadruples comment out the following 21 lines
+     & n0+1:n2,n0+1:n2,n0+1:n2,n0+1:n1))
+       rewind(td)
+       read(td)t4d
+       allocate(d1(n0+1:n2,n0+1:n2,n2+1:n3,n2+1:n3))
+       call reorder2143(n0,n3,n0,n3,n0,n3,n0,n3,
+     & n0,n2,n0,n2,n2,n3,n2,n3,intb,d1)
+       allocate(h2(n0+1:n2,n0+1:n2,n2+1:n3,n2+1:n3,n2+1:n3,n1+1:n3,
+     & n0+1:n2,n0+1:n1))
+       call reorder56123478(n2,n3,n2,n3,n2,n3,n1,n3,n0,n2,n0,n2,n0,n2,
+     & n0,n1,n0,n2,n0,n2,n2,n3,n2,n3,n2,n3,n1,n3,n0,n2,n0,n1,t4d,h2)
+       allocate(z29(n2+1:n3,n1+1:n3,n0+1:n2,n0+1:n1))
+       i2=k1*k2*k3*k4
+       i3=k4*k4*k2*k2
+       call egemm2(i2,i3,d1,h2,z29)
+       deallocate(d1)
+       deallocate(h2)
+       deallocate(t4d)
 c
-!      endif
+       v2b=v2b+0.250*z29
+       deallocate(z29)
+c
+      endif
        do i=n0+1,n1
        do j=n0+1,n2
        do a=n1+1,n3
