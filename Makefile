@@ -59,7 +59,9 @@ GIT_SHA1 := $(GIT_SHA1)$(shell test -z "$$(git status --porcelain 2>/dev/null)" 
 # Compilation macros
 .SUFFIXES:
 .SUFFIXES: $(EXTS)
+.PHONY: clean cleanall debug test
 
+all: $(BIN_DIR)/$(PROGRAM)
 
 
 # Fortran
@@ -91,7 +93,6 @@ $(BUILD_DIR)/gen_uuid.o: src/gen_uuid.c
 # Goals
 # -------
 #
-.PHONY: clean cleanall debug test
 
 # Compile binary
 $(BIN_DIR)/$(PROGRAM): $(OBJS) $(BUILD_DIR)/gen_uuid.o | $(BIN_DIR)
