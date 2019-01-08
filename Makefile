@@ -59,7 +59,7 @@ GIT_SHA1 := $(GIT_SHA1)$(shell test -z "$$(git status --porcelain 2>/dev/null)" 
 # Compilation macros
 .SUFFIXES:
 .SUFFIXES: $(EXTS)
-.PHONY: clean cleanall debug test
+.PHONY: all clean cleanall debug test
 
 all: $(BIN_DIR)/$(PROGRAM)
 
