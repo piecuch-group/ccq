@@ -10,7 +10,7 @@ methods. Also, externally corrected CC is available
 Building
 --------
 
-A ``BLAS`` routine is required to compile this program. It is strongly advised
+A ``BLAS`` library is required to compile this program. It is strongly advised
 to use an optimized version, such as OpenBLAS or Intel's MKL.
 
 To compile, just link or copy a configuration file in ``config/`` to
@@ -79,6 +79,7 @@ act_ind_q:
 ACC options
 ^^^^^^^^^^^
 ACC options to scale various diagrams. All values are space separated.
+
 t2t2_t2:
    T_2^2 projected on doubles. Takes 5 values.
 
