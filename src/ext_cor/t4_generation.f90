@@ -12,7 +12,8 @@ contains
         use excitations, only: excit_t, get_excitation_level
         use ext_cor_types, only: vec3_t
         use printing, only: io
-        use system, only: sys_t, cc_t
+        use system, only: sys_t
+        use cc_types, only: cc_t
 
 
         type(sys_t), intent(in) :: sys
@@ -175,7 +176,8 @@ contains
             analyze_t4_abbb, analyze_t4_bbbb
         use excitations, only: excit_t, get_excitation_spin_integrate
         use ext_cor_types, only: vec3_t
-        use system, only: sys_t, cc_t
+        use system, only: sys_t
+        use cc_types, only: cc_t
 
         type(sys_t), intent(in) :: sys
         type(cc_t), intent(inout) :: cc
@@ -235,7 +237,8 @@ contains
 
         use const, only: dp, i0
         use excitations, only: excit_t, get_excitation_level, get_excitation
-        use system, only: sys_t, cc_t
+        use system, only: sys_t
+        use cc_types, only: cc_t
 
         type(sys_t), intent(in) :: sys
         type(cc_t), intent(inout) :: cc
@@ -410,7 +413,8 @@ contains
         use determinants, only: decode_det
         use excitations, only: excit_t, create_excited_det
         use ext_cor_types, only: vec3_t
-        use system, only: sys_t, cc_t
+        use system, only: sys_t
+        use cc_types, only: cc_t
 
         type(sys_t), intent(in) :: sys
         type(cc_t), intent(inout) :: cc

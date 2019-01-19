@@ -11,7 +11,7 @@
 BUILD_DIR := build
 BIN_DIR := bin
 DEPEND_DIR := $(BUILD_DIR)/depend
-VPATH := src:src/cc:src/ext_cor
+VPATH := src:src/cc:src/ext_cor:src/cc_opt_ccsdt:src/hbar:src/lcc:src/mm_cor
 
 # Include architecture configuration file
 include config.mk
@@ -108,7 +108,7 @@ $(F_DEPEND): $(F_FILES)
 # Phonies
 # -------
 clean:
-	rm -f $(BUILD_DIR)/*
+	rm -fr $(BUILD_DIR)/*
 	rm -f $(BIN_DIR)/$(PROGRAM)
 
 cleanall:

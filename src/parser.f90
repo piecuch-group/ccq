@@ -81,7 +81,8 @@ contains
     subroutine get_config(sys, run, cc)
 
         use const, only: sp, dp, config_unit, line_len
-        use system, only: sys_t, run_t, cc_t, config_t
+        use system, only: sys_t, run_t, config_t
+        use cc_types, only: cc_t
 
         use printing, only: io, abort_cc
 
@@ -170,7 +171,7 @@ contains
                     call get_run_opts(sys, run, cc, option, val)
                     call get_acc_opts(sys, run, cc, option, val)
 
-                case ('CCSDt')
+                case ('CCSDt', 'CC(t;3)')
                     call get_run_opts(sys, run, cc, option, val)
                     call get_act_opts(sys, run, cc, option, val)
 
@@ -195,7 +196,11 @@ contains
         sys%occ_a = (nfroz + nocc_spin) / 2
         sys%occ_b = sys%occ_a - (sys%mult - 1) / 2
         sys%orbs = (nfroz + nocc_spin + nunocc_spin) / 2
+
+        ! Set active space
+        sys%act_occ_b = max(sys%occ_b - sys%act_occ, sys%froz)
         sys%act_occ_a = sys%act_occ_b + sys%occ_a - sys%occ_b
+        sys%act_unocc_a = min(sys%occ_a + sys%act_unocc, sys%orbs)
         sys%act_unocc_b = sys%act_unocc_a + sys%occ_a - sys%occ_b
 
         sys%nel = sys%occ_a + sys%occ_b
@@ -229,13 +234,20 @@ contains
             write(io, '(a)') 'WARNING: '//trim(run%bin_file)//' already exists'
 
 
+        if (trim(run%calc_type) == 'CCSDt' &
+            .and. sys%act_occ == -1 .and. sys%act_unocc == -1 ) then
+            call abort_cc('CONFIGURATION ERROR: Active space methods require an active space')
+        endif
+
+
     end subroutine get_config
 
 
     subroutine get_calc_macros(sys, run, cc)
 
         use const, only: sp, dp, line_len
-        use system, only: sys_t, run_t, cc_t
+        use system, only: sys_t, run_t
+        use cc_types, only: cc_t
 
         type(sys_t), intent(inout) :: sys
         type(run_t), intent(inout) :: run
@@ -300,11 +312,24 @@ contains
 
                 case ('CCSDt')
                     run%calc_type = 'CCSDt'
-                    sys%act_occ_a = -1
-                    sys%act_occ_b = -1
-                    sys%act_unocc_a= -1
-                    sys%act_unocc_b= -1
-                    run%act_ind_t = 0
+                    run%sorted_ints = .true.
+                    sys%act_occ = -1
+                    sys%act_unocc= -1
+                    run%act_ind_t = 1
+                    run%act_ind_q = 0
+
+                    run%lvl_t = .true.
+                    run%lvl_q = .false.
+
+                case ('CCT3', 'CCt3', 'CC(t;3)')
+                    run%calc_type = 'CC(t;3)'
+                    run%sorted_ints = .true.
+                    run%hbar = .true.
+                    run%lcc = .true.
+                    run%mm_23 = .true.
+                    sys%act_occ = -1
+                    sys%act_unocc= -1
+                    run%act_ind_t = 1
                     run%act_ind_q = 0
 
                     run%lvl_t = .true.
@@ -336,7 +361,8 @@ contains
     subroutine get_acc_opts(sys, run, cc, option, val)
         use const, only: sp, dp
         use printing, only: abort_cc
-        use system, only: sys_t, run_t, cc_t
+        use system, only: sys_t, run_t
+        use cc_types, only: cc_t
 
         type(sys_t), intent(inout) :: sys
         type(run_t), intent(inout) :: run
@@ -369,7 +395,8 @@ contains
     subroutine get_act_opts(sys, run, cc, option, val)
         use const, only: sp, dp
         use printing, only: abort_cc
-        use system, only: sys_t, run_t, cc_t
+        use system, only: sys_t, run_t
+        use cc_types, only: cc_t
 
         type(sys_t), intent(inout) :: sys
         type(run_t), intent(inout) :: run
@@ -382,17 +409,16 @@ contains
         ! [TODO] by-pass this if full calcs
         select case (option)
         case ('act_occ')
-            read(val, *) sys%act_occ_b
+            read(val, *) sys%act_occ
 
         case ('act_unocc')
-            read(val, *) sys%act_unocc_a
+            read(val, *) sys%act_unocc
 
         case ('act_ind_t')
             read(val, *) run%act_ind_t
 
         case ('act_ind_q')
             read(val, *) run%act_ind_q
-
 
         case ('lvl_t')
             read(val, *,iostat=ios) run%lvl_t
@@ -408,7 +434,8 @@ contains
     subroutine get_ext_cor_opts(sys, run, cc, option, val)
         use const, only: sp, dp
         use printing, only: abort_cc
-        use system, only: sys_t, run_t, cc_t
+        use system, only: sys_t, run_t
+        use cc_types, only: cc_t
 
         type(sys_t), intent(inout) :: sys
         type(run_t), intent(inout) :: run
@@ -438,7 +465,8 @@ contains
 
         use const, only: sp, dp
         use printing, only: abort_cc
-        use system, only: sys_t, run_t, cc_t
+        use system, only: sys_t, run_t
+        use cc_types, only: cc_t
 
         type(sys_t), intent(inout) :: sys
         type(run_t), intent(inout) :: run
@@ -451,6 +479,10 @@ contains
 
         ! Run configuration options
         select case (option)
+        case ('sorted_ints')
+            read(val, *, iostat=ios) run%sorted_ints
+            if (ios /= 0) call abort_cc('CONFIGURATION ERROR: rhf must logical')
+
         case ('rhf')
             read(val, *, iostat=ios) run%rhf
             if (ios /= 0) call abort_cc('CONFIGURATION ERROR: rhf must logical')
@@ -542,7 +574,8 @@ contains
     subroutine set_default_options(sys, run, cc)
 
         use const, only: sp, dp
-        use system, only: sys_t, run_t, cc_t
+        use system, only: sys_t, run_t
+        use cc_types, only: cc_t
 
         type(sys_t), intent(inout) :: sys
         type(run_t), intent(inout) :: run
@@ -554,12 +587,17 @@ contains
         sys%act_unocc_a = 0
 
         ! Run
-        run%rhf = .false.
+        run%sorted_ints = .false.
+        run%hbar = .false.
+        run%lcc = .false.
+        run%mm_23 = .false.
         run%act_ind_t = 0
         run%act_ind_q = 0
-        run%keep_bin = .true.
         run%lvl_t = .false.
         run%lvl_q = .false.
+
+        run%rhf = .false.
+        run%keep_bin = .true.
         run%shift = 0.0_dp
         run%restart = .false.
         run%diis_space = 5

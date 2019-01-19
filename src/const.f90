@@ -29,14 +29,18 @@ module const
     integer, parameter :: line_len = 255
 
     ! File units
+    integer, parameter :: part_ints_a_unit = 130
+    integer, parameter :: part_ints_b_unit = 131
+    integer, parameter :: part_ints_c_unit = 132
+
     integer, parameter :: log_unit = 140
     integer, parameter :: config_unit = 141
     integer, parameter :: tmp_unit = 142
     integer, parameter :: cnf_unit = 147
     integer, parameter :: t_unit = 389
     integer, parameter :: t_vecs_unit = 390
-    integer, parameter :: l_vecs_unit = 433
-    integer, parameter :: l_unit = 482
+    integer, parameter :: l_unit = 422
+    integer, parameter :: l_vecs_unit = 423
     integer, parameter :: hbar_unit = 488
     integer, parameter :: end_unit = 489
     integer, parameter :: walk_unit = 490

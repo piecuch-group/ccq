@@ -1,7 +1,8 @@
 program main
 
     use calc_driver, only: run_calcs
-    use system, only: sys_t, run_t, cc_t, ints_t
+    use system, only: sys_t, run_t, ints_t
+    use cc_types, only: cc_t
     use parser, only: get_opts, get_config
     use printing, only: init_print, print_header, print_config, close_print
 

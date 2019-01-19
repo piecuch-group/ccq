@@ -1,25 +1,49 @@
 module system
 
-    use const, only: dp, sp, line_len
+    use const, only: p, dp, sp, line_len
     use basis_types, only: basis_t
-    use ext_cor_types, only: ext_cor_t
-
-    type acc_t
-        real(sp) :: t2t2_t2(5)
-        real(sp) :: t3_t2(2)
-        real(sp) :: t1t3_t2(4)
-        real(sp) :: t2t2_t3(3)
-        real(sp) :: t2t3_t3(5)
-
-        real(dp), allocatable :: t2_mc(:)
-    end type acc_t
 
     type ints_t
-        real(dp), allocatable :: f_a(:,:)
-        real(dp), allocatable :: f_b(:,:)
-        real(dp), allocatable :: v_aa(:,:,:,:)
-        real(dp), allocatable :: v_ab(:,:,:,:)
-        real(dp), allocatable :: v_bb(:,:,:,:)
+        ! Unsorted integrals for older CC codes and CCSDTQ derivatives
+        real(p), allocatable :: f_a(:,:)
+        real(p), allocatable :: f_b(:,:)
+        real(p), allocatable :: v_aa(:,:,:,:)
+        real(p), allocatable :: v_ab(:,:,:,:)
+        real(p), allocatable :: v_bb(:,:,:,:)
+
+        ! Sorted integrals for faster CC
+        real(p), allocatable :: fahh(:,:)
+        real(p), allocatable :: fahp(:,:)
+        real(p), allocatable :: fapp(:,:)
+        real(p), allocatable :: fbhh(:,:)
+        real(p), allocatable :: fbhp(:,:)
+        real(p), allocatable :: fbpp(:,:)
+        real(p), allocatable :: vahhhh(:,:,:,:)
+        real(p), allocatable :: vahhhp(:,:,:,:)
+        real(p), allocatable :: vahhpp(:,:,:,:)
+        real(p), allocatable :: vahphp(:,:,:,:)
+        real(p), allocatable :: vahppp(:,:,:,:)
+        real(p), allocatable :: vbhhhh(:,:,:,:)
+        real(p), allocatable :: vbhhhp(:,:,:,:)
+        real(p), allocatable :: vbhhph(:,:,:,:)
+        real(p), allocatable :: vbhhpp(:,:,:,:)
+        real(p), allocatable :: vbhphp(:,:,:,:)
+        real(p), allocatable :: vbhpph(:,:,:,:)
+        real(p), allocatable :: vbphph(:,:,:,:)
+        real(p), allocatable :: vbhppp(:,:,:,:)
+        real(p), allocatable :: vbphpp(:,:,:,:)
+        real(p), allocatable :: vchhhh(:,:,:,:)
+        real(p), allocatable :: vchhhp(:,:,:,:)
+        real(p), allocatable :: vchhpp(:,:,:,:)
+        real(p), allocatable :: vchphp(:,:,:,:)
+        real(p), allocatable :: vchppp(:,:,:,:)
+
+        ! Active integrals
+        real(p), allocatable :: vaappp(:,:,:,:)
+        real(p), allocatable :: vbappp(:,:,:,:)
+        real(p), allocatable :: vbpapp(:,:,:,:)
+        real(p), allocatable :: vcappp(:,:,:,:)
+
     end type ints_t
 
     type sys_t
@@ -40,6 +64,9 @@ module system
         type(basis_t) :: basis
 
         ! Active partitioning
+        integer :: act_occ
+        integer :: act_unocc
+
         integer :: act_occ_a
         integer :: act_occ_b
         integer :: act_unocc_a
@@ -53,22 +80,6 @@ module system
         real(dp) :: en_ref
 
     end type sys_t
-
-    type cc_t
-        ! CC vector
-        real(dp), allocatable :: t_vec(:)
-        integer :: t_size
-        integer :: pos(20)
-
-        ! ACC data
-        type(acc_t) :: acc
-
-        ! Externally corrected data
-        type(ext_cor_t) :: ext_cor
-
-        ! Correlation energy
-        real(dp) :: en_cor
-    end type cc_t
 
     type config_t
         character(len=255) :: filename
@@ -87,6 +98,7 @@ module system
         integer :: max_iter
         logical :: rhf
 
+
         ! Calculation ID
         character(len=255) :: label
         character(len=37) :: uuid
@@ -98,6 +110,12 @@ module system
         logical :: ext_cor
         ! Use singles and doubles
         logical :: ext_cor_sd
+
+        ! Calc type specifics
+        logical :: sorted_ints
+        logical :: hbar
+        logical :: lcc
+        logical :: mm_23
 
         ! Compatibility layer
         character(len=6) :: lvl
@@ -116,7 +134,6 @@ module system
         character(len=255) :: twobody_file
         character(len=255) :: bin_file
     end type run_t
-
 
 
 end module system

@@ -19,13 +19,14 @@ contains
 
         use const, only: dp, i0
         use determinants, only: gen_f_ref
-        use energy, only: calculate_energy
+        use energy, only: calculate_unsorted_energy
         use ext_cor, only: alloc_vec3_t, dealloc_vec3_t
         use ext_cor_types, only: vec3_t
         use t4_generation, only: update_t2_cluster, ext_cor_4
         use process_ci, only: find_fciqmc_c3
         use printing, only: io, print_date
-        use system, only: sys_t, run_t, cc_t
+        use system, only: sys_t, run_t
+        use cc_types, only: cc_t
         use symmetry, only: read_sym
         use utilities, only: antisymmetrize
 
@@ -84,7 +85,8 @@ contains
         ! Write to CC vector
         write(io, '(4x,a/)') '=> Writing T2 files'
         call update_t2_cluster(sys, cc%ext_cor, f_ref)
-        cc%en_cor = calculate_energy(sys, cc)
+
+        cc%en_cor = calculate_unsorted_energy(sys, cc)
         write(io, '(2x,a27,2x,f16.10/)') 'External correlation energy', cc%en_cor
 
         call print_date('  cluster analysis ended on:')
@@ -337,7 +339,8 @@ contains
         !   cc: coupled-cluster information with updated T vector (cc%t_vec) amplitudes
 
         use const, only: dp
-        use system, only: sys_t, cc_t
+        use system, only: sys_t
+        use cc_types, only: cc_t
         use ext_cor_types, only: vec3_t
 
         type(sys_t), intent(in) :: sys

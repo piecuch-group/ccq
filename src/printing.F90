@@ -100,7 +100,8 @@ contains
     subroutine print_calc_params(sys, run, cc)
 
         use const, only: dp
-        use system, only: sys_t, run_t, cc_t
+        use system, only: sys_t, run_t
+        use cc_types, only: cc_t
 
         type(sys_t), intent(in) :: sys
         type(run_t), intent(in) :: run
@@ -160,9 +161,30 @@ contains
 
     end subroutine print_calc_params
 
+    subroutine print_cct3(sys, cc)
+
+        use system, only: sys_t
+        use cc_types, only: cc_t
+
+        type(sys_t), intent(in) :: sys
+        type(cc_t), intent(in) :: cc
+
+        write(io,'(/a20,2a18)') 'Method', 'Correlation (Eh)', 'Total Energy (Eh)'
+        write(io,'(10x,46("-"))')
+        write(io,'(a20,2f18.12)') 'CCSDt', cc%en_cor, sys%en_ref + cc%en_cor
+        write(io,'(a20,2f18.12)') 'CC(t;3),A', cc%en_cor + cc%mm_en_cor_a, sys%en_ref + cc%en_cor + cc%mm_en_cor_a
+        write(io,'(a20,2f18.12)') 'CC(t;3),B', cc%en_cor + cc%mm_en_cor_b, sys%en_ref + cc%en_cor + cc%mm_en_cor_b
+        write(io,'(a20,2f18.12)') 'CC(t;3),C', cc%en_cor + cc%mm_en_cor_c, sys%en_ref + cc%en_cor + cc%mm_en_cor_c
+        write(io,'(a20,2f18.12)') 'CC(t;3)', cc%en_cor + cc%mm_en_cor_d, sys%en_ref + cc%en_cor + cc%mm_en_cor_d
+
+        call flush(io)
+
+    end subroutine print_cct3
+
     subroutine print_summary(sys, run, cc)
 
-        use system, only: sys_t, run_t, cc_t
+        use system, only: sys_t, run_t
+        use cc_types, only: cc_t
 
         type(sys_t), intent(in) :: sys
         type(run_t), intent(in) :: run

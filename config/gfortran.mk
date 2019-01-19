@@ -8,7 +8,7 @@ F90_MOD_FLAG := -J
 CPPFLAGS := -DUSE_POPCNT
 
 FFLAGS := -O3 -fdefault-integer-8 -m64 -I${MKLROOT}/include -ffree-line-length-none -ffixed-line-length-132 -mtune=native
-FFLAGS_DEBUG := -O0 -fcheck=all -fdefault-integer-8 -m64 -I${MKLROOT}/include -fbacktrace -mtune=native -ffixed-line-length-132 -ffree-line-length-none -mpopcnt
+FFLAGS_DEBUG := -O0 -fcheck=all -fdefault-integer-8 -m64 -I${MKLROOT}/include -fbacktrace -mtune=native -ffixed-line-length-132 -ffree-line-length-none -mpopcnt -g
 
 # Linking
 LDFLAGS :=

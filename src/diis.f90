@@ -5,178 +5,178 @@ module diis
     integer :: chunk_size = 0
     integer, parameter :: max_len = (2**30/8)
 
-    contains
+contains
 
-        subroutine calc_diis(diis_space, run, cc)
+    subroutine calc_diis(run, conv)
 
-            use const, only: dp, t_vecs_unit
-            use printing, only: abort_cc
-            use system, only: run_t, cc_t
+        use const, only: p, t_vecs_unit
+        use printing, only: abort_cc
+        use system, only: run_t
+        use cc_types, only: cc_t
+        use solver_types, only: conv_t
 
-            ! Input vars
-            integer, intent(in) :: diis_space
-            type(run_t), intent(in) :: run
-            type(cc_t), intent(inout) :: cc
+        ! Input vars
+        type(run_t), intent(in) :: run
+        type(conv_t), intent(inout) :: conv
 
-            ! Local vars
-            integer, allocatable :: ipiv(:)
-            integer :: info
-            integer :: indx, indy
-            integer :: max_t_size
+        ! Local vars
+        integer, allocatable :: ipiv(:)
+        integer :: info
+        integer :: indx, indy
+        integer :: max_t_size
 
-            real(dp), allocatable :: t_aux_1(:), t_aux_2(:), t_aux_3(:)
-            real(dp), allocatable :: B(:,:), C(:)
+        real(p), allocatable :: vec_aux_1(:), vec_aux_2(:), vec_aux_3(:)
+        real(p), allocatable :: B(:,:), C(:)
 
-            real(dp) :: accum
-            real(dp) ddot, axpy
+        real(p) :: accum
+        real(p) ddot, axpy
 
-            ! Allocate
-            allocate(B(diis_space+1,diis_space+1))
-            B=0.0d0
-            allocate(t_aux_1(cc%t_size))
-            allocate(t_aux_2(cc%t_size))
-            allocate(t_aux_3(cc%t_size))
+        ! Allocate
+        allocate(B(run%diis_space+1,run%diis_space+1))
+        B=0.0_p
+        allocate(vec_aux_1(conv%vec_size))
+        allocate(vec_aux_2(conv%vec_size))
+        allocate(vec_aux_3(conv%vec_size))
 
-            if (run%ext_cor) then
-                max_t_size = cc%pos(6) - 1
-            else
-                max_t_size = cc%t_size
-            endif
+        max_t_size = conv%vec_size
 
-            do indx = 1, diis_space
+        do indx = 1, run%diis_space
+
+            ! Generate difference vector
+            !read(t_vecs_unit, rec=indx) vec_aux_1
+            !read(t_vecs_unit, rec=indx+1) vec_aux_2
+            call read_vecs(conv, indx,  vec_aux_1)
+            call read_vecs(conv, indx+1,  vec_aux_2)
+
+            vec_aux_3 = vec_aux_2 - vec_aux_1
+
+            do indy = 1, run%diis_space
 
                 ! Generate difference vector
-                !read(t_vecs_unit, rec=indx) t_aux_1
-                !read(t_vecs_unit, rec=indx+1) t_aux_2
-                call read_t_vecs(indx,  t_aux_1)
-                call read_t_vecs(indx+1,  t_aux_2)
+                !read(t_vecs_unit, rec=indy) vec_aux_1
+                !read(t_vecs_unit, rec=indy+1) vec_aux_2
+                call read_vecs(conv, indy,  vec_aux_1)
+                call read_vecs(conv, indy+1,  vec_aux_2)
 
-                t_aux_3 = t_aux_2 - t_aux_1
+                vec_aux_2 = vec_aux_2 - vec_aux_1
 
-                do indy = 1, diis_space
+                accum = 0.0_p
+                accum = ddot(max_t_size, vec_aux_3, 1, vec_aux_2, 1)
 
-                    ! Generate difference vector
-                    !read(t_vecs_unit, rec=indy) t_aux_1
-                    !read(t_vecs_unit, rec=indy+1) t_aux_2
-                    call read_t_vecs(indy,  t_aux_1)
-                    call read_t_vecs(indy+1,  t_aux_2)
-
-                    t_aux_2 = t_aux_2 - t_aux_1
-
-                    accum = 0.0d0
-                    accum = ddot(max_t_size, t_aux_3, 1, t_aux_2, 1)
-
-                    B(indx,indy) = B(indx,indy) + accum
-                enddo
+                B(indx,indy) = B(indx,indy) + accum
             enddo
+        enddo
 
-            deallocate(t_aux_2, t_aux_3)
+        deallocate(vec_aux_2, vec_aux_3)
 
-            ! Set DIIS matrix boundaries
-            b(:,diis_space+1) = -1.0d0
-            b(diis_space+1,:) = -1.0d0
+        ! Set DIIS matrix boundaries
+        b(:,run%diis_space+1) = -1.0_p
+        b(run%diis_space+1,:) = -1.0_p
 
-            !allocate(L(iDIIS+1),C(iDIIS+1))
-            allocate(ipiv(diis_space+1))
-            allocate(c(diis_space+1))
+        !allocate(L(iDIIS+1),C(iDIIS+1))
+        allocate(ipiv(run%diis_space+1))
+        allocate(c(run%diis_space+1))
 
-            c=0.0d0
-            c(diis_space+1) = -1.0d0
+        c=0.0_p
+        c(run%diis_space+1) = -1.0_p
 
-            ! Solve system of equations
-            call dgesv(diis_space+1, 1, B, diis_space+1, ipiv, c, diis_space+1, info)
+        ! Solve system of equations
+        call dgesv(run%diis_space+1, 1, B, run%diis_space+1, ipiv, c, run%diis_space+1, info)
 
-            if (info /= 0) call abort_cc('DIIS error.')
+        if (info /= 0) call abort_cc('DIIS error.')
 
-            cc%t_vec(1:max_t_size) = 0.0d0
-            do indx = 1, diis_space
-                !read(t_vecs_unit, rec=indx) t_aux_1
-                call read_t_vecs(indx, t_aux_1)
+        conv%vec_ptr(1:max_t_size) = 0.0_p
+        do indx = 1, run%diis_space
+            !read(t_vecs_unit, rec=indx) vec_aux_1
+            call read_vecs(conv, indx, vec_aux_1)
 
-                call daxpy(max_t_size, C(indx), t_aux_1, 1, cc%t_vec, 1)
+            call daxpy(max_t_size, C(indx), vec_aux_1, 1, conv%vec_ptr, 1)
+
+        enddo
+
+        deallocate(vec_aux_1)
+        deallocate(ipiv, c, b)
+
+    end subroutine calc_diis
+
+    subroutine write_vecs(conv, iter, diis_space)
+
+        use const, only: t_vecs_unit
+        use solver_types, only: conv_t
+
+        type(conv_t), intent(in) :: conv
+        integer, intent(in) :: iter
+        integer, intent(in) :: diis_space
+
+        integer :: indx_rec, i_chunk, i
+
+        indx_rec = mod(iter, diis_space + 1)
+        if (indx_rec == 0) indx_rec = diis_space + 1
+
+        if (chunks == 0) then
+            write(conv%vecs_unit, rec=indx_rec) conv%vec_ptr(1:conv%vec_size)
+        else
+            do i_chunk=0, chunks
+                if (i_chunk < chunks) then
+                    write(conv%vecs_unit, rec=((indx_rec - 1) * chunks) + i_chunk + 1) &
+                        conv%vec_ptr(i_chunk*max_len+1:(i_chunk+1)*max_len)
+                else
+                    write(conv%vecs_unit, rec=((indx_rec - 1) * chunks) + i_chunk + 1) &
+                        conv%vec_ptr(i_chunk*max_len+1:i_chunk*max_len + chunk_size)
+                endif
 
             enddo
-
-            deallocate(t_aux_1)
-            deallocate(ipiv, c, b)
-
-        end subroutine calc_diis
-
-        subroutine write_t_vecs(iter, diis_space, cc)
-
-            use const, only: t_vecs_unit
-            use system, only: cc_t
-
-            integer, intent(in) :: iter
-            integer, intent(in) :: diis_space
-            type(cc_t), intent(in) :: cc
-
-            integer :: indx_rec, i_chunk, i
-
-            indx_rec = mod(iter, diis_space + 1)
-            if (indx_rec == 0) indx_rec = diis_space + 1
-
-            if (chunks == 0) then
-                write(t_vecs_unit, rec=indx_rec) cc%t_vec
-            else
-                do i_chunk=0, chunks
-                    if (i_chunk < chunks) then
-                        write(t_vecs_unit, rec=((indx_rec - 1) * chunks) + i_chunk + 1) &
-                            cc%t_vec(i_chunk*max_len+1:(i_chunk+1)*max_len)
-                    else
-                        write(t_vecs_unit, rec=((indx_rec - 1) * chunks) + i_chunk + 1) &
-                            cc%t_vec(i_chunk*max_len+1:i_chunk*max_len + chunk_size)
-                    endif
-
-                enddo
-            endif
+        endif
 
 
-        end subroutine write_t_vecs
+    end subroutine write_vecs
 
-        subroutine read_t_vecs(indx,  t)
+    subroutine read_vecs(conv, indx,  vec)
 
-            use const, only: t_vecs_unit
-
-            integer, intent(in) :: indx
-            real(kind=8), allocatable, intent(inout) :: t(:)
-
-            integer :: i_chunk
+        use const, only: p
+        use solver_types, only: conv_t
 
 
-            if (chunks == 0) then
-                read(t_vecs_unit, rec=indx) t
-            else
-                do i_chunk=0, chunks
-                    if (i_chunk < chunks) then
-                        read(t_vecs_unit, rec=((indx - 1) * chunks) + i_chunk + 1) &
-                            t(i_chunk*max_len+1:(i_chunk+1)*max_len)
-                    else
-                        read(t_vecs_unit, rec=((indx - 1) * chunks) + i_chunk + 1) &
-                            t(i_chunk*max_len+1:i_chunk*max_len + chunk_size)
-                    endif
-                enddo
-            endif
+        type(conv_t), intent(in) :: conv
+        integer, intent(in) :: indx
+        real(p), allocatable, intent(inout) :: vec(:)
 
-        end subroutine read_t_vecs
-
-        subroutine init_t_vecs(t_size)
-
-            use const, only: t_vecs_unit
-
-            integer, intent(in) :: t_size
-
-            chunks = int(t_size / max_len)
-            chunk_size = t_size - max_len * chunks
-
-            if (chunks == 0) then
-                open(t_vecs_unit, file='t_vecs.bin', form='unformatted', recl=t_size*8, access='direct')
-            else
-                open(t_vecs_unit, file='t_vecs.bin', form='unformatted', recl=max_len*8, access='direct')
-            endif
+        integer :: i_chunk
 
 
-        end subroutine init_t_vecs
+        if (chunks == 0) then
+            read(conv%vecs_unit, rec=indx) vec
+        else
+            do i_chunk=0, chunks
+                if (i_chunk < chunks) then
+                    read(conv%vecs_unit, rec=((indx - 1) * chunks) + i_chunk + 1) &
+                        vec(i_chunk*max_len+1:(i_chunk+1)*max_len)
+                else
+                    read(conv%vecs_unit, rec=((indx - 1) * chunks) + i_chunk + 1) &
+                        vec(i_chunk*max_len+1:i_chunk*max_len + chunk_size)
+                endif
+            enddo
+        endif
+
+    end subroutine read_vecs
+
+    subroutine init_vecs(conv)
+
+        use solver_types, only: conv_t
+
+        type(conv_t), intent(in) :: conv
+
+        chunks = int(conv%vec_size / max_len)
+        chunk_size = conv%vec_size - max_len * chunks
+
+        if (chunks == 0) then
+            open(conv%vecs_unit, file='iter_vecs.bin', form='unformatted', recl=conv%vec_size*8, access='direct')
+        else
+            open(conv%vecs_unit, file='iter_vecs.bin', form='unformatted', recl=max_len*8, access='direct')
+        endif
 
 
-    end module diis
+    end subroutine init_vecs
+
+
+end module diis
