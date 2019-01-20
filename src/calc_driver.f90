@@ -101,17 +101,13 @@ contains
         ! Initialize vectors
         if (run%lvl_q) call open_t4_files(sys, run)
         call init_t_vec(run, cc)
-        if (run%lcc) then
-            cc%l_size = cc%pos(6) - 1
-            allocate(cc%l_vec(cc%l_size))
-        endif
 
 
     end subroutine init_system
 
     subroutine clean_system(sys, run, cc, cc_failed)
 
-        use const, only: t_unit, t_vecs_unit
+        use const, only: t_unit, t_vecs_unit, l_unit
         use system, only: sys_t, run_t
         use cc_types, only: cc_t
         use integrals, only: unload_ints, unload_sorted_ints
@@ -135,6 +131,7 @@ contains
         ! Close T vec file
         if (run%keep_bin .or. cc_failed) then
             close(t_unit)
+            close(l_unit)
         else
             close(t_unit, status='delete')
         endif
@@ -151,7 +148,7 @@ contains
 
     subroutine init_t_vec(run, cc)
 
-        use const, only: p, t_unit
+        use const, only: p, t_unit, l_unit
         use printing, only: abort_cc
         use system, only: run_t
         use cc_types, only: cc_t
@@ -162,6 +159,12 @@ contains
 
         if (.not. allocated(cc%t_vec)) allocate(cc%t_vec(cc%t_size))
         if (.not. allocated(cc%acc%t2_mc)) allocate(cc%acc%t2_mc(cc%pos(6)-cc%pos(3)))
+
+        if (run%lcc) then
+            cc%l_size = cc%pos(6) - 1
+            allocate(cc%l_vec(cc%l_size))
+        endif
+        open(l_unit,file=trim(run%bin_file)//"l_vec",form='unformatted')
 
         if (run%restart) then
             inquire(file=trim(run%bin_file), exist=t_exists)

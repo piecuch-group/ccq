@@ -76,6 +76,7 @@ contains
 
 
         ! Variable declaration
+        e23a = 0.0_p
         e23b = 0.0_p
         e23c = 0.0_p
         e23d = 0.0_p
