@@ -1,6 +1,6 @@
 module printing
 
-    use, intrinsic :: iso_fortran_env, only: output_unit, error_unit
+    use, intrinsic :: iso_fortran_env, only: output_unit
 
     implicit none
 
@@ -265,15 +265,6 @@ contains
         call exit()
 
     end subroutine print_help
-
-    subroutine abort_cc(msg)
-
-        character(len=*), intent(in) :: msg
-
-        write(error_unit, '(a)') trim(msg)
-        call exit(1)
-
-    end subroutine abort_cc
 
     subroutine print_config(config)
 

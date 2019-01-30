@@ -10,7 +10,7 @@ contains
     subroutine calc_diis(run, conv)
 
         use const, only: p, t_vecs_unit
-        use printing, only: abort_cc
+        use errors, only: stop_all
         use system, only: run_t
         use cc_types, only: cc_t
         use solver_types, only: conv_t
@@ -83,7 +83,7 @@ contains
         ! Solve system of equations
         call dgesv(run%diis_space+1, 1, B, run%diis_space+1, ipiv, c, run%diis_space+1, info)
 
-        if (info /= 0) call abort_cc('DIIS error.')
+        if (info /= 0) call stop_all('calc_diis', 'DIIS error.')
 
         conv%vec_ptr(1:max_t_size) = 0.0_p
         do indx = 1, run%diis_space

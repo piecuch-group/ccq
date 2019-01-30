@@ -23,7 +23,7 @@ contains
         use determinants, only: encode_det
         use excitations, only: excit_t, get_excitation_spin_integrate, get_excitation_level
         use ext_cor_types, only: vec3_t
-        use printing, only: abort_cc
+        use errors, only: stop_all
         use system, only: sys_t
 
         ! Interface variables
@@ -52,7 +52,7 @@ contains
 
         ! Loop over determinants in the walker file
         inquire(file=trim(filename), exist=t_exists)
-        if (.not. t_exists) call abort_cc("RUNTIME ERROR: Walker file not found")
+        if (.not. t_exists) call stop_all('find_fciqmc_c3', "RUNTIME ERROR: Walker file not found")
 
         open(walk_unit, file=trim(filename), status='old')
         do
@@ -134,7 +134,7 @@ contains
 
         ! Check whether we have the HF coefficient. Otherwise exit with error.
         if (coef_norm == 0.0d0) then
-            call abort_cc('RUNTIME ERROR: Hartree-Fock coefficient not found in routine: find_fciqmc_c3')
+            call stop_all('find_fciqmc_c3', 'RUNTIME ERROR: Hartree-Fock coefficient not found in routine: find_fciqmc_c3')
         endif
 
         ! Renormalize coeffcients to the intermediate renormalization (useful for CC)

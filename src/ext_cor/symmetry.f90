@@ -19,7 +19,8 @@ contains
         !   filename: file containing molecular orbital symmetries
 
         use const, only: sym_unit
-        use printing, only: abort_cc
+        use errors, only: stop_all
+
         integer, intent(in) :: orbs
         character(len=*), intent(in) :: filename
 
@@ -34,7 +35,7 @@ contains
 
         inquire(file=filename, exist=t_exists)
         if (.not. t_exists) then
-            call abort_cc('Symmetry file, '//trim(filename)//', does not exist.')
+            call stop_all('read_sym', 'Symmetry file, '//trim(filename)//', does not exist.')
         endif
 
         char_tables = reshape(&
@@ -80,7 +81,7 @@ contains
             pg_sym_name = "D2H"
 
         case default
-            call abort_cc('Point-group symmetry not supported')
+            call stop_all('read_sym', 'Point-group symmetry not supported')
 
         end select
 

@@ -1,5 +1,7 @@
 module solver
 
+    ! Module containing all solver routines.
+
     use const, only: p
 
     implicit none
@@ -9,9 +11,18 @@ contains
 
     subroutine solve_cc(sys, run, cc, failed)
 
+        ! Solve ground-state CC equations
+        ! In:
+        !    sys: system information
+        !    run: runtime information
+        ! In/Out:
+        !    cc: coupled-cluster information (including T vector, energies, etc.)
+        !    failed: a boolean flag used to signal the calc driver that convergence
+        !    failed and amplitudes must be stored
+
         use const, only: p, t_unit, t_vecs_unit
         use energy, only: calculate_sorted_energy, calculate_unsorted_energy
-        use printing, only: io, print_iter_head, abort_cc, print_date
+        use printing, only: io, print_iter_head, print_date
         use proc_pointers, only: update_ptr, calculate_energy_ptr
         use system, only: sys_t, run_t
         use cc_types, only: cc_t
@@ -31,7 +42,7 @@ contains
         write(io, '(a)') 'Coupled cluster'
         write(io, '(a)') '---------------'
 
-        ! Select procedure
+        ! Select CC procedure
         if (run%sorted_ints) then
             update_ptr => update_clusters_t3_opt
             calculate_energy_ptr => calculate_sorted_energy
@@ -40,12 +51,13 @@ contains
             calculate_energy_ptr => calculate_unsorted_energy
         endif
 
+        ! [TODO] The restarting code should be improved
         if (run%restart) then
             conv%en_cor = calculate_energy_ptr(sys, cc)
             write(io, '(2x,a27,2x,f16.10/)') 'Restart correlation energy', conv%en_cor
         endif
 
-        ! Write to ouput
+        ! Print wall time and iteration table header
         call print_date('  CC program started on:')
         call print_iter_head()
 
@@ -58,22 +70,36 @@ contains
             conv%vec_size = cc%t_size
         endif
 
+        ! Load convergence pointers. These are used to allow the Jacobi
+        ! iterator to work on any method
         conv%vec_ptr => cc%t_vec
         conv%vec_unit = t_unit
         conv%vecs_unit = t_vecs_unit
 
+        ! Perform Jacobi iterations
         call jacobi_iter(sys, run, cc, conv)
 
         ! [TODO] clean interface a bit more
         cc%en_cor = conv%en_cor
         failed = conv%failed
 
-
+        ! Print ending wall time
         call print_date('  CC program ended on:')
 
     end subroutine solve_cc
 
     subroutine solve_lcc(sys, run, cc, failed)
+
+        ! Solve left ground-state CC equations. It calculates the
+        ! linear de-excitation amplitudes that match the CC ground-state
+        ! energy.
+        ! In:
+        !    sys: system information
+        !    run: runtime information
+        ! In/Out:
+        !    cc: coupled-cluster information (including T vector, energies, etc.)
+        !    failed: a boolean flag used to signal the calc driver that convergence
+        !    failed and amplitudes must be stored
 
         use const, only: l_unit, l_vecs_unit
         use system, only: sys_t, run_t
@@ -105,26 +131,29 @@ contains
         conv%vec_size = cc%l_size
         allocate(cc%lh_vec(cc%l_size))
 
-        ! Write to ouput
+        ! Print starting wall clock
         call print_date('  L-CC program started on:')
         call print_iter_head()
 
+        ! Load convergence pointers. These are used to allow the Jacobi
+        ! iterator to work on any method
         conv%vec_ptr => cc%l_vec
         conv%vec_unit = l_unit
         conv%vecs_unit = l_vecs_unit
 
+        ! Perform Jacobi iterations
         call jacobi_iter(sys, run, cc, conv)
 
         ! [TODO] check that energies match
         !conv%en_cor
         failed = conv%failed
 
+        ! Print ending wall clock
         call print_date('  L-CC program ended on:')
 
+        ! Deallocate aux L vector
+        ! [TODO] might be a better way to do this
         if (allocated(cc%lh_vec)) deallocate(cc%lh_vec)
-
-        !close(l_vecs_unit, status='delete')
-        !close(l_unit)
 
     end subroutine solve_lcc
 
@@ -132,7 +161,7 @@ contains
 
         use const, only: p, t_unit, t_vecs_unit
         use diis, only: calc_diis, write_vecs, init_vecs
-        use printing, only: io, print_iteration, abort_cc, print_date
+        use printing, only: io, print_iteration, print_date
         use cc_utils, only: residuum
         use system, only: sys_t, run_t
         use cc_types, only: cc_t

@@ -11,7 +11,7 @@
 BUILD_DIR := build
 BIN_DIR := bin
 DEPEND_DIR := $(BUILD_DIR)/depend
-VPATH := src:src/cc:src/ext_cor:src/cc_opt_ccsdt:src/hbar:src/lcc:src/mm_cor
+VPATH := src:src/cc:src/ext_cor:src/cc_opt_ccsdt:src/hbar:src/lcc:src/mm_cor:src/external:src/utils
 
 # Include architecture configuration file
 include config.mk
@@ -86,7 +86,7 @@ $(BUILD_DIR)/%.o: %.f90
 
 # C
 # -
-$(BUILD_DIR)/gen_uuid.o: src/gen_uuid.c
+$(BUILD_DIR)/gen_uuid.o: src/utils/gen_uuid.c
 	$(CC) -c -o $@ $<
 
 
@@ -103,7 +103,7 @@ $(BIN_DIR) $(BUILD_DIR) $(DEPEND_DIR):
 	mkdir -p $@
 
 $(F_DEPEND): $(F_FILES)
-	config/sfmakedepend --file - --silent --objdir \$$\(BUILD_DIR\) --moddir \$$\(BUILD_DIR\) --depend=mod $^ > $@
+	tools/sfmakedepend --file - --silent --objdir \$$\(BUILD_DIR\) --moddir \$$\(BUILD_DIR\) --depend=mod $^ > $@
 
 # Phonies
 # -------

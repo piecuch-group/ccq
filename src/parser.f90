@@ -15,7 +15,8 @@ contains
     subroutine get_opts(sys, run)
 
         use system, only: sys_t, run_t
-        use printing, only: print_help, abort_cc
+        use printing, only: print_help
+        use errors, only: stop_all
 
         type(sys_t), intent(inout) :: sys
         type(run_t), intent(inout) :: run
@@ -61,7 +62,7 @@ contains
                         run%config%filename = tmp_arg
                         cycle
                     else
-                        call abort_cc('Filename not provided!')
+                        call stop_all('get_opts', 'Filename not provided!')
                     endif
                 endif
 
@@ -84,7 +85,8 @@ contains
         use system, only: sys_t, run_t, config_t
         use cc_types, only: cc_t
 
-        use printing, only: io, abort_cc
+        use printing, only: io
+        use errors, only: stop_all
 
         type(sys_t), intent(inout) :: sys
         type(run_t), intent(inout) :: run
@@ -182,7 +184,7 @@ contains
                     call get_acc_opts(sys, run, cc, option, val)
 
                 case default
-                    call abort_cc('CONFIGURATION ERROR: calc_type not recognized or not found')
+                    call stop_all('get_config', 'CONFIGURATION ERROR: calc_type not recognized or not found')
 
 
                 end select
@@ -210,22 +212,22 @@ contains
 
         ! Error checks
         if (nocc_spin == -1 .or. nunocc_spin == -1) then
-            call abort_cc('CONFIGURATION ERROR: nel and nvir keywords must be given.')
+            call stop_all('get_config', 'CONFIGURATION ERROR: nel and nvir keywords must be given.')
         endif
 
         inquire(file=trim(run%onebody_file), exist=t_exists)
-        if (.not. t_exists) call abort_cc('CONFIGURATION ERROR: Onebody integral file not found')
+        if (.not. t_exists) call stop_all('get_config', 'CONFIGURATION ERROR: Onebody integral file not found')
 
         inquire(file=trim(run%twobody_file), exist=t_exists)
-        if (.not. t_exists) call abort_cc('CONFIGURATION ERROR: Twobody integral file not found')
+        if (.not. t_exists) call stop_all('get_config', 'CONFIGURATION ERROR: Twobody integral file not found')
         if (run%restart) then
-            if (trim(run%bin_file) == 'tvec_'//trim(run%uuid)//'.bin') &
-                call abort_cc('CONFIGURATION ERROR: Restart requires setting output_bin to the output file')
+            inquire(file=trim(run%bin_file), exist=t_exists)
+            if (.not. t_exists) call stop_all('get_config', 'CONFIGURATION ERROR: Twobody integral file not found')
         endif
 
         if (trim(run%label) /= '') then
             if (run%restart) &
-                call abort_cc('CONFIGURATION ERROR: Restart requires setting output_bin')
+                call stop_all('get_config', 'CONFIGURATION ERROR: Restart requires setting output_bin')
             run%bin_file = 'tvec_'//trim(run%label)//'.bin'
         endif
 
@@ -236,7 +238,7 @@ contains
 
         if (trim(run%calc_type) == 'CCSDt' &
             .and. sys%act_occ == -1 .and. sys%act_unocc == -1 ) then
-            call abort_cc('CONFIGURATION ERROR: Active space methods require an active space')
+            call stop_all('get_config', 'CONFIGURATION ERROR: Active space methods require an active space')
         endif
 
 
@@ -360,7 +362,7 @@ contains
 
     subroutine get_acc_opts(sys, run, cc, option, val)
         use const, only: sp, dp
-        use printing, only: abort_cc
+        use errors, only: stop_all
         use system, only: sys_t, run_t
         use cc_types, only: cc_t
 
@@ -394,7 +396,7 @@ contains
 
     subroutine get_act_opts(sys, run, cc, option, val)
         use const, only: sp, dp
-        use printing, only: abort_cc
+        use errors, only: stop_all
         use system, only: sys_t, run_t
         use cc_types, only: cc_t
 
@@ -422,18 +424,18 @@ contains
 
         case ('lvl_t')
             read(val, *,iostat=ios) run%lvl_t
-            if (ios /= 0) call abort_cc('CONFIGURATION ERROR: lvl_t must logical')
+            if (ios /= 0) call stop_all('get_act_opts', 'CONFIGURATION ERROR: lvl_t must logical')
 
         case ('lvl_q')
             read(val, *, iostat=ios) run%lvl_q
-            if (ios /= 0) call abort_cc('CONFIGURATION ERROR: lvl_q must logical')
+            if (ios /= 0) call stop_all('get_act_opts', 'CONFIGURATION ERROR: lvl_q must logical')
         end select
 
     end subroutine get_act_opts
 
     subroutine get_ext_cor_opts(sys, run, cc, option, val)
         use const, only: sp, dp
-        use printing, only: abort_cc
+        use errors, only: stop_all
         use system, only: sys_t, run_t
         use cc_types, only: cc_t
 
@@ -450,13 +452,13 @@ contains
         case ('ext_cor')
             if (run%calc_type == 'dev') then
                 read(val, *, iostat=ios) run%ext_cor
-                if (ios /= 0) call abort_cc('CONFIGURATION ERROR: ext_cor must logical')
+                if (ios /= 0) call stop_all('get_ext_cor_opts', 'CONFIGURATION ERROR: ext_cor must logical')
             endif
         case ('ext_cor_file')
             run%ext_cor_file = val
         case ('ext_cor_sd')
             read(val, *, iostat=ios) run%ext_cor_sd
-            if (ios /= 0) call abort_cc('CONFIGURATION ERROR: ext_cor_sd must logical')
+            if (ios /= 0) call stop_all('get_ext_cor_opts', 'CONFIGURATION ERROR: ext_cor_sd must logical')
         end select
 
     end subroutine get_ext_cor_opts
@@ -464,7 +466,7 @@ contains
     subroutine get_run_opts(sys, run, cc, option, val)
 
         use const, only: sp, dp
-        use printing, only: abort_cc
+        use errors, only: stop_all
         use system, only: sys_t, run_t
         use cc_types, only: cc_t
 
@@ -481,11 +483,11 @@ contains
         select case (option)
         case ('sorted_ints')
             read(val, *, iostat=ios) run%sorted_ints
-            if (ios /= 0) call abort_cc('CONFIGURATION ERROR: rhf must logical')
+            if (ios /= 0) call stop_all('get_run_opts', 'CONFIGURATION ERROR: rhf must logical')
 
         case ('rhf')
             read(val, *, iostat=ios) run%rhf
-            if (ios /= 0) call abort_cc('CONFIGURATION ERROR: rhf must logical')
+            if (ios /= 0) call stop_all('get_run_opts', 'CONFIGURATION ERROR: rhf must logical')
 
         case ('shift')
             read(val, *) run%shift
@@ -535,7 +537,7 @@ contains
     subroutine load_config_file(config)
 
         use const, only: line_len, config_unit
-        use printing, only: abort_cc
+        use errors, only: stop_all
         use system, only: config_t
 
         type(config_t), intent(inout) :: config
@@ -548,7 +550,7 @@ contains
 
             inquire(file=trim(filename), exist=t_exists)
             if (.not. t_exists) &
-                call abort_cc('CONFIGURATION ERROR: configuration file not found')
+                call stop_all('load_config_file', 'CONFIGURATION ERROR: configuration file not found')
 
             open(unit=config_unit,file=trim(filename),status='old')
 
@@ -556,12 +558,12 @@ contains
                 read(config_unit, '(a)', iostat=ios) line
                 if (ios == -1) exit
                 if (ios /= 0) &
-                    call abort_cc("CONFIGURATION ERROR: could not read configuration file")
+                    call stop_all('load_config_file', "CONFIGURATION ERROR: could not read configuration file")
 
                 ! Load config file into memory
                 file_size = file_size + 1
                 if (file_size > size(config%lines,1)) &
-                    call abort_cc("CONFIGURATION ERROR: configuration file too large")
+                    call stop_all('load_config_file', "CONFIGURATION ERROR: configuration file too large")
                 lines(file_size) = line
             enddo
 

@@ -7,7 +7,8 @@ contains
     subroutine hbar2(sys, run, cc)
 
         use const, only: p
-        use printing, only: io, print_date, abort_cc
+        use printing, only: io, print_date
+        use errors, only: stop_all
         use system, only: sys_t, run_t
         use cc_types, only: cc_t, init_hbar
 

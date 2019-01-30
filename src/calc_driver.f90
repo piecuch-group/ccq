@@ -1,10 +1,21 @@
 module calc_driver
 
+    ! This module holds routines that drive various methods. It takes care
+    ! of initializing arrays and binary files.
+
     implicit none
 
 contains
 
     subroutine run_calcs(sys, run, cc)
+
+        ! Main routine. This is the entry point for all calculations
+        ! In:
+        !    sys: system information
+        !    run: runtime information
+        ! In/Out:
+        !    cc: coupled-cluster information (including amplitudes, energies,
+        !        and any other resulting data)
 
         use system, only: sys_t, run_t
         use cc_types, only: cc_t
@@ -23,7 +34,7 @@ contains
 
         logical :: cc_failed = .false.
 
-        ! Start clock
+        ! Start wall clock
         call print_date('  ccq started on:')
         call init_system(sys, run, cc)
 
@@ -100,7 +111,7 @@ contains
 
         ! Initialize vectors
         if (run%lvl_q) call open_t4_files(sys, run)
-        call init_t_vec(run, cc)
+        call init_vecs(run, cc)
 
 
     end subroutine init_system
@@ -114,11 +125,22 @@ contains
         use basis_types, only: dealloc_basis_t
         use excitations, only: end_excitations
         use cc_utils, only: close_t4_files
+        use hdf5_io, only: write_calc_data
 
         type(sys_t), intent(inout) :: sys
         type(run_t), intent(in) :: run
         type(cc_t), intent(inout) :: cc
         logical, intent(in) :: cc_failed
+
+        close(t_unit, status='delete')
+        close(l_unit, status='delete')
+
+        ! Close T vec file
+        if (run%keep_bin .or. cc_failed) then
+            call write_calc_data(sys, run, cc)
+        endif
+
+        if (run%lvl_q) call close_t4_files(sys, run%keep_bin, cc_failed)
 
         ! [TODO] clean deallocations and allocations. Prolly better to have a module handling this
         ! Deallocate T
@@ -127,15 +149,6 @@ contains
 
         ! Deallocate L
         if (allocated(cc%l_vec)) deallocate(cc%l_vec)
-
-        ! Close T vec file
-        if (run%keep_bin .or. cc_failed) then
-            close(t_unit)
-            close(l_unit)
-        else
-            close(t_unit, status='delete')
-        endif
-        if (run%lvl_q) call close_t4_files(sys, run%keep_bin, cc_failed)
 
         call dealloc_basis_t(sys%basis)
         call end_excitations(sys%basis%excit_mask)
@@ -146,10 +159,10 @@ contains
 
     end subroutine clean_system
 
-    subroutine init_t_vec(run, cc)
+    subroutine init_vecs(run, cc)
 
         use const, only: p, t_unit, l_unit
-        use printing, only: abort_cc
+        use errors, only: stop_all
         use system, only: run_t
         use cc_types, only: cc_t
 
@@ -157,31 +170,33 @@ contains
         type(cc_t), intent(inout) :: cc
         logical :: t_exists
 
-        if (.not. allocated(cc%t_vec)) allocate(cc%t_vec(cc%t_size))
-        if (.not. allocated(cc%acc%t2_mc)) allocate(cc%acc%t2_mc(cc%pos(6)-cc%pos(3)))
-
-        if (run%lcc) then
-            cc%l_size = cc%pos(6) - 1
-            allocate(cc%l_vec(cc%l_size))
-        endif
-        open(l_unit,file=trim(run%bin_file)//"l_vec",form='unformatted')
-
-        if (run%restart) then
-            inquire(file=trim(run%bin_file), exist=t_exists)
-            if (.not. t_exists) &
-                call abort_cc("RESTART ERROR: Vector file not found "//trim(run%bin_file))
-
-            open(t_unit,file=trim(run%bin_file),form='unformatted')
-            rewind(t_unit)
-            read(t_unit) cc%t_vec
-            cc%acc%t2_mc = cc%t_vec(cc%pos(3):cc%pos(6)-1)
-        else
-            open(t_unit,file=trim(run%bin_file),form='unformatted')
+        ! T vector
+        if (.not. allocated(cc%t_vec)) then
+            allocate(cc%t_vec(cc%t_size))
             cc%t_vec=0.0_p
+
+            ! Open binary file
+            open(t_unit,file="t_vec_"//trim(run%uuid)//".bin",form='unformatted')
+        endif
+
+        ! T2 vector coming from MC
+        ! [TODO] only load this when externally correcting
+        if (.not. allocated(cc%acc%t2_mc)) then
+            allocate(cc%acc%t2_mc(cc%pos(6)-cc%pos(3)))
             cc%acc%t2_mc = 0.0_p
         endif
 
-    end subroutine init_t_vec
+        ! Lambda vector
+        if (run%lcc) then
+            ! For now up to doubles. This has to change based on the level of theory
+            cc%l_size = cc%pos(6) - 1
+            if (.not. allocated(cc%l_vec)) allocate(cc%l_vec(cc%l_size))
+
+            ! Open binary file
+            open(l_unit,file="l_vec_"//trim(run%uuid)//".bin",form='unformatted')
+        endif
+
+    end subroutine init_vecs
 
     subroutine get_t_sizes(sys, cc)
 
