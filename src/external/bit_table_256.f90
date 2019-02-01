@@ -1,3 +1,6 @@
+! Module borrowed and adapted from HANDE
+! https://github.com/hande-qmc/hande
+
 module bit_table_256_m
 
     ! 256-bit lookup table.

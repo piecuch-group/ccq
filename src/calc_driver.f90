@@ -1,7 +1,8 @@
 module calc_driver
 
-    ! This module holds routines that drive various methods. It takes care
-    ! of initializing arrays and binary files.
+    ! This module contains routines that drive the various CC/EOMCC
+    ! methods of this package. It takes care of initializing arrays
+    ! and binary files.
 
     implicit none
 
@@ -10,9 +11,11 @@ contains
     subroutine run_calcs(sys, run, cc)
 
         ! Main routine. This is the entry point for all calculations
+
         ! In:
         !    sys: system information
         !    run: runtime information
+
         ! In/Out:
         !    cc: coupled-cluster information (including amplitudes, energies,
         !        and any other resulting data)
@@ -23,9 +26,9 @@ contains
         use const, only: p
         use printing, only: print_calc_params, print_date, print_summary
 
-        use cluster_analysis, only: cluster_analysis_driver_opt
+        use ext_cor, only: ext_cor_driver
         use solver, only: solve_cc, solve_lcc
-        use hbar, only: hbar2
+        use hbar_gen, only: hbar2
         use mm_correct, only: crcc23
 
         type(sys_t), intent(inout) :: sys
@@ -46,7 +49,7 @@ contains
         ! --------------------
 
         if (run%ext_cor) then
-            call cluster_analysis_driver_opt(sys, run, cc)
+            call ext_cor_driver(sys, run, cc)
         endif
 
         ! Solve coupled cluster
@@ -55,6 +58,7 @@ contains
 
         ! Hbar generation
         ! ---------------
+        ! [TODO] improve naming of hbar2
         if (run%hbar) then
             call hbar2(sys, run, cc)
         endif
@@ -83,10 +87,11 @@ contains
 
         use system, only: sys_t, run_t
         use cc_utils, only: open_t4_files
-        use cc_types, only: cc_t
+        use cc_types, only: cc_t, init_p_space_slater
         use integrals, only: load_ints, load_sorted_ints
         use basis_types, only: init_basis_strings
         use excitations, only: init_excitations
+        use cc_utils, only: get_t_sizes, get_t_sizes_act
 
         type(sys_t), intent(inout) :: sys
         type(run_t), intent(in) :: run
@@ -112,6 +117,11 @@ contains
         ! Initialize vectors
         if (run%lvl_q) call open_t4_files(sys, run)
         call init_vecs(run, cc)
+
+        ! Original p space init
+        ! [TODO] clean this
+        !if (run%stoch) call init_p_space(sys, cc%stoch)
+        if (run%stoch) call init_p_space_slater(sys, 'p_space_det', 3, cc%stoch)
 
 
     end subroutine init_system
@@ -197,125 +207,6 @@ contains
         endif
 
     end subroutine init_vecs
-
-    subroutine get_t_sizes(sys, cc)
-
-        use system, only: sys_t
-        use cc_types, only: cc_t
-
-        type(sys_t), intent(in) :: sys
-        type(cc_t), intent(inout) :: cc
-
-        integer :: k1, k2, k3, k4
-        integer :: k1a, k1b, k2a, k2b, k2c, k3a, k3b, k3c, k3d, t_size
-
-        K1 = sys%occ_a-sys%froz
-        K3 = sys%orbs-sys%occ_a
-        K2 = sys%occ_b-sys%froz
-        K4 = sys%orbs-sys%occ_b
-
-        t_size = 0
-        cc%pos(1) = t_size+1
-
-        t_size = t_size+K1*K3
-        cc%pos(2) = t_size+1
-
-        t_size = t_size+K2*K4
-        cc%pos(3) = t_size+1
-
-        t_size = t_size+K1*K1*K3*K3
-        cc%pos(4) = t_size+1
-
-        t_size = t_size+K2*K2*K4*K4
-        cc%pos(5) = t_size+1
-
-        t_size = t_size+K1*K2*K3*K4
-        cc%pos(6) = t_size+1
-
-        t_size = t_size+K3*K3*K3*K1*K1*K1
-        cc%pos(7) = t_size+1
-
-        t_size = t_size+K4*K4*K4*K2*K2*K2
-        cc%pos(8) = t_size+1
-
-        t_size = t_size+K3*K4*K3*K1*K2*K1
-        cc%pos(9) = t_size+1
-
-        cc%t_size = t_size+K4*K4*K3*K2*K2*K1
-
-    end subroutine get_t_sizes
-
-    subroutine get_t_sizes_act(sys, cc)
-
-        use system, only: sys_t
-        use cc_types, only: cc_t
-
-        type(sys_t), intent(in) :: sys
-        type(cc_t), intent(inout) :: cc
-
-        integer :: nocc_a, nocc_b, nunocc_a, nunocc_b
-        integer :: actocc_a, actocc_b, actunocc_a, actunocc_b
-        integer :: non_actocc, non_actunocc
-
-        nocc_a = sys%occ_a - sys%froz
-        nocc_b = sys%occ_b - sys%froz
-        nunocc_a = sys%orbs - sys%occ_a
-        nunocc_b = sys%orbs - sys%occ_b
-        non_actocc = sys%act_occ_b - sys%froz
-        non_actunocc = sys%orbs - sys%act_unocc_a
-        actocc_a = sys%occ_a - sys%act_occ_b
-        actocc_b = sys%occ_b - sys%act_occ_b
-        actunocc_a = sys%act_unocc_a - sys%occ_a
-        actunocc_b = sys%act_unocc_a - sys%occ_b
-
-        ! T1 alpha size
-        ! K1A
-        cc%pos(1) = 1
-
-        ! T1 beta size
-        ! K1B
-        cc%pos(2)=cc%pos(1)+nocc_a*nunocc_a
-
-        ! T2 alpha-alpha size
-        ! K2A
-        cc%pos(3)=cc%pos(2)+nocc_b*nunocc_b
-
-        ! T2 alpha-beta size
-        ! K2B
-        cc%pos(4)=cc%pos(3)+nocc_a*nocc_a*nunocc_a*nunocc_a
-
-        ! T2 beta-beta size
-        ! K2C
-        cc%pos(5)= cc%pos(4)+nocc_a*nocc_b*nunocc_a*nunocc_b
-
-        ! T3 sizes
-        ! K3A
-        cc%pos(6)=cc%pos(5)+nocc_b*nocc_b*nunocc_b*nunocc_b
-        ! K3B1
-        cc%pos(7)=cc%pos(6)+nunocc_a*nunocc_a*actunocc_a*nocc_a*nocc_a*actocc_a  !1**1**
-        ! K3B2
-        cc%pos(8)=cc%pos(7)+nunocc_b*nunocc_a*actunocc_a*nocc_b*nocc_a*actocc_a  !1**1**
-        ! K3B3
-        cc%pos(9)=cc%pos(8)+actunocc_b*non_actunocc*non_actunocc*actocc_b*non_actocc*non_actocc  !001001
-        ! K3B4
-        cc%pos(10)=cc%pos(9)+actunocc_b*non_actunocc*non_actunocc*nocc_b*nocc_a*actocc_a  !1**001
-        ! K3C1
-        cc%pos(11)=cc%pos(10)+nunocc_b*nunocc_a*actunocc_a*actocc_b*non_actocc*non_actocc  !0011**
-        ! K3C2
-        cc%pos(12)=cc%pos(11)+nunocc_b*actunocc_b*nunocc_a*nocc_b*actocc_b*nocc_a  !*1**1*
-        ! K3C3
-        cc%pos(13)=cc%pos(12)+non_actunocc*non_actunocc*actunocc_a*non_actocc*non_actocc*actocc_a  !100100
-        ! K3C4
-        cc%pos(14)=cc%pos(13)+non_actunocc*non_actunocc*actunocc_a*nocc_b*actocc_b*nocc_a  !*1*100
-        ! K3D
-        cc%pos(15)=cc%pos(14)+nunocc_b*actunocc_b*nunocc_a*non_actocc*non_actocc*actocc_a  !100*1*
-        ! End
-        cc%pos(16)=cc%pos(15)+nunocc_b*nunocc_b*actunocc_b*nocc_b*nocc_b*actocc_b  !1**1**
-
-        ! Total T size
-        cc%t_size = cc%pos(16) - 1
-
-    end subroutine get_t_sizes_act
 
 end module calc_driver
 

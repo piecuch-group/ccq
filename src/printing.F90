@@ -133,8 +133,9 @@ contains
         write(io,'(2x,a27,2x,es16.2)') 'Convergence tolerance', run%tol
         write(io,'(2x,a27,2x,i16)') 'Max. iterations', run%max_iter
         write(io,'(2x,a27,2x,i16)') 'DIIS space', run%diis_space
+        write(io,'(2x,a27,2x,f16.4)') 'Shift energy', run%shift
         write(io,'(2x,a27,2x,l16)') 'Restart', run%restart
-        write(io,'(2x,a27,2x,f16.4/)') 'Shift energy', run%shift
+        write(io,'(2x,a27,2x,l16/)') 'Restricted CC', run%rhf
 
         write(io,'(2x,a27,2x,i16)') 'Active triples indices', run%act_ind_t
         write(io,'(2x,a27,2x,i16/)') 'Active quadruples indices', run%act_ind_q
@@ -217,13 +218,13 @@ contains
 
         ! Print the iteration table header
 
-        write(io,'(/2x,a4,3(a15),a16)') 'It.',  'E (Corr)', 'dE', 'Residuum', 'CPU Time'
+        write(io,'(/2x,a4,3(a15),a16)') 'It.',  'E (Corr)', 'dE', 'Residuum', 'Wall Time'
         write(io,'(2x,65("-"))')
         call flush(io)
 
     end subroutine print_iter_head
 
-    subroutine print_iteration(iter, ecor, energy_diff, res, prev_time)
+    subroutine print_iteration(iter, ecor, energy_diff, res, prev_time, new_time)
 
         use const, only: dp
 
@@ -231,14 +232,13 @@ contains
         real(dp), intent(in) :: ecor
         real(dp), intent(in) :: energy_diff
         real(dp), intent(in) :: res
-        real(dp), intent(in) :: prev_time
+        real(dp), intent(in) :: prev_time, new_time
         real(dp) :: cputime
 
         real(dp) :: nsec
         integer :: nmin
 
-        call cpu_time(cputime)
-        nsec=cputime - prev_time
+        nsec=new_time - prev_time
         nmin=int(nsec) / 60
         nsec=nsec-real(nmin, dp)*60.0_dp
 

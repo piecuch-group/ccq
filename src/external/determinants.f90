@@ -1,4 +1,5 @@
-! Module borrowed and modified from HANDE <https://github.com/hande-qmc/hande>
+! Module borrowed and adapted from HANDE
+! https://github.com/hande-qmc/hande
 
 module determinants
 
@@ -272,6 +273,73 @@ contains
         call decode_det(sys%basis, f, d%occ_list)
 
     end subroutine decode_det_occ
+
+    pure subroutine decode_det_full(basis_set, f, occ_list, unocc_list)
+
+        ! Decode determinant bit string into integer lists containing the
+        ! occupied and unoccupied orbitals.
+        !
+        ! In:
+        !    basis_set: information about the single-particle basis.
+        !    f(:): bit string representation of the Slater
+        !        determinant.
+        ! Out:
+        !    occ_list(:): integer list of occupied orbitals in the Slater
+        !        determitant. (size: number of electrons)
+        !    unocc_list(:): integer list of unoccupied orbitals in the Slater
+        !        determitant. (size: number of orbitals - number of electrons)
+
+        use basis_types, only: basis_t
+
+        type(basis_t), intent(in) :: basis_set
+        integer(i0), intent(in) :: f(basis_set%string_len)
+        integer, intent(out) :: occ_list(:), unocc_list(:)
+        integer :: i, j, iocc, iunocc, orb, last_basis_ind
+
+        ! A bit too much to do the chunk-based decoding of the occupied list and then fill
+        ! in the remaining information.  We only use this in Hubbard model calculations in
+        ! k-space, so for now just do a (slow) bit-wise inspection.
+
+        iocc = 0
+        iunocc = 0
+        orb = 0
+
+        do i = 1, basis_set%string_len - 1
+            ! Manual unrolling allows us to avoid 2 mod statements
+            ! and some branching.
+            do j = 0, i0_end
+                ! Test alpha orbital.
+                orb = orb + 1
+                if (btest(f(i), j)) then
+                    iocc = iocc + 1
+                    occ_list(iocc) = orb
+                else
+                    iunocc = iunocc + 1
+                    unocc_list(iunocc) = orb
+                end if
+            end do
+        end do
+
+        ! Deal with the last element in the determinant bit array separately.
+        ! Note that decoding a bit string is surprisingly slow (or, more
+        ! importantly, adds up when doing billions of times).
+        ! Treating the last element as a special case rather than having an if
+        ! statement in the above loop results a speedup of the Hubbard k-space
+        ! FCIQMC calculations of 1.5%.
+        last_basis_ind = basis_set%nbasis - i0_length*(basis_set%string_len-1) - 1
+        do j = 0, last_basis_ind
+            ! Test alpha orbital.
+            orb = orb + 1
+            if (btest(f(i), j)) then
+                iocc = iocc + 1
+                occ_list(iocc) = orb
+            else
+                iunocc = iunocc + 1
+                unocc_list(iunocc) = orb
+            end if
+        end do
+
+    end subroutine decode_det_full
 
     pure subroutine decode_det_spinocc_spinunocc(sys, f, d)
 

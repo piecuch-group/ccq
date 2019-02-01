@@ -1,4 +1,4 @@
-module hbar
+module hbar_gen
 
     implicit none
 
@@ -30,31 +30,31 @@ contains
         real(p), allocatable :: IntB(:,:,:,:)
         real(p), allocatable :: IntM(:,:,:,:)
 
-        real(p),allocatable::V0A2A(:,:)
-        real(p),allocatable::V0A2C(:,:)
-        real(p),allocatable::V0A4A(:,:,:,:)
-        real(p),allocatable::V0A4C(:,:,:,:)
-        real(p),allocatable::V0A4E(:,:,:,:)
-        real(p),allocatable::V1A1A(:,:)
-        real(p),allocatable::V1A3A(:,:,:,:)
-        real(p),allocatable::V1A3C(:,:,:,:)
-        real(p),allocatable::V1B1B(:,:)
-        real(p),allocatable::V1B3B(:,:,:,:)
-        real(p),allocatable::V1B3D(:,:,:,:)
-        real(p),allocatable::V2A0A(:,:)
-        real(p),allocatable::V2A2A(:,:,:,:)
-        real(p),allocatable::V2A2C(:,:,:,:)
-        real(p),allocatable::V2B2B(:,:,:,:)
-        real(p),allocatable::V2C0A(:,:)
-        real(p),allocatable::V2C2A(:,:,:,:)
-        real(p),allocatable::V2C2C(:,:,:,:)
-        real(p),allocatable::V3A1A(:,:,:,:)
-        real(p),allocatable::V3B1B(:,:,:,:)
-        real(p),allocatable::V3C1A(:,:,:,:)
-        real(p),allocatable::V3D1B(:,:,:,:)
-        real(p),allocatable::V4A0A(:,:,:,:)
-        real(p),allocatable::V4C0A(:,:,:,:)
-        real(p),allocatable::V4E0A(:,:,:,:)
+        real(p), allocatable::v0a2a(:,:)
+        real(p), allocatable::v0a2c(:,:)
+        real(p), allocatable::v0a4a(:,:,:,:)
+        real(p), allocatable::v0a4c(:,:,:,:)
+        real(p), allocatable::v0a4e(:,:,:,:)
+        real(p), allocatable::v1a1a(:,:)
+        real(p), allocatable::v1a3a(:,:,:,:)
+        real(p), allocatable::v1a3c(:,:,:,:)
+        real(p), allocatable::v1b1b(:,:)
+        real(p), allocatable::v1b3b(:,:,:,:)
+        real(p), allocatable::v1b3d(:,:,:,:)
+        real(p), allocatable::v2a0a(:,:)
+        real(p), allocatable::v2a2a(:,:,:,:)
+        real(p), allocatable::v2a2c(:,:,:,:)
+        real(p), allocatable::v2b2b(:,:,:,:)
+        real(p), allocatable::v2c0a(:,:)
+        real(p), allocatable::v2c2a(:,:,:,:)
+        real(p), allocatable::v2c2c(:,:,:,:)
+        real(p), allocatable::v3a1a(:,:,:,:)
+        real(p), allocatable::v3b1b(:,:,:,:)
+        real(p), allocatable::v3c1a(:,:,:,:)
+        real(p), allocatable::v3d1b(:,:,:,:)
+        real(p), allocatable::v4a0a(:,:,:,:)
+        real(p), allocatable::v4c0a(:,:,:,:)
+        real(p), allocatable::v4e0a(:,:,:,:)
 
         ! Compatibility layer
         n0 = sys%froz
@@ -78,8 +78,8 @@ contains
 
         call print_date('  (H_N e^(T_1 + T_2))_C generation started on')
 
-        ! Initialize hbar arrays
-        call init_hbar(sys, cc)
+        ! Initialize hbar arrays. We don't need 3-body HBar
+        call init_hbar(sys, cc, 2)
 
         associate(fockr=>sys%ints%f_a, fockb=>sys%ints%f_b, &
                 intr=>sys%ints%v_aa, intb=>sys%ints%v_bb, intm=>sys%ints%v_ab)
@@ -748,4 +748,4 @@ contains
 
     end subroutine add_twobody_hbar
 
-end module hbar
+end module hbar_gen

@@ -119,6 +119,8 @@ contains
                 do e=sys%occ_a+1,sys%orbs
                     do f=sys%occ_a+1,sys%orbs
                         e1a1a = e1a1a + 0.50_p * sys%ints%v_aa(e,f,m,n) * t1a(f,n)*t1a(e,m)
+                        ! [TMPDEBUG]
+                        print '(4i4,3es24.10)', e, f, m, n,sys%ints%v_aa(e,f,m,n), t1a(f,n), t1a(e,m)
                     enddo
                 enddo
             enddo
@@ -142,6 +144,16 @@ contains
             enddo
         enddo
 
+        ! [TMPDEBUG]
+        !print *, 'e1a', e1a
+        !print *, 'e1b', e1b
+        !print *, 'e2a', e2a
+        !print *, 'e2b', e2b
+        !print *, 'e2c', e2c
+        !print *, 'e1a1a', e1a1a
+        !print *, 'e1a1b', e1a1b
+        !print *, 'e1b1b', e1b1b
+        !print *, 'v*t2', e2a + e2b + e2c
         energy = e1a + e1b + e2a + e2b + e2c + e1a1a + e1a1b + e1b1b
 
     end function calculate_unsorted_energy

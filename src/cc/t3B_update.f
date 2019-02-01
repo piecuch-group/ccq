@@ -1,4 +1,4 @@
-       subroutine t3b_update(n0,n1,n2,n3,k1,k2,k3,k4,lvl_t,lvl_q,shift,v3b
+       subroutine t3b_update(n0,n1,n2,n3,k1,k2,k3,k4,lvl_q,shift,v3b
      & ,fockr,fockb,intr,intb,intm,t1a,t1b,t2a,t2b,t2c,t3a,t3b,t3c,t3d,
      & iactocca,iactoccb,iactunoa,iactunob,iactindt,
      & t2diag3,t2diag4,t2diag5,t3diag1,t3diag2,t3diag3,t3diag4,t3diag5)
@@ -9,7 +9,7 @@ c
        integer iocca,ioccb,iunoa,iunob
        integer,allocatable::indocc(:,:,:)
        integer,allocatable::indunocc(:,:,:)
-       logical lvl_t,lvl_q
+       logical lvl_q
 !       integer indocc(n0+1:n2,n0+1:n1,n0+1:n1)
 !       integer indunocc(n2+1:n3,n1+1:n3,n1+1:n3)
        real t2diag3,t2diag4,t2diag5

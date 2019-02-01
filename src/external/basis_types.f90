@@ -1,3 +1,6 @@
+! Module borrowed and adapted from HANDE
+! https://github.com/hande-qmc/hande
+
 module basis_types
 
     use const, only: i0

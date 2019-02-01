@@ -1,9 +1,9 @@
 subroutine t3a_antisym(n0,n1,n2,n3,t3a)
 
-    use const, only: dp
+    use const, only: p
 
     integer, intent(in) :: n0, n1, n2, n3
-    real(dp), intent(inout) :: t3a(n1+1:n3,n1+1:n3,n1+1:n3,n0+1:n1,n0+1:n1,n0+1:n1)
+    real(p), intent(inout) :: t3a(n1+1:n3,n1+1:n3,n1+1:n3,n0+1:n1,n0+1:n1,n0+1:n1)
     integer :: a,b,c,i,j,k
 
     do i=n0+1,n1-2
@@ -58,10 +58,10 @@ end subroutine t3a_antisym
 
 subroutine t3b_antisym(n0,n1,n2,n3,t3b)
 
-    use const, only: dp
+    use const, only: p
 
     integer, intent(in) :: n0, n1, n2, n3
-    real(dp), intent(inout) :: t3b(n2+1:n3,n1+1:n3,n1+1:n3,n0+1:n2,n0+1:n1,n0+1:n1)
+    real(p), intent(inout) :: t3b(n2+1:n3,n1+1:n3,n1+1:n3,n0+1:n2,n0+1:n1,n0+1:n1)
     integer :: a,b,c,i,j,k
 
     do i=n0+1,n1-1
@@ -84,10 +84,10 @@ end subroutine t3b_antisym
 
 subroutine t3c_antisym(n0,n1,n2,n3,t3c)
 
-    use const, only: dp
+    use const, only: p
 
     integer, intent(in) :: n0, n1, n2, n3
-    real(dp), intent(inout) :: t3c(n2+1:n3,n2+1:n3,n1+1:n3,n0+1:n2,n0+1:n2,n0+1:n1)
+    real(p), intent(inout) :: t3c(n2+1:n3,n2+1:n3,n1+1:n3,n0+1:n2,n0+1:n2,n0+1:n1)
     integer :: a,b,c,i,j,k
 
     do i=n0+1,n1
@@ -110,10 +110,10 @@ end subroutine t3c_antisym
 
 subroutine t3d_antisym(n0,n1,n2,n3,t3d)
 
-    use const, only: dp
+    use const, only: p
 
     integer, intent(in) :: n0, n1, n2, n3
-    real(dp), intent(inout) :: t3d(n2+1:n3,n2+1:n3,n2+1:n3,n0+1:n2,n0+1:n2,n0+1:n2)
+    real(p), intent(inout) :: t3d(n2+1:n3,n2+1:n3,n2+1:n3,n0+1:n2,n0+1:n2,n0+1:n2)
     integer :: a,b,c,i,j,k
 
     do i=n0+1,n2-2
@@ -168,10 +168,10 @@ end subroutine t3d_antisym
 
 subroutine t4a_antisym(n0, n1, n2, n3)
 
-    use const, only: dp, ta
+    use const, only: p, ta
 
     integer, intent(in) :: n0, n1, n2, n3
-    real(dp), allocatable :: t4a(:,:,:,:,:,:,:,:)
+    real(p), allocatable :: t4a(:,:,:,:,:,:,:,:)
     integer :: a,b,c,d,i,j,k,l
 
     allocate(t4a(n1+1:n3,n1+1:n3,n1+1:n3,n1+1:n3,n0+1:n1,n0+1:n1,n0+1:n1,n0+1:n1))
@@ -776,10 +776,10 @@ end subroutine t4a_antisym
 
 subroutine t4b_antisym(n0, n1, n2, n3)
 
-    use const, only: dp, tb
+    use const, only: p, tb
 
     integer, intent(in) :: n0, n1, n2, n3
-    real(dp), allocatable :: t4b(:,:,:,:,:,:,:,:)
+    real(p), allocatable :: t4b(:,:,:,:,:,:,:,:)
     integer :: a,b,c,d,i,j,k,l
 
     allocate(t4b(n2+1:n3,n1+1:n3,n1+1:n3,n1+1:n3,n0+1:n2,n0+1:n1,n0+1:n1,n0+1:n1))
@@ -846,10 +846,10 @@ end subroutine t4b_antisym
 
 subroutine t4c_antisym(n0, n1, n2, n3)
 
-    use const, only: dp, tc
+    use const, only: p, tc
 
     integer, intent(in) :: n0, n1, n2, n3
-    real(dp), allocatable :: t4c(:,:,:,:,:,:,:,:)
+    real(p), allocatable :: t4c(:,:,:,:,:,:,:,:)
     integer :: a,b,c,d,i,j,k,l
 
     allocate(t4c(n2+1:n3,n2+1:n3,n1+1:n3,n1+1:n3,n0+1:n2,n0+1:n2,n0+1:n1,n0+1:n1))
@@ -894,10 +894,10 @@ end subroutine t4c_antisym
 
 subroutine t4d_antisym(n0, n1, n2, n3)
 
-    use const, only: dp, td
+    use const, only: p, td
 
     integer, intent(in) :: n0, n1, n2, n3
-    real(dp), allocatable :: t4d(:,:,:,:,:,:,:,:)
+    real(p), allocatable :: t4d(:,:,:,:,:,:,:,:)
     integer :: a,b,c,d,i,j,k,l
 
     allocate(t4d(n2+1:n3,n2+1:n3,n2+1:n3,n1+1:n3,n0+1:n2,n0+1:n2,n0+1:n2,n0+1:n1))
@@ -963,10 +963,10 @@ end subroutine t4d_antisym
 
 subroutine t4e_antisym(n0, n1, n2, n3)
 
-    use const, only: dp, te
+    use const, only: p, te
 
     integer, intent(in) :: n0, n1, n2, n3
-    real(dp), allocatable :: t4e(:,:,:,:,:,:,:,:)
+    real(p), allocatable :: t4e(:,:,:,:,:,:,:,:)
     integer :: a,b,c,d,i,j,k,l
 
     allocate(t4e(n2+1:n3,n2+1:n3,n2+1:n3,n2+1:n3,n0+1:n2,n0+1:n2,n0+1:n2,n0+1:n2))

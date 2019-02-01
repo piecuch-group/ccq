@@ -1,5 +1,12 @@
 module const
 
+    type e_op_t
+        integer :: a, b
+        integer :: aa, ab, bb
+        integer :: aaa, aab, abb, bbb
+        integer :: aaaa, aaab, aabb, abbb, bbbb
+    end type e_op_t
+
     ! 32-bit (4-byte) integer.
     integer, parameter :: int_32 = selected_int_kind(6)
     ! 64-bit (8-byte) integer.
@@ -26,6 +33,7 @@ module const
 
 
     ! Maximum parameters
+    integer, parameter :: max_p_space = 50000000
     integer, parameter :: line_len = 255
 
     ! File units
@@ -52,5 +60,8 @@ module const
     integer, parameter :: tc = 31
     integer, parameter :: td = 32
     integer, parameter :: te = 33
+
+    ! Helpers
+    type(e_op_t), parameter :: e_op = e_op_t(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14)
 
 end module const

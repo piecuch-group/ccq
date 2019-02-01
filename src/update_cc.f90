@@ -7,9 +7,11 @@ contains
 
     subroutine update_clusters_t4(sys, run, cc)
 
-        use const, only: sp, dp, ta, tb, tc, td, te
+        use const, only: sp, p, ta, tb, tc, td, te
         use system, only: sys_t, run_t
         use cc_types, only: cc_t
+        use stoch_cc, only: update_stoch_t3
+        use cc_utils, only: antisym_t
 
         implicit none
 
@@ -17,12 +19,12 @@ contains
         type(run_t), intent(in) :: run
         type(cc_t), intent(inout), target :: cc
 
-        real(dp), pointer :: t(:) => null()
-        real(dp), pointer :: t2_mc(:) => null()
+        real(p), pointer :: t(:) => null()
+        real(p), pointer :: t2_mc(:) => null()
 
-        real(dp), allocatable :: v1(:,:)
-        real(dp), allocatable :: v2(:,:,:,:)
-        real(dp), allocatable :: v3(:,:,:,:,:,:)
+        real(p), allocatable :: v1(:,:)
+        real(p), allocatable :: v2(:,:,:,:)
+        real(p), allocatable :: v3(:,:,:,:,:,:)
 
 
         ! Adapt for Ilias old scheme
@@ -160,12 +162,57 @@ contains
                 deallocate(v1)
             endif
 
-            if (.not. run%ext_cor) then
+            !do i=k3a, k3b-1
+            !    if (dabs(t(i)) > 1.0d-5) print *, t(i)
+            !enddo
+            if (run%stoch) call update_stoch_t3(sys, run, cc)
+            !if (run%stoch) then
+            if (.false.) then
+
+            allocate(V3(N1+1:N3,N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1,N0+1:N1))
+            V3=0.0_p
+
+            call t3A_update_stoch(N0,N1,N2,N3,K1,K2,K3,K4,run%shift,V3,&
+                FockR,FockB,IntR,IntB,IntM,&
+                t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),&
+                t(k3a),t(k3b),t(k3c),t(k3d),cc%stoch%o3)
+            deallocate(V3)
+
+            allocate(V3(N2+1:N3,N1+1:N3,N1+1:N3,N0+1:N2,N0+1:N1,N0+1:N1))
+            V3=0.0_p
+
+            call t3B_update_stoch(N0,N1,N2,N3,K1,K2,K3,K4,run%shift,V3,&
+                FockR,FockB,IntR,IntB,IntM,&
+                t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),&
+                t(k3a),t(k3b),t(k3c),t(k3d),cc%stoch%o3)
+            deallocate(V3)
+
+            allocate(V3(N2+1:N3,N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N2,N0+1:N1))
+            V3=0.0_p
+
+            call t3C_update_stoch(N0,N1,N2,N3,K1,K2,K3,K4,run%shift,V3,&
+                FockR,FockB,IntR,IntB,IntM,&
+                t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),&
+                t(k3a),t(k3b),t(k3c),t(k3d),cc%stoch%o3)
+            deallocate(V3)
+
+            allocate(V3(N2+1:N3,N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2,N0+1:N2))
+            V3=0.0_p
+
+            call t3D_update_stoch(N0,N1,N2,N3,K1,K2,K3,K4,run%shift,V3,&
+                FockR,FockB,IntR,IntB,IntM,&
+                t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),&
+                t(k3a),t(k3b),t(k3c),t(k3d),cc%stoch%o3)
+            deallocate(V3)
+
+            endif
+
+            if (.not. run%ext_cor .and. .not. run%stoch) then
                 if(run%lvl_t)then
 
                     allocate(v3(n1+1:n3,n1+1:n3,n1+1:n3,n0+1:n1,n0+1:n1,n0+1:n1))
                     v3=0.0d0
-                    call t3a_update(n0,n1,n2,n3,k1,k2,k3,k4,run%lvl_t,run%lvl_q,run%shift,v3, &
+                    call t3a_update(n0,n1,n2,n3,k1,k2,k3,k4,run%lvl_q,run%shift,v3, &
                         fockr,fockb,intr,intb,intm,t(k1a),t(k1b),t(k2a),t(k2b),t(k2c), &
                         t(k3a),t(k3b),t(k3c),t(k3d),iactocca,iactunoa,iactindt, &
                         t2diag3,t2diag4,t2diag5,t3diag1,t3diag2,t3diag3,t3diag4,t3diag5)
@@ -178,7 +225,7 @@ contains
                     else
                         allocate(v3(n2+1:n3,n2+1:n3,n2+1:n3,n0+1:n2,n0+1:n2,n0+1:n2))
                         v3=0.0d0
-                        call t3d_update(n0,n1,n2,n3,k1,k2,k3,k4,run%lvl_t,run%lvl_q,run%shift,v3, &
+                        call t3d_update(n0,n1,n2,n3,k1,k2,k3,k4,run%lvl_q,run%shift,v3, &
                             fockr,fockb,intr,intb,intm,t(k1a),t(k1b),t(k2a),t(k2b),t(k2c), &
                             t(k3a),t(k3b),t(k3c),t(k3d),iactoccb,iactunob,iactindt, &
                             t2diag3,t2diag4,t2diag5,t3diag1,t3diag2,t3diag3,t3diag4,t3diag5)
@@ -187,7 +234,7 @@ contains
 
                     allocate(v3(n2+1:n3,n1+1:n3,n1+1:n3,n0+1:n2,n0+1:n1,n0+1:n1))
                     v3=0.0d0
-                    call t3b_update(n0,n1,n2,n3,k1,k2,k3,k4,run%lvl_t,run%lvl_q,run%shift,v3, &
+                    call t3b_update(n0,n1,n2,n3,k1,k2,k3,k4,run%lvl_q,run%shift,v3, &
                         fockr,fockb,intr,intb,intm,t(k1a),t(k1b),t(k2a),t(k2b),t(k2c), &
                         t(k3a),t(k3b),t(k3c),t(k3d), &
                         iactocca,iactoccb,iactunoa,iactunob,iactindt, &
@@ -199,7 +246,7 @@ contains
                     else
                         allocate(v3(n2+1:n3,n2+1:n3,n1+1:n3,n0+1:n2,n0+1:n2,n0+1:n1))
                         v3=0.0d0
-                        call t3c_update(n0,n1,n2,n3,k1,k2,k3,k4,run%lvl_t,run%lvl_q,run%shift,v3, &
+                        call t3c_update(n0,n1,n2,n3,k1,k2,k3,k4,run%lvl_q,run%shift,v3, &
                             fockr,fockb,intr,intb,intm,t(k1a),t(k1b),t(k2a),t(k2b),t(k2c), &
                             t(k3a),t(k3b),t(k3c),t(k3d), &
                             iactocca,iactoccb,iactunoa,iactunob,iactindt, &

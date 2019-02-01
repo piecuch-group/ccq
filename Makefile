@@ -3,7 +3,7 @@
 # Inspired in James Spencer's
 # http://github.com/jsspencer/generic_makefile
 #
-# 2019, Emiliano Deustua
+# 2019, J. Emiliano Deustua
 
 
 # Directory structure and config
@@ -86,7 +86,7 @@ $(BUILD_DIR)/%.o: %.f90
 
 # C
 # -
-$(BUILD_DIR)/gen_uuid.o: src/utils/gen_uuid.c
+$(BUILD_DIR)/%.o: %.c
 	$(CC) -c -o $@ $<
 
 
@@ -95,7 +95,7 @@ $(BUILD_DIR)/gen_uuid.o: src/utils/gen_uuid.c
 #
 
 # Compile binary
-$(BIN_DIR)/$(PROGRAM): $(OBJS) $(BUILD_DIR)/gen_uuid.o | $(BIN_DIR)
+$(BIN_DIR)/$(PROGRAM): $(OBJS) | $(BIN_DIR)
 	$(LD) -o $@ $(LDFLAGS) -I $(BUILD_DIR) $(OBJS) $(LIBS)
 
 
@@ -103,7 +103,7 @@ $(BIN_DIR) $(BUILD_DIR) $(DEPEND_DIR):
 	mkdir -p $@
 
 $(F_DEPEND): $(F_FILES)
-	tools/sfmakedepend --file - --silent --objdir \$$\(BUILD_DIR\) --moddir \$$\(BUILD_DIR\) --depend=mod $^ > $@
+	@tools/sfmakedepend --file - --silent --objdir \$$\(BUILD_DIR\) --moddir \$$\(BUILD_DIR\) --depend=mod $^ > $@
 
 # Phonies
 # -------

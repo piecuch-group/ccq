@@ -4,6 +4,11 @@ module system
     use basis_types, only: basis_t
 
     type ints_t
+        ! Bare integrals
+        real(p), allocatable :: e1int(:,:)
+        ! e2int equivalent to v_ab so no needed (for now)
+
+
         ! Unsorted integrals for older CC codes and CCSDTQ derivatives
         real(p), allocatable :: f_a(:,:)
         real(p), allocatable :: f_b(:,:)
@@ -11,7 +16,9 @@ module system
         real(p), allocatable :: v_ab(:,:,:,:)
         real(p), allocatable :: v_bb(:,:,:,:)
 
-        ! Sorted integrals for faster CC
+        ! Sorted integrals for faster CC calculations
+        ! ------------------------------------------
+        ! Main integrals
         real(p), allocatable :: fahh(:,:)
         real(p), allocatable :: fahp(:,:)
         real(p), allocatable :: fapp(:,:)
@@ -37,8 +44,7 @@ module system
         real(p), allocatable :: vchhpp(:,:,:,:)
         real(p), allocatable :: vchphp(:,:,:,:)
         real(p), allocatable :: vchppp(:,:,:,:)
-
-        ! Active integrals
+        ! Active space integrals integrals. Truncated to within the active space.
         real(p), allocatable :: vaappp(:,:,:,:)
         real(p), allocatable :: vbappp(:,:,:,:)
         real(p), allocatable :: vbpapp(:,:,:,:)
@@ -116,6 +122,7 @@ module system
         logical :: hbar
         logical :: lcc
         logical :: mm_23
+        logical :: stoch
 
         ! Compatibility layer
         character(len=6) :: lvl

@@ -1,3 +1,6 @@
+! Module borrowed and adapted from HANDE
+! https://github.com/hande-qmc/hande
+
 module utils
 
 ! Various utilities and tools...
@@ -121,68 +124,92 @@ contains
 
     end function factorial_combination_1
 
-    pure subroutine next_comb(n, k, comb, ierr)
+    subroutine next_comb(nitems, inds, r, done)
 
-        ! Create the next combination of k objects from a set of size n.
+        ! Generate the next combination of a selection of r items
+        ! in the inds array. This subroutine was translated from
+        ! python's itertools example.
+        ! https://docs.python.org/3.7/library/itertools.html#itertools.combinations
 
         ! In:
-        !    n: size of set.
-        !    k: size of subset/combination.
+        !    nitems: total number of items
+        !    r: subset of items to choose
         ! In/Out:
-        !    comb: contains the previous combination on input and the next
-        !        combination on output.  Use (0,1,2,...,k-1) for the first
-        !        combination.  The returned combination is 0-indexed.
-        ! Out:
-        !    ierr: 0 if a combination is found and 1 if there are no more
-        !        combinations.
+        !    inds: index combination
+        !    done: whether the last combination has been reached
 
-        ! Translated from the C implementation at:
-        ! https://compprog.wordpress.com/2007/10/17/generating-combinations-1/.
-        ! The author, Alexandru Scvortov (scvalex@gmail.com), gave permission
-        ! via email that we are 'free to use/modify/redistribute that code
-        ! however [we] like'.  His code is provided as-is.
-
-        integer, intent(in) :: n, k
-        integer, intent(inout) :: comb(0:k-1) ! 0-indexed for easy translation from original C.
-        integer, intent(out) :: ierr
+        integer, intent(in) :: nitems
+        integer, intent(inout) :: inds(:)
+        integer, intent(in) :: r
+        logical, intent(out) :: done
 
         integer :: i, j
 
-        ! The final element of the previous combination must, at very least, be
-        ! incremented.
-        i = k - 1
-        comb(i) = comb(i) + 1
+        done = .false.
 
-        do while (comb(i) >= n - k + 1 + i)
-            ! The i-th element is greater than the maximum allowed value (note
-            ! that combinations are generated as ascending sequences).  Hence
-            ! there are no more combinations which begin comb(0:i-1).  Increment
-            ! comb(i-1) and use that as the start of the next combination.
-            i = i - 1
-            if (i < 0) exit
-            comb(i) = comb(i) + 1
-        end do
+        do i=r, 1, -1
+            if (inds(i) /= i + nitems - r) exit
 
-        if (comb(0) > n - k) then
-            ! combination (n-k, n-k+1, ..., n) reached.
-            ! no more combinations can be geerated.
-            ierr = 1
-        else
-            ierr = 0
-            ! comb now looks like (..., x, n_1, n_2, n_3, ..., n_n),
-            ! where n_i ! >= max value of comb.
-            ! Turn it into (..., x, x+1, x+1, ...), ie the first combination
-            ! which starts with ( ..., x).  Subsequent calls to next_comb will
-            ! then iterate over 'higher' combinations with the same starting
-            ! sequence.
-            ! The i-th position at the end of the previous loop holds the
-            ! x entry.
-            do j = i+1, k-1
-                comb(j) = comb(j-1) + 1
-            end do
-        end if
+            if (i == 1) then
+                done = .true.
+                return
+            endif
+        enddo
+
+        inds(i) = inds(i) + 1
+        do j=i+1, r
+            inds(j) = inds(j-1) + 1
+        enddo
 
     end subroutine next_comb
+
+    subroutine combs(items, r, comb)
+
+        integer, intent(in) :: items(:)
+        integer, intent(in) :: r
+        integer, allocatable, intent(out) :: comb(:,:)
+
+        integer, allocatable :: inds(:)
+        integer :: n
+        integer :: i, j, k, indx
+        integer :: n_combs
+
+        n = size(items)
+
+        n_combs = binom_i(n, r)
+
+        allocate(comb(r, n_combs))
+
+        allocate(inds(n))
+
+        do i=1, r
+            inds(i) = i
+        enddo
+
+        indx = 1
+        do k=1, r
+            comb(k,indx) = items(inds(k))
+        enddo
+
+        outer: do
+            do i=r, 1, -1
+                if (inds(i) /= i + n - r) exit
+                if (i == 1) exit outer
+            enddo
+            inds(i) = inds(i) + 1
+            do j=i+1, r
+                inds(j) = inds(j-1) + 1
+            enddo
+
+            indx = indx + 1
+            do k=1, r
+                comb(k,indx) = items(inds(k))
+            enddo
+        enddo outer
+
+        deallocate(inds)
+
+    end subroutine combs
 
 !--- format statement formatting ---
 
@@ -542,6 +569,50 @@ contains
 
     end function carray_to_fstring
 
+    function count_file_lines(file_path) result(line_count)
+
+        ! Count the number of lines in a file.
+
+        ! In:
+        !    file_path: path to the file
+        ! Returns:
+        !    The number of lines in the file
+
+        use const, only: tmp_unit
+
+        integer :: line_count
+        character(len=*), intent(in) :: file_path
+
+        integer :: ios
+
+        line_count = 0
+        open(tmp_unit, file=trim(file_path), status="old")
+
+        do
+            read(tmp_unit, *, iostat=ios)
+            if (ios /= 0) exit
+            line_count = line_count + 1
+        enddo
+
+        close(tmp_unit)
+
+    end function count_file_lines
+
+!--- System output ---
+
+    function get_walltime_sec() result(res)
+
+        use const, only: int_64, dp
+
+        real(dp) :: res
+        integer(int_64) :: cnt, cnt_rate, cnt_max
+
+        call system_clock(cnt, cnt_rate, cnt_max)
+
+        res = real(cnt / cnt_rate, dp)
+
+    end function get_walltime_sec
+
 !--- Informative output ---
 
     subroutine print_matrix(matrix)
@@ -549,7 +620,7 @@ contains
         ! Print out a given real matrix in a neat format.
 
         ! In:
-        !    matrix: The matrix which is to be output to the screen. 
+        !    matrix: The matrix which is to be output to the screen.
 
         use const, only: p
 

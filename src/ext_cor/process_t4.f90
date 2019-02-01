@@ -1,86 +1,13 @@
-module t4_generation
+module process_t4
 
     implicit none
 
 contains
 
-    subroutine ext_cor_4(sys, cc, f_ref, filename, coef_norm, c_vec)
-
-        use const, only: i0, dp, walk_unit
-        use checking, only: check_allocate, check_deallocate
-        use determinants, only: encode_det
-        use excitations, only: excit_t, get_excitation_level
-        use ext_cor_types, only: vec3_t
-        use printing, only: io
-        use system, only: sys_t
-        use cc_types, only: cc_t
-
-
-        type(sys_t), intent(in) :: sys
-        type(cc_t), intent(inout) :: cc
-        integer(i0), intent(in) :: f_ref(sys%basis%string_len)
-        character(len=*), intent(in) :: filename
-        real(dp), intent(in) :: coef_norm
-        type(vec3_t), intent(in) :: c_vec
-
-        integer, parameter :: init_c4 = 100000
-        integer(i0), allocatable :: c4_confs(:,:)
-
-        integer :: occ_list(sys%nel)
-        integer(i0) :: f_t4(sys%basis%string_len)
-        integer :: ndoubles_conf
-        integer :: line(2), c4_coef
-        integer :: cnt_c4 = 0
-        integer :: ios
-        integer :: ierr
-        integer :: excit_rank
-
-
-        allocate(c4_confs(sys%basis%string_len, init_c4), stat=ierr)
-        call check_allocate('c4_confs', init_c4, ierr)
-
-        write(io, '(4x,a)') '=> Creating twobody configurations'
-        call gen_doubles_conf(sys, cc%ext_cor%doubles_conf, f_ref)
-        ndoubles_conf = size(cc%ext_cor%doubles_conf, 2)
-
-        allocate(cc%ext_cor%doubles_proj(ndoubles_conf), stat=ierr)
-        cc%ext_cor%doubles_proj = 0.0_dp
-
-        ! Run over all alpha combinations
-        open(walk_unit, file=trim(filename), status='old')
-
-        write(io, '(4x,a)') '=> Starting loop over stochastic quadruply excited determinants'
-        do
-            read(walk_unit, *, iostat=ios) line, occ_list
-            if (ios /= 0) exit
-
-            c4_coef = line(2)
-
-            call encode_det(sys%basis, occ_list, f_t4)
-            excit_rank = get_excitation_level(f_ref, f_t4)
-
-            if (excit_rank /= 4) cycle
-
-            cnt_c4 = cnt_c4 + 1
-            c4_confs(:,cnt_c4) = f_t4
-            call contract_t4(sys, cc, f_ref, f_t4, c_vec, c4_coef, coef_norm)
-        enddo
-
-        close(walk_unit)
-
-        write(io, '(4x,a)') '=> Starting loop over disconnected quadruply excited determinants'
-        call find_disc_t4(sys, cc, f_ref, cnt_c4, c4_confs, c_vec)
-
-        deallocate(c4_confs, stat=ierr)
-        call check_deallocate('c4_confs', ierr)
-
-
-    end subroutine ext_cor_4
-
     subroutine gen_doubles_conf(sys, confs, f_ref)
 
         use const, only: i0
-        use combinatorics, only: combinations
+        use utils, only: combs
         use checking, only: check_allocate, check_deallocate
         use determinants, only: encode_det
         use excitations, only: excit_t, create_excited_det
@@ -114,12 +41,12 @@ contains
         do i=1, sys%nel
             elecs(i) = i
         enddo
-        call combinations(elecs, r, combs_elecs)
+        call combs(elecs, r, combs_elecs)
 
         do i=1, sys%nvirt
             virts(i) = sys%nel + i
         enddo
-        call combinations(virts, r, combs_virts)
+        call combs(virts, r, combs_virts)
 
         n_combs_elecs = size(combs_elecs, 2)
         n_combs_virts = size(combs_virts, 2)
@@ -171,8 +98,8 @@ contains
 
     subroutine contract_t4(sys, cc, f_ref, f_t4, c_vec, c4_coef, coef_norm)
 
-        use const, only: i0, dp
-        use directed_t4_analysis, only: analyze_t4_aaaa, analyze_t4_aaab, analyze_t4_aabb, &
+        use const, only: i0, p
+        use cluster_analysis, only: analyze_t4_aaaa, analyze_t4_aaab, analyze_t4_aabb, &
             analyze_t4_abbb, analyze_t4_bbbb
         use excitations, only: excit_t, get_excitation_spin_integrate
         use ext_cor_types, only: vec3_t
@@ -184,7 +111,7 @@ contains
         integer(i0), intent(in) :: f_ref(sys%basis%string_len)
         integer(i0), intent(in) :: f_t4(sys%basis%string_len)
         integer, intent(in) :: c4_coef
-        real(dp), intent(in) :: coef_norm
+        real(p), intent(in) :: coef_norm
         type(vec3_t), intent(in) :: c_vec
 
         integer :: nconf
@@ -192,8 +119,8 @@ contains
         integer :: ios
         type(excit_t) :: excit
         integer :: excit_sign
-        real(dp) :: renorm_coef
-        real(dp) :: t4_amp
+        real(p) :: renorm_coef
+        real(p) :: t4_amp
 
 
         nconf = size(cc%ext_cor%doubles_conf, 2)
@@ -203,10 +130,11 @@ contains
         else
             excit_sign = 1
         endif
-        renorm_coef =  real(c4_coef, dp) / coef_norm * excit_sign
+        renorm_coef =  real(c4_coef, p) / coef_norm * excit_sign
 
         select case(excit%nexcit_alpha)
 
+        ! Obtain t4_amp from the cluster analysis of the Cs
         case(4)
             call analyze_t4_aaaa(c_vec, excit, renorm_coef, t4_amp)
 
@@ -224,9 +152,22 @@ contains
 
         end select
 
+        ! Fix sign before the projection in Slater determinant space.
+        ! As a note, this is kind of tricky. One has to think about the different
+        ! references as you translate between excitation and Slater
+        ! determinant space. In the former, the phase factors are calculated with
+        ! respect to the structure of the of the excitation (e.g. |D_ijk^abc> where
+        ! i<j<k and a<b<c and all indices are alpha spin or |D_ijk^abc> where i<j,k and
+        ! a<b,c where i,j and a,b are alpha spin and k and c are beta spin) which means
+        ! that one must pay attention to how the determinants are defined in the theory.
+
+        ! In the later, the phase factors depend on how the occupation numbers are
+        ! defined in the the determinant string (e.g. by numerical order or by an
+        ! alpha-beta, alpha-beta, etc. structure).
+
         t4_amp = t4_amp * excit_sign
 
-        if (t4_amp /= 0.0_dp) then
+        if (t4_amp /= 0.0_p) then
             call update_proj_t2(sys, cc, f_t4, t4_amp)
         endif
 
@@ -235,114 +176,60 @@ contains
 
     subroutine update_proj_t2(sys, cc, t4_conf, t4_amp)
 
-        use const, only: dp, i0
+        use const, only: p, i0
         use excitations, only: excit_t, get_excitation_level, get_excitation
+        use hmat, only: get_v
         use system, only: sys_t
         use cc_types, only: cc_t
 
         type(sys_t), intent(in) :: sys
         type(cc_t), intent(inout) :: cc
         integer(i0), intent(in) :: t4_conf(sys%basis%string_len)
-        real(dp), intent(in) :: t4_amp
+        real(p), intent(in) :: t4_amp
 
         !  Local variables
-        type(excit_t) :: excit
-        integer :: i
+        integer :: iconf
+        integer :: i, j, a, b
         integer :: nexcit
-
-        integer :: cnt
-        real(dp) :: h_element
+        type(excit_t) :: excit
+        real(p) :: h_element
 
         ! Read configurations
-        cnt = 1
         associate(doubles_conf=>cc%ext_cor%doubles_conf, doubles_proj=>cc%ext_cor%doubles_proj)
-            do i=1, size(doubles_conf,2)
 
-                nexcit = get_excitation_level(doubles_conf(:,i), t4_conf)
+            do iconf=1, size(doubles_conf,2)
+
+                ! Cycle if not a double excitation. Only double excitations
+                ! are allowed between doubly and quadruply excited determinants.
+                nexcit = get_excitation_level(doubles_conf(:,iconf), t4_conf)
                 if (nexcit /= 2) cycle
 
-                excit = get_excitation(sys%nel, sys%basis, doubles_conf(:,i), t4_conf)
+                ! Get excitation information
+                excit = get_excitation(sys%nel, sys%basis, doubles_conf(:,iconf), t4_conf)
 
-                if (excit%perm) then
-                    h_element = -get_v(excit, sys%ints)
-                else
-                    h_element = get_v(excit, sys%ints)
-                endif
-                doubles_proj(i) = doubles_proj(i) + (h_element * t4_amp)
-                !print '(i4,2f18.10)', i, h_element, t4_amp
-                cnt = cnt + 1
+                ! Calculate matrix element. Note that only double excitations
+                ! are allowed, thus only twobody integrals are needed (Slater rules).
+                i = excit%from_orb(1)
+                j = excit%from_orb(2)
+                a = excit%to_orb(1)
+                b = excit%to_orb(2)
+
+                h_element = get_v(sys%ints%v_aa, sys%ints%v_ab, sys%ints%v_bb, i, j, a, b)
+
+                ! Apply the appropriate permutation parity
+                if (excit%perm) h_element = -h_element
+
+                ! Update projection on doubles
+                doubles_proj(iconf) = doubles_proj(iconf) + (h_element * t4_amp)
             enddo
 
         end associate
-        cnt = cnt - 1
 
     end subroutine update_proj_t2
 
-    function get_v(excit, ints) result(h_element)
-
-        use const, only: dp
-        use excitations, only: excit_t
-        use system, only: ints_t
-
-        real(dp) :: h_element
-        type(excit_t), intent(in) :: excit
-        type(ints_t), intent(in) :: ints
-        integer :: dod
-        integer :: a, b, c, d
-
-        a = int((excit%from_orb(1) + 1) / 2)
-        b = int((excit%from_orb(2) + 1) / 2)
-        c = int((excit%to_orb(1) + 1) / 2)
-        d = int((excit%to_orb(2) + 1) / 2)
-
-        ! Total spin
-        dod=mod(excit%from_orb(1),2) + mod(excit%from_orb(2),2) + &
-            mod(excit%to_orb(1),2) + mod(excit%to_orb(2),2)
-        !! All spins are the same
-        !if (dod == 0 .or. dod == 4) then
-        !    h_element = ints%v_aa(a,b,c,d)
-
-        !    ! Two spins are the same
-        !else if (dod == 2) then
-
-        !    if (mod(excit%from_orb(1), 2) == mod(excit%to_orb(1), 2)) then
-        !        ! Bra and ket indices match spin
-        !        h_element = ints%v_ab(a,b,c,d)
-        !    else
-        !        ! Bra and ket indices are flipped
-        !        h_element = -ints%v_ab(a,b,d,c)
-        !    endif
-
-        !else
-        !    h_element = 0.0_dp
-        !end if
-
-        ! All spins are the same
-        if (dod == 0 .or. dod == 4) then
-            h_element = ints%v_aa(a,b,c,d)
-
-        else if (dod.eq.1.or.dod.eq.3) then
-            h_element = 0.0_dp
-
-        else if (mod(excit%from_orb(1), 2) == mod(excit%from_orb(2), 2)) then
-            h_element = 0.0_dp
-            ! Two spins are the same
-
-        else if (mod(excit%from_orb(1), 2) == mod(excit%to_orb(1), 2)) then
-            ! Bra and ket indices match spin
-            h_element = ints%v_ab(a,b,c,d)
-
-        else if (mod(excit%from_orb(1), 2) == mod(excit%to_orb(2), 2)) then
-                ! Bra and ket indices are flipped
-                h_element = -ints%v_ab(a,b,d,c)
-        endif
-
-
-    end function get_v
-
     subroutine update_t2_cluster(sys, ext_cor, f_ref)
 
-        use const, only: dp, i0
+        use const, only: p, i0
         use excitations, only: excit_t, get_excitation_spin_integrate
         use ext_cor_types, only: ext_cor_t
         use system, only: sys_t
@@ -363,26 +250,26 @@ contains
 
         if (.not. allocated(ext_cor%t2a)) &
             allocate(ext_cor%t2a(nunocc_a, nunocc_a, nocc_a, nocc_a))
-        ext_cor%t2a = 0.0_dp
+        ext_cor%t2a = 0.0_p
         if (.not. allocated(ext_cor%t2b)) &
             allocate(ext_cor%t2b(nunocc_b, nunocc_a, nocc_b, nocc_a))
-        ext_cor%t2b = 0.0_dp
+        ext_cor%t2b = 0.0_p
         if (.not. allocated(ext_cor%t2c)) &
             allocate(ext_cor%t2c(nunocc_b, nunocc_b, nocc_b, nocc_b))
-        ext_cor%t2c = 0.0_dp
+        ext_cor%t2c = 0.0_p
 
         associate(from_a=>excit%from_a, from_b=>excit%from_b, &
                 to_a=>excit%to_a, to_b=>excit%to_b)
 
 
             do i=1, size(ext_cor%doubles_proj, 1)
-                !print '(6i4)', ext_cor%twobody_confs(:,i)
+                ! Compute excitation
                 excit = get_excitation_spin_integrate(sys%nel, sys%basis, f_ref, ext_cor%doubles_conf(:,i))
-                if (excit%perm) then
-                    e_sign = -1
-                else
-                    e_sign = 1
-                endif
+                ! Get excitation sign
+                e_sign = 1
+                if (excit%perm) e_sign = -1
+
+                ! Shift numbers to match the system's array
                 to_a = to_a - sys%occ_a
                 to_b = to_b - sys%occ_b
 
@@ -395,6 +282,7 @@ contains
                 case(1)
                     ext_cor%t2b(to_b(1), to_a(1), from_b(1), from_a(1)) = &
                         ext_cor%doubles_proj(i) * e_sign
+
                 case(0)
                     ext_cor%t2c(to_b(2), to_b(1), from_b(2), from_b(1)) = &
                         ext_cor%doubles_proj(i) * e_sign
@@ -407,29 +295,32 @@ contains
 
     end subroutine update_t2_cluster
 
-    subroutine find_disc_t4(sys, cc, f_ref, c4_cnt, c4_confs, c_vec)
+    subroutine find_disc_t4(sys, cc, f_ref, c4_cnt, c4_hash, c_vec)
 
-        use const, only: i0, dp
+        use const, only: i0, p
         use determinants, only: decode_det
         use excitations, only: excit_t, create_excited_det
         use ext_cor_types, only: vec3_t
         use system, only: sys_t
         use cc_types, only: cc_t
+        use utils, only: next_comb
 
         type(sys_t), intent(in) :: sys
         type(cc_t), intent(inout) :: cc
         integer, intent(in) :: c4_cnt
-        integer(i0), allocatable, intent(in) :: c4_confs(:,:)
+        !integer(i0), allocatable, intent(in) :: c4_confs(:,:)
+        type(dictionary_t), intent(in) :: c4_hash
         integer(i0), intent(in) :: f_ref(sys%basis%string_len)
         type(vec3_t), intent(in) :: c_vec
 
         integer(i0) :: f_t4(sys%basis%string_len)
         type(excit_t) :: excit
         integer, parameter :: r = 4
-        integer :: elecs(sys%nel), virts(sys%nvirt)
+        integer :: elecs(sys%nel-sys%froz*2), virts(sys%nvirt)
         integer :: inds_elecs(r), inds_virts(r)
 
         integer :: i
+        logical :: done
         ! Debug
         integer :: cnt_eqs = 0
         integer :: cnt = 0
@@ -440,8 +331,8 @@ contains
         excit%nexcit = r
 
         ! Set electrons array
-        do i=1, sys%nel
-            elecs(i) = i
+        do i=1, sys%nel-sys%froz*2
+            elecs(i) = i + sys%froz*2
         enddo
 
         ! Set virts array
@@ -476,51 +367,32 @@ contains
                 if (t_spin .and. t_sym) then
                     ! Check existence
                     call create_excited_det(sys%basis, f_ref, excit, f_t4)
-                    t_exist = check_exists(f_t4, c4_confs, c4_cnt)
+                    ! [TODO] replace check exists with something that doesn't have linear scaling (say hash table)
+                    !t_exist = check_exists(f_t4, c4_confs, c4_cnt)
+                    t_exist = c4_hash%get(f_t4) /= 0
                     if (.not. t_exist) then
                         ! Contract
                         !call decode_det(sys%basis, f_t4, occ_list)
                         !print '(6i4)', occ_list
-                        call contract_t4(sys, cc, f_ref, f_t4, c_vec, 0, 1.0_dp)
+                        call contract_t4(sys, cc, f_ref, f_t4, c_vec, 0, 1.0_p)
                         cnt = cnt + 1
                     endif
                 endif
 
-                if (loop_combs(sys%nvirt, inds_virts, r)) exit virts_loop
+                ! Get next combination of virtual orbitals
+                call next_comb(sys%nvirt, inds_virts, r, done)
+                if (done) exit virts_loop
             enddo virts_loop
 
-            if (loop_combs(sys%nel, inds_elecs, r)) exit elecs_loop
+            ! Get next combination of occupied orbitals
+            call next_comb(sys%nel-sys%froz*2, inds_elecs, r, done)
+            if (done) exit elecs_loop
         enddo elecs_loop
 
         !print '(a,i15)', 'all quads', cnt
 
     end subroutine find_disc_t4
 
-    function loop_combs(nitems, inds, r) result(done)
-
-        logical :: done
-        integer, intent(in) :: nitems
-        integer, intent(inout) :: inds(:)
-        integer, intent(in) :: r
-        integer :: i, j
-
-        done = .false.
-
-        do i=r, 1, -1
-            if (inds(i) /= i + nitems - r) exit
-
-            if (i == 1) then
-                done = .true.
-                return
-            endif
-        enddo
-
-        inds(i) = inds(i) + 1
-        do j=i+1, r
-            inds(j) = inds(j-1) + 1
-        enddo
-
-    end function loop_combs
 
     function check_exists(f_t4, c4_confs, cnt_c4) result(res)
 
@@ -598,5 +470,4 @@ contains
 
     end function check_sym
 
-
-end module t4_generation
+end module process_t4

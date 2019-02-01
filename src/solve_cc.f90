@@ -106,7 +106,7 @@ contains
         use cc_types, only: cc_t
         use energy, only: calculate_left_energy
         use proc_pointers, only: update_ptr, calculate_energy_ptr
-        use hbar, only: add_twobody_hbar
+        use hbar_gen, only: add_twobody_hbar
         use update_lcc, only: update_l2
         use solver_types, only: conv_t
         use printing, only: io, print_date, print_iter_head
@@ -159,7 +159,7 @@ contains
 
     subroutine jacobi_iter(sys, run, cc, conv)
 
-        use const, only: p, t_unit, t_vecs_unit
+        use const, only: dp, p, t_unit, t_vecs_unit
         use diis, only: calc_diis, write_vecs, init_vecs
         use printing, only: io, print_iteration, print_date
         use cc_utils, only: residuum
@@ -168,6 +168,7 @@ contains
         use cc_utils, only: residuum, open_t4_files
         use proc_pointers, only: update_ptr, calculate_energy_ptr
         use solver_types, only: conv_t
+        use utils, only: get_walltime_sec
 
         type(sys_t), intent(in) :: sys
         type(run_t), intent(in) :: run
@@ -175,13 +176,14 @@ contains
 
         type(conv_t), intent(inout) :: conv
 
-        real(p) :: e_cor_new, energy_diff, prev_time
+        real(p) :: e_cor_new, energy_diff
+        real(dp) :: new_time, prev_time
         real(p) :: res
         integer :: iter
 
         ! Start main CC loop timing
         conv%failed = .false.
-        call cpu_time(prev_time)
+        prev_time = get_walltime_sec()
 
         call init_vecs(conv)
 
@@ -215,8 +217,10 @@ contains
             endif
 
             ! Print iteration information
-            call print_iteration(iter, e_cor_new, energy_diff, res, prev_time)
-            call cpu_time(prev_time)
+
+            new_time = get_walltime_sec()
+            call print_iteration(iter, e_cor_new, energy_diff, res, prev_time, new_time)
+            prev_time = new_time
 
 
             if (check_sig()) then

@@ -1,4 +1,11 @@
+! ccq
+
+! Developed in the Piecuch group at the Michigan State University.
+
 program main
+
+    ! ccq main program. This is the point of entrance when running
+    ! directly from the shell.
 
     use calc_driver, only: run_calcs
     use system, only: sys_t, run_t, ints_t
@@ -19,6 +26,7 @@ program main
     ! Initialize printing
     call init_print(run)
 
+    ! Print settings and info to the output
     call print_header(run%uuid)
     if (run%config%echo) call print_config(run%config)
 
@@ -27,6 +35,5 @@ program main
 
 
     call close_print()
-
 
 end program

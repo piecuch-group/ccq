@@ -1,5 +1,7 @@
 module parser
-    !    use printing
+
+    ! Module for parsing ccq input files and setting options
+
     implicit none
 
     interface
@@ -14,6 +16,13 @@ contains
 
     subroutine get_opts(sys, run)
 
+        ! Read command line options
+        ! In:
+        !    command line arguments from system shell
+        ! In/Out:
+        !    sys: system information
+        !    run: runtime information
+
         use system, only: sys_t, run_t
         use printing, only: print_help
         use errors, only: stop_all
@@ -27,15 +36,17 @@ contains
 
         character(len=255) :: tmp_arg
 
-        ! Initialize
+        ! Initialize uuid
         call gen_uuid(run%uuid)
-        ! [TODO] solve this
+
+        ! [TODO] create a better interface maybe
         run%uuid = trim(run%uuid(1:36))
         run%config%filename = ''
         run%output_file = ''
 
         arg_cnt = command_argument_count()
 
+        ! Print help and exit if no input file is given
         if (arg_cnt < 1) then
             call print_help()
         endif
@@ -62,7 +73,7 @@ contains
                         run%config%filename = tmp_arg
                         cycle
                     else
-                        call stop_all('get_opts', 'Filename not provided!')
+                        call stop_all('get_opts', 'Input filename not provided!')
                     endif
                 endif
 
@@ -80,6 +91,15 @@ contains
     end subroutine get_opts
 
     subroutine get_config(sys, run, cc)
+
+        ! Read the input config file. [TODO] probably convert this to a better
+        ! tech. Either AOTUS, f2py, or forpy
+
+        ! In/Out:
+        !     run: runtime configuration (specifically the config file path)
+        ! Out:
+        !     sys: system information
+        !     cc: coupled-cluster information
 
         use const, only: sp, dp, config_unit, line_len
         use system, only: sys_t, run_t, config_t
@@ -108,12 +128,19 @@ contains
         integer :: ios
 
 
+        ! Load input config file and store it in memory (to be printed
+        ! on the log if wanted)
         call load_config_file(run%config)
+
+        ! Set default options and parameters
         call set_default_options(sys, run, cc)
+
+        ! Get options and parameters required for each particular
+        ! calculation type.
         call get_calc_macros(sys, run, cc)
 
 
-        ! Default values
+        ! Initial values for the molecular system
         ! [TODO] find a better place for this
         nfroz = 0
         nocc_spin = -1
@@ -121,6 +148,7 @@ contains
         act_occ = 0
         act_unocc = 0
 
+        ! Parse config file
         do l_indx=1, run%config%file_size
             line = run%config%lines(l_indx)
 
@@ -130,7 +158,11 @@ contains
             ! Skip empty lines
             if (trim(line) == '') cycle
 
+            ! Find equal sign and separate keyword from value
             indx = scan(line, '=')
+
+            ! Load flag keywords (i.e. keywords that if present
+            ! represent a true value, if missing false)
             if (indx == 0 ) then
                 select case (line)
                 case ('restart', 'rest')
@@ -140,20 +172,25 @@ contains
                     run%config%echo = .true.
 
                 end select
+
             else
 
+                ! Parse options
                 option = trim(adjustl(line(1:indx-1)))
                 val = trim(adjustl(line(indx+1:)))
 
-                ! System options
+                ! Molecular system parameters.
+                ! All calues are loaded locally in order to be able to check
+                ! for errors. [TODO] improve
                 select case (option)
                 case ('core', 'nfroz', 'frozen', 'froz')
+                    ! This is in spin orbital form
                     read(val, *) nfroz
 
                 case ('nel', 'electrons')
                     read(val, *) nocc_spin
 
-                case ('nvir', 'virtuals')
+                case ('nvir', 'nvirt', 'virtuals')
                     read(val, *) nunocc_spin
 
                 case ('multiplicity', 'mult')
@@ -161,31 +198,36 @@ contains
 
                 end select
 
+                ! Load specific options based on calculation type.
+                ! run%calc_type should have been loaded in
+                ! get_calc_macros.
                 select case (run%calc_type)
-                case ('CCSD', 'CCSDT', 'CCSDTQ')
-                    call get_run_opts(sys, run, cc, option, val)
+                case ('CCSD', 'CCSDT', 'CCSDTQ', 'stoch-CC')
+                    call get_run_opts(run, option, val)
 
                 case ('CADFCIQMC', 'DCSD-MC')
-                    call get_run_opts(sys, run, cc, option, val)
+                    call get_run_opts(run, option, val)
                     call get_ext_cor_opts(sys, run, cc, option, val)
 
                 case ('ACC')
-                    call get_run_opts(sys, run, cc, option, val)
+                    call get_run_opts(run, option, val)
                     call get_acc_opts(sys, run, cc, option, val)
 
                 case ('CCSDt', 'CC(t;3)')
-                    call get_run_opts(sys, run, cc, option, val)
+                    call get_run_opts(run, option, val)
                     call get_act_opts(sys, run, cc, option, val)
 
                 case ('dev')
-                    call get_run_opts(sys, run, cc, option, val)
+                    ! This is a special macro that lets one set every
+                    ! available option. Use at your own discretion.
+                    call get_run_opts(run, option, val)
                     call get_ext_cor_opts(sys, run, cc, option, val)
                     call get_act_opts(sys, run, cc, option, val)
                     call get_acc_opts(sys, run, cc, option, val)
 
                 case default
-                    call stop_all('get_config', 'CONFIGURATION ERROR: calc_type not recognized or not found')
-
+                    ! If no calc_type is given, stop.
+                    call stop_all('get_config', 'CONFIGURATION ERROR: calc_type keyword not found')
 
                 end select
             endif
@@ -194,6 +236,7 @@ contains
 
         ! Update final numbers
         ! Convert spin orbital number to spatial
+        ! [TODO] move this to a better place
         sys%froz = nfroz / 2
         sys%occ_a = (nfroz + nocc_spin) / 2
         sys%occ_b = sys%occ_a - (sys%mult - 1) / 2
@@ -211,8 +254,9 @@ contains
 
 
         ! Error checks
+        ! [TODO] write a routine for this
         if (nocc_spin == -1 .or. nunocc_spin == -1) then
-            call stop_all('get_config', 'CONFIGURATION ERROR: nel and nvir keywords must be given.')
+            call stop_all('get_config', 'CONFIGURATION ERROR: nel and nvirt keywords must be given.')
         endif
 
         inquire(file=trim(run%onebody_file), exist=t_exists)
@@ -247,6 +291,16 @@ contains
 
     subroutine get_calc_macros(sys, run, cc)
 
+        ! Get calculation type from input file and set default
+        ! configurations and parameters
+        !
+        ! In/Out:
+        !     run: runtime information. Specifically the config file
+        ! Out:
+        !     sys: system information
+        !     run: runtime information
+        !     cc: CC information
+
         use const, only: sp, dp, line_len
         use system, only: sys_t, run_t
         use cc_types, only: cc_t
@@ -261,6 +315,7 @@ contains
 
         integer :: indx, l_indx
 
+        ! Loop over the config file lines searchinf for calc_type
         do l_indx=1, run%config%file_size
             line = run%config%lines(l_indx)
 
@@ -323,6 +378,15 @@ contains
                     run%lvl_t = .true.
                     run%lvl_q = .false.
 
+                case ('stoch-CC')
+                    run%calc_type = 'stoch-CC'
+                    run%act_ind_t = 0
+                    run%act_ind_q = 0
+
+                    run%lvl_t = .true.
+                    run%lvl_q = .false.
+                    run%stoch = .true.
+
                 case ('CCT3', 'CCt3', 'CC(t;3)')
                     run%calc_type = 'CC(t;3)'
                     run%sorted_ints = .true.
@@ -361,6 +425,17 @@ contains
     end subroutine get_calc_macros
 
     subroutine get_acc_opts(sys, run, cc, option, val)
+
+        ! Get ACC-type methods specific configuration parameters
+        !
+        ! In:
+        !     option: option keyword from the config file
+        !     val: option's value
+        ! Out:
+        !     sys: system information
+        !     run: runtime information
+        !     cc: CC information
+
         use const, only: sp, dp
         use errors, only: stop_all
         use system, only: sys_t, run_t
@@ -395,6 +470,17 @@ contains
     end subroutine get_acc_opts
 
     subroutine get_act_opts(sys, run, cc, option, val)
+
+        ! Get active-space-type calculation configuration parameters
+        !
+        ! In:
+        !     option: option keyword from the config file
+        !     val: option's value
+        ! Out:
+        !     sys: system information
+        !     run: runtime information
+        !     cc: CC information
+
         use const, only: sp, dp
         use errors, only: stop_all
         use system, only: sys_t, run_t
@@ -434,6 +520,17 @@ contains
     end subroutine get_act_opts
 
     subroutine get_ext_cor_opts(sys, run, cc, option, val)
+
+        ! Get externally correction configuration parameters
+        !
+        ! In:
+        !     option: option keyword from the config file
+        !     val: option's value
+        ! Out:
+        !     sys: system information
+        !     run: runtime information
+        !     cc: CC information
+
         use const, only: sp, dp
         use errors, only: stop_all
         use system, only: sys_t, run_t
@@ -463,16 +560,21 @@ contains
 
     end subroutine get_ext_cor_opts
 
-    subroutine get_run_opts(sys, run, cc, option, val)
+    subroutine get_run_opts(run, option, val)
 
-        use const, only: sp, dp
+        ! Get generic runtime information options
+        !
+        ! In:
+        !     option: option keyword from the config file
+        !     val: option's value
+        ! Out:
+        !     run: runtime information
+
+        use const, only: sp, p
         use errors, only: stop_all
-        use system, only: sys_t, run_t
-        use cc_types, only: cc_t
+        use system, only: run_t
 
-        type(sys_t), intent(inout) :: sys
         type(run_t), intent(inout) :: run
-        type(cc_t), intent(inout) :: cc
         character(len=*), intent(in) :: option
         character(len=*), intent(in) :: val
 
@@ -504,7 +606,7 @@ contains
                 read(val, *) run%tol
             else
                 if (itol > 0) print '(a)', 'CONFIGURATION WARNING: tolerance exponent is positive'
-                run%tol = 1.0_dp ** itol
+                run%tol = 10.0_p ** itol
             endif
 
 
@@ -535,6 +637,12 @@ contains
 
 
     subroutine load_config_file(config)
+
+        ! Load config file into memory
+        !
+        ! In/Out:
+        !    config: configuration data, including input filename,
+        !            input file contents, etc. (see system.f90)
 
         use const, only: line_len, config_unit
         use errors, only: stop_all
@@ -574,6 +682,13 @@ contains
     end subroutine load_config_file
 
     subroutine set_default_options(sys, run, cc)
+
+        ! Set default options and configuration parameters
+        !
+        ! In/Out:
+        !    sys: system information
+        !    run: runtime information
+        !    cc: cc information
 
         use const, only: sp, dp
         use system, only: sys_t, run_t

@@ -493,4 +493,26 @@ contains
 
     end function excitation_sign_qmc
 
+
+    subroutine shift_occ_list(froz, nel, occ_list)
+
+        integer, intent(in) :: froz
+        integer, intent(in) :: nel
+        integer, intent(inout) :: occ_list(:)
+
+        integer :: occ_list_aux(nel)
+        integer :: i
+
+        do i=1, froz
+            occ_list_aux(i) = i
+        enddo
+
+        do i=froz+1,nel
+            occ_list_aux(i) = occ_list(i-froz) + froz
+        enddo
+
+        occ_list = occ_list_aux
+
+    end subroutine shift_occ_list
+
 end module excitations
