@@ -258,7 +258,7 @@ contains
 
         ! From http://graphics.stanford.edu/~seander/bithacks.html.
 
-        t1 = ior(v, v-1) + 1
+        t1 = ior(v, v - 1_i0) + 1
         t2 = ishft(iand(t1,-t1)/iand(v,-v),-1) - 1
         w = ior(t1, t2)
 

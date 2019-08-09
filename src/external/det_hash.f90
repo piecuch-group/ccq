@@ -17,7 +17,7 @@ module det_hash
 
     private
 
-    public :: dictionary_t, murmurhash_bit_string
+    public :: dictionary_t, murmurhash_bit_string, hash_exist, get_val
 
     !> Single entry in the dictionary
     type entry_t
@@ -51,7 +51,7 @@ module det_hash
 
     interface
         ! Interfaces to hashing algorithms written in C.
-        function MurmurHash2(key, N, seed) result(hash) bind(c, name='MurmurHash2')
+        pure function MurmurHash2(key, N, seed) result(hash) bind(c, name='MurmurHash2')
             ! In:
             !    key: data to be hashed.
             !    seed: random(ish!) number to seed the hash.
@@ -70,7 +70,7 @@ module det_hash
 contains
 
     !function murmurhash_bit_string(f, N, seed) result(hash)
-    function murmurhash_bit_string(f, N) result(hash)
+    pure function murmurhash_bit_string(f, N) result(hash)
 
         ! Wrapper around MurmurHash2.
 
@@ -103,6 +103,81 @@ contains
 
     end function murmurhash_bit_string
 
+
+    ! Testing
+    ! [TMPDEBUG]
+    function hash_exist(s, dict_size, dict) result(exists)
+
+        logical :: exists
+
+        integer(i0), intent(in) :: s(:)
+        integer, intent(in) :: dict_size
+        type(dictionary_t), intent(in) :: dict
+
+        integer :: string_len
+        integer :: hash
+        integer :: r
+        integer :: i
+
+        integer :: b_idx
+
+        exists = .true.
+
+        string_len = size(s)
+        hash = int(murmurhash_bit_string(s, string_len))
+        r = modulo(hash, dict_size) + 1
+
+        if (dict%buckets(r)%current_size == 0) then
+            exists = .false.
+            return
+        end if
+
+        exists = .false.
+        do i = 1, dict%buckets(r)%current_size
+            if (all(dict%buckets(r)%entries(i)%key == s)) then
+                exists = .true.
+                exit
+            end if
+        end do
+
+    end function hash_exist
+
+    ! Testing
+    ! [TMPDEBUG]
+    pure function get_val(s, dict_size, dict) result(val)
+
+        integer :: val
+
+        integer(i0), intent(in) :: s(:)
+        integer, intent(in) :: dict_size
+        type(dictionary_t), intent(in) :: dict
+
+        integer :: string_len
+        integer :: hash
+        integer :: r
+        integer :: i
+
+        integer :: b_idx
+
+        string_len = size(s)
+        hash = int(murmurhash_bit_string(s, string_len))
+        r = modulo(hash, dict_size) + 1
+
+        if (dict%buckets(r)%current_size == 0) then
+            val = 0
+            return
+        end if
+
+        val = 0
+        do i = 1, dict%buckets(r)%current_size
+            if (all(dict%buckets(r)%entries(i)%key == s)) then
+                val = dict%buckets(r)%entries(i)%value
+                return
+            end if
+        end do
+
+    end function get_val
+
     !> djb2 hash function
     !!
     !! \param this the dictionary_t object
@@ -113,10 +188,12 @@ contains
     class(dictionary_t), intent(in) :: this
         integer(i0), intent(in) :: s(:)
         integer :: string_len
+        integer :: hash
         integer :: r
 
         string_len = size(s)
-        r = modulo(murmurhash_bit_string(s, string_len), this%dict_size) + 1
+        hash = int(murmurhash_bit_string(s, string_len))
+        r = modulo(hash, this%dict_size) + 1
 
     end function djb2
 
@@ -134,7 +211,7 @@ contains
 
         integer :: h, i, b_idx
 
-        h = this%djb2(k) + 1
+        h = this%djb2(k)
 
         b_idx = this%buckets(h)%find(k)
 
@@ -259,7 +336,9 @@ contains
 
         integer :: h, b_idx
 
-        h = this%djb2(k) + 1
+        integer :: string_len
+
+        h = this%djb2(k)
 
         b_idx = this%buckets(h)%find(k)
 

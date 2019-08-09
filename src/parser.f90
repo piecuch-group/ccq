@@ -43,6 +43,7 @@ contains
         run%uuid = trim(run%uuid(1:36))
         run%config%filename = ''
         run%output_file = ''
+        run%h5_master_file = 'master_'//trim(run%uuid)//'.h5'
 
         arg_cnt = command_argument_count()
 

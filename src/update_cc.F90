@@ -6,6 +6,7 @@ module update_cc
 contains
 
     subroutine update_clusters_t4(sys, run, cc)
+        ! Update all cluster operators up to T_4 during the Jacobi iteration
 
         use const, only: sp, p, ta, tb, tc, td, te
         use system, only: sys_t, run_t
@@ -305,6 +306,7 @@ contains
             part_ints_a_unit, part_ints_b_unit, part_ints_c_unit
         use system, only: sys_t, run_t
         use cc_types, only: cc_t
+        use errors, only: stop_all
 
         implicit none
 
@@ -345,6 +347,10 @@ contains
         real(p), allocatable :: ht3c4(:,:,:,:,:,:)
 
         real(p), allocatable :: ht3d(:,:,:,:,:,:)
+
+#ifdef DISABLE_OPT_T3
+        call stop_all('update_clusters_t3_opt', 'ERROR: Feature not compiled.')
+#else
 
         ! Compatibility vars
         ! [TODO] all this has to be removed
@@ -2139,6 +2145,8 @@ contains
             deallocate(ht3d,ht3c2,ht3c3)
 
         end associate
+
+#endif
 
     end subroutine update_clusters_t3_opt
 

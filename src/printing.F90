@@ -69,6 +69,11 @@ contains
             'Compiler', 'ifort ', __INTEL_COMPILER
 #endif
 
+#ifdef CPPFLAGS
+        write(io,'(2x,a20,1x,a)') &
+            'CPP Flags', CPPFLAGS
+#endif
+
 #ifdef FLAGS
         write(io,'(2x,a20,1x,a)') &
             'Flags', FLAGS

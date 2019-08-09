@@ -5,7 +5,7 @@ LD := $(FC)
 
 # Flags
 F90_MOD_FLAG := -J
-CPPFLAGS := -DUSE_POPCNT -DENABLE_HDF5
+CPPFLAGS := -DUSE_POPCNT -DENABLE_HDF5 -DDISABLE_OPT_T3
 
 FFLAGS := -O3 -fdefault-integer-8 -m64 -I${MKLROOT}/include -I/usr/include -ffree-line-length-none -ffixed-line-length-132 -mtune=native
 FFLAGS_DEBUG := -O0 -fcheck=all -fdefault-integer-8 -m64 -I${MKLROOT}/include -I/usr/include -fbacktrace -mtune=native -ffixed-line-length-132 -ffree-line-length-none -mpopcnt -g

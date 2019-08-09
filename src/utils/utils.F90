@@ -124,7 +124,7 @@ contains
 
     end function factorial_combination_1
 
-    subroutine next_comb(nitems, inds, r, done)
+    pure subroutine next_comb(nitems, inds, r, done)
 
         ! Generate the next combination of a selection of r items
         ! in the inds array. This subroutine was translated from
@@ -598,21 +598,6 @@ contains
 
     end function count_file_lines
 
-!--- System output ---
-
-    function get_walltime_sec() result(res)
-
-        use const, only: int_64, dp
-
-        real(dp) :: res
-        integer(int_64) :: cnt, cnt_rate, cnt_max
-
-        call system_clock(cnt, cnt_rate, cnt_max)
-
-        res = real(cnt / cnt_rate, dp)
-
-    end function get_walltime_sec
-
 !--- Informative output ---
 
     subroutine print_matrix(matrix)
@@ -635,5 +620,21 @@ contains
         end do
 
     end subroutine print_matrix
+
+!--- Timing ---
+
+    function get_wall_time() result(t)
+
+        use const, only: int_64, p
+
+        real(p) :: t
+
+        integer(int_64) :: t_int, count_rate, count_max
+
+        call system_clock(t_int, count_rate, count_max)
+
+        t = real(t_int, p) / real(count_rate, p)
+
+    end function get_wall_time
 
 end module utils

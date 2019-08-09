@@ -4,40 +4,33 @@ module cc_utils
 
 contains
 
-    function residuum(iter, diis_space, vecs_unit, vec_size)
+    function residuum(conv, iter, diis_space)
 
         use const, only: p
+        use solver_types, only: conv_t
 
+        use hdf5_io, only: get_chunk_residuum
+
+
+        type(conv_t), intent(in) :: conv
         integer, intent(in) :: iter
         integer, intent(in) :: diis_space
-        integer, intent(in) :: vecs_unit
-        integer, intent(in) :: vec_size
 
         real(p) :: residuum
-        real(p), allocatable :: vec_aux(:,:)
-        real(p) :: ddot
-        integer :: i, indx_rec
+        integer :: indx1, indx2
 
 
-        allocate(vec_aux(vec_size, 2))
+        indx1 = mod(iter - 1, diis_space + 1)
+        if (indx1 == 0) indx1 = diis_space + 1
 
-        do i=0, 1
+        indx2 = mod(iter, diis_space + 1)
+        if (indx2 == 0) indx2 = diis_space + 1
 
-            indx_rec = mod(iter - i, diis_space + 1)
-            if (indx_rec == 0) indx_rec = diis_space + 1
 
-            if (iter - i == 0) then
-                vec_aux(:,i+1) = 0
-            else
-                read(vecs_unit, rec=indx_rec) vec_aux(:,i+1)
-            endif
+        residuum = get_chunk_residuum(conv%filename, conv%iter_dset_name, &
+             indx1, indx2)
 
-        enddo
-
-        vec_aux(:,1) = vec_aux(:,2) - vec_aux(:,1)
-        residuum = ddot(vec_size, vec_aux(:,1), 1, vec_aux(:,1), 1)
-
-        deallocate(vec_aux)
+        !residuum = 0.0_p
 
         residuum = dsqrt(residuum)
 
@@ -286,6 +279,50 @@ contains
 
     end subroutine t4_aaab_to_t4_abbb
 
+    subroutine antisymmetrize_t2(sys, t2a, t2c)
+
+        use const, only: p
+        use system, only: sys_t
+
+        type(sys_t), intent(in) :: sys
+        real(p), intent(inout) :: t2a(:,:,:,:), t2c(:,:,:,:)
+
+        integer :: a, b, c
+        integer :: i, j, k
+
+
+        associate(froz=>sys%froz, occ_a=>sys%occ_a, occ_b=>sys%occ_b, total=>sys%orbs)
+
+
+            do i=froz+1, occ_a
+                do j=i+1, occ_a
+                    do a=1, total-occ_a
+                        do b=a+1, total-occ_a
+                            t2a(b,a,i,j)=-t2a(b,a,j,i) !(ij)
+                            t2a(a,b,j,i)=-t2a(b,a,j,i) !(ab)
+                            t2a(a,b,i,j)=t2a(b,a,j,i) !(ab)(ij)
+                        enddo
+                    enddo
+                enddo
+            enddo
+
+            do i=froz+1, occ_b
+                do j=i+1, occ_b
+                    do a=1, total-occ_b
+                        do b=a+1, total-occ_b
+                            t2c(b,a,i,j)=-t2c(b,a,j,i) !(ij)
+                            t2c(a,b,j,i)=-t2c(b,a,j,i) !(ab)
+                            t2c(a,b,i,j)=t2c(b,a,j,i) !(ab)(ij)
+                        enddo
+                    enddo
+                enddo
+            enddo
+
+        end associate
+
+    end subroutine antisymmetrize_t2
+
+
     subroutine antisymmetrize(sys, c_vec)
 
         ! Antisymmetrize arrays
@@ -463,13 +500,14 @@ contains
 
     end subroutine antisymmetrize
 
-    subroutine get_t_sizes(sys, cc)
+    subroutine get_t_sizes(sys, cc, calc_type)
 
         use system, only: sys_t
         use cc_types, only: cc_t
 
         type(sys_t), intent(in) :: sys
         type(cc_t), intent(inout) :: cc
+        character(len=*), intent(in) :: calc_type
 
         integer :: k1, k2, k3, k4
         integer :: k1a, k1b, k2a, k2b, k2c, k3a, k3b, k3c, k3d, t_size
@@ -518,9 +556,26 @@ contains
         t_size = t_size+K3*K4*K3*K1*K2*K1
         cc%pos(9) = t_size+1
 
-        ! T total
-        cc%t_size = t_size+K4*K4*K3*K2*K2*K1
-        cc%pos(10) = cc%t_size+1
+        ! T max
+        t_size = t_size+K4*K4*K3*K2*K2*K1
+        cc%pos(10) = t_size+1
+
+        ! [TODO] make this work. Currently, everything is being passed to the
+        ! update t4 routine which requires passing triples even though they
+        ! might not be needed
+        select case (trim(calc_type))
+        case ('CCSD')
+            !cc%t_size = cc%pos(6) - 1
+            cc%t_size = cc%pos(10) - 1
+
+        case ('CCSDT', 'CCSDTQ')
+            cc%t_size = cc%pos(10) - 1
+
+        case default
+            cc%t_size = cc%pos(10) - 1
+
+        end select
+
 
     end subroutine get_t_sizes
 

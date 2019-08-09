@@ -90,12 +90,16 @@ contains
                 enddo
             endif
 
-            do i=froz+1,occ_a
-                do j=i+1,occ_a
-                    do k=j+1,occ_a
-                        do a=occ_a+1,total
-                            do b=a+1,total
-                                do c=b+1,total
+            !$omp parallel default(shared), private(i, j, k, a, b, c, ex_orbs)
+
+            !$omp do
+            do a=occ_a+1,total
+                do b=a+1,total
+                    do c=b+1,total
+
+                        do i=froz+1,occ_a
+                            do j=i+1,occ_a
+                                do k=j+1,occ_a
 
                                     ex_orbs(1) = a
                                     ex_orbs(2) = b
@@ -125,16 +129,20 @@ contains
                                 enddo
                             enddo
                         enddo
+
                     enddo
                 enddo
             enddo
+            !$omp end do
 
-            do i=froz+1,occ_a
-                do j=i+1,occ_a
-                    do k=froz+1,occ_b
-                        do a=occ_a+1,total
-                            do b=a+1,total
-                                do c=occ_b+1,total
+            !$omp do
+            do a=occ_a+1,total
+                do b=a+1,total
+                    do c=occ_b+1,total
+
+                        do i=froz+1,occ_a
+                            do j=i+1,occ_a
+                                do k=froz+1,occ_b
 
                                     ex_orbs(1) = a
                                     ex_orbs(2) = b
@@ -156,21 +164,26 @@ contains
                                 enddo
                             enddo
                         enddo
+
                     enddo
                 enddo
             enddo
+            !$omp end do
 
-            if (rhf) then
-                call t3_aab_to_t3_abb(sys, t_vec%o3_aab, t_vec%o3_abb)
-                t_vec%o3_bbb = t_vec%o3_aaa
-            else
+            !$omp end parallel
 
-                do i=froz+1,occ_a
-                    do j=froz+1,occ_b
-                        do k=j+1,occ_b
-                            do a=occ_a+1,total
-                                do b=occ_b+1,total
-                                    do c=b+1,total
+            if (.not. rhf) then
+
+                !$omp parallel default(shared), private(i, j, k, a, b, c, ex_orbs)
+
+                !$omp do
+                do a=occ_a+1,total
+                    do b=occ_b+1,total
+                        do c=b+1,total
+
+                            do i=froz+1,occ_a
+                                do j=froz+1,occ_b
+                                    do k=j+1,occ_b
 
                                         ex_orbs(1) = a
                                         ex_orbs(2) = b
@@ -192,16 +205,20 @@ contains
                                     enddo
                                 enddo
                             enddo
+
                         enddo
                     enddo
                 enddo
+                !$omp end do
 
-                do i=froz+1,occ_b
-                    do j=i+1,occ_b
-                        do k=j+1,occ_b
-                            do a=occ_b+1,total
-                                do b=a+1,total
-                                    do c=b+1,total
+                !$omp do
+                do a=occ_b+1,total
+                    do b=a+1,total
+                        do c=b+1,total
+
+                            do i=froz+1,occ_b
+                                do j=i+1,occ_b
+                                    do k=j+1,occ_b
 
                                         ex_orbs(1) = a
                                         ex_orbs(2) = b
@@ -231,16 +248,24 @@ contains
                                     enddo
                                 enddo
                             enddo
+
                         enddo
                     enddo
                 enddo
+                !$omp end do
+
+                !$omp end parallel
+
+            else
+                call t3_aab_to_t3_abb(sys, t_vec%o3_aab, t_vec%o3_abb)
+                t_vec%o3_bbb = t_vec%o3_aaa
             endif
 
         end associate
 
     end subroutine analyze_t3
 
-    subroutine analyze_t4_aaaa(c_vec, excit, c4, t4)
+    pure function analyze_t4_aaaa(c_vec, excit, c4) result(t4_amp)
 
         ! Perform the cluster analysis
         !
@@ -254,13 +279,14 @@ contains
         use excitations, only: excit_t
         use ext_cor_types, only: vec3_t
 
+        ! T amplitudes
+        real(dp) :: t4_amp
+
         ! CI coefficients
         type(vec3_t), intent(in) :: c_vec
         real(dp), intent(in) :: c4
         type(excit_t), intent(in) :: excit
 
-        ! T amplitudes
-        real(dp), intent(inout) :: t4
 
         ! Indices
         integer :: i, j, k, l
@@ -285,7 +311,7 @@ contains
                 c3_aaa=>c_vec%o3_aaa, c3_aab=>c_vec%o3_aab, &
                 c3_abb=>c_vec%o3_abb, c3_bbb=>c_vec%o3_bbb)
 
-            t4 = (c4 &
+            t4_amp = (c4 &
                 ! -C_1 * C_3
             -c1_a(a,i)*c3_aaa(b,c,d,j,k,l) &
                 +c1_a(a,j)*c3_aaa(b,c,d,i,k,l) &
@@ -421,9 +447,9 @@ contains
 
         end associate
 
-    end subroutine analyze_t4_aaaa
+    end function analyze_t4_aaaa
 
-    subroutine analyze_t4_aaab(c_vec, excit, c4, t4)
+    pure function analyze_t4_aaab(c_vec, excit, c4) result(t4_amp)
 
         ! Perform the cluster analysis
         !
@@ -437,13 +463,13 @@ contains
         use excitations, only: excit_t
         use ext_cor_types, only: vec3_t
 
+        ! T amplitudes
+        real(dp) :: t4_amp
+
         ! CI coefficients
         type(vec3_t), intent(in) :: c_vec
         real(dp), intent(in) :: c4
         type(excit_t), intent(in) :: excit
-
-        ! T amplitudes
-        real(dp), intent(inout) :: t4
 
         ! Indices
         integer :: i, j, k, l
@@ -469,7 +495,7 @@ contains
                 c3_aaa=>c_vec%o3_aaa, c3_aab=>c_vec%o3_aab, &
                 c3_abb=>c_vec%o3_abb, c3_bbb=>c_vec%o3_bbb)
 
-            t4 = (c4 &
+            t4_amp = (c4 &
                 -c1_a(a,i)*c3_aab(b,c,d,j,k,l) &
                 +c1_a(a,j)*c3_aab(b,c,d,i,k,l) &
                 +c1_a(a,k)*c3_aab(b,c,d,j,i,l) &
@@ -525,9 +551,9 @@ contains
 
         end associate
 
-    end subroutine analyze_t4_aaab
+    end function analyze_t4_aaab
 
-    subroutine analyze_t4_aabb(c_vec, excit , c4, t4)
+    pure function analyze_t4_aabb(c_vec, excit , c4) result(t4_amp)
 
         ! Perform the cluster analysis
         !
@@ -541,13 +567,14 @@ contains
         use excitations, only: excit_t
         use ext_cor_types, only: vec3_t
 
+        ! T amplitudes
+        real(dp) :: t4_amp
+
         ! CI coefficients
         type(vec3_t), intent(in) :: c_vec
         real(dp), intent(in) :: c4
         type(excit_t), intent(in) :: excit
 
-        ! T amplitudes
-        real(dp), intent(inout) :: t4
 
         ! Indices
         integer :: i, j, k, l
@@ -630,12 +657,12 @@ contains
         !endif
 
 
-        t4=c4 + c1c3 + c12c2 + c22 + c13
+        t4_amp = c4 + c1c3 + c12c2 + c22 + c13
         !print '(f13.10)', t4_aabb(a,b,c,d,i,j,k,l)
 
-    end subroutine analyze_t4_aabb
+    end function analyze_t4_aabb
 
-    subroutine analyze_t4_abbb(c_vec, excit, c4, t4)
+    pure function analyze_t4_abbb(c_vec, excit, c4) result(t4_amp)
 
         ! Perform the cluster analysis
         !
@@ -649,13 +676,14 @@ contains
         use excitations, only: excit_t
         use ext_cor_types, only: vec3_t
 
+        ! T amplitudes
+        real(dp) :: t4_amp
+
         ! CI coefficients
         type(vec3_t), intent(in) :: c_vec
         real(dp), intent(in) :: c4
         type(excit_t), intent(in) :: excit
 
-        ! T amplitudes
-        real(dp), intent(inout) :: t4
 
         ! Indices
         integer :: i, j, k, l
@@ -679,7 +707,7 @@ contains
                 c3_aaa=>c_vec%o3_aaa, c3_aab=>c_vec%o3_aab, &
                 c3_abb=>c_vec%o3_abb, c3_bbb=>c_vec%o3_bbb)
 
-            t4 = (c4 &
+            t4_amp = (c4 &
                 -c1_a(a,i)*c3_bbb(b,c,d,j,k,l) &
                 -c1_b(d,l)*c3_abb(a,b,c,i,j,k) &
                 +c1_b(d,j)*c3_abb(a,b,c,i,l,k) &
@@ -735,9 +763,9 @@ contains
 
         end associate
 
-    end subroutine analyze_t4_abbb
+    end function analyze_t4_abbb
 
-    subroutine analyze_t4_bbbb(c_vec, excit, c4, t4)
+    pure function analyze_t4_bbbb(c_vec, excit, c4) result(t4_amp)
 
         ! Perform the cluster analysis
         !
@@ -751,13 +779,14 @@ contains
         use excitations, only: excit_t
         use ext_cor_types, only: vec3_t
 
+        ! T amplitudes
+        real(dp) :: t4_amp
+
         ! CI coefficients
         type(vec3_t), intent(in) :: c_vec
         real(dp), intent(in) :: c4
         type(excit_t), intent(in) :: excit
 
-        ! T amplitudes
-        real(dp), intent(inout) :: t4
 
         ! Indices
         integer :: i, j, k, l
@@ -781,7 +810,7 @@ contains
                 c3_aaa=>c_vec%o3_aaa, c3_aab=>c_vec%o3_aab, &
                 c3_abb=>c_vec%o3_abb, c3_bbb=>c_vec%o3_bbb)
 
-            t4 = &
+            t4_amp = &
                 (c4 &
                 -c1_b(a,i)*c3_bbb(b,c,d,j,k,l) &
                 +c1_b(a,j)*c3_bbb(b,c,d,i,k,l) &
@@ -916,6 +945,6 @@ contains
 
         end associate
 
-    end subroutine analyze_t4_bbbb
+    end function analyze_t4_bbbb
 
 end module cluster_analysis

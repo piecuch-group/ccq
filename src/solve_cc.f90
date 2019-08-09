@@ -66,13 +66,21 @@ contains
         ! externally corrected calculations
         if (run%ext_cor) then
             conv%vec_size = cc%pos(6) - 1
+        ! [TODO] this is only temporal for saving memory. Should be
+        ! moved to the calculation init
+        else if (trim(run%calc_type) == 'CCSD') then
+            conv%vec_size = cc%pos(6) - 1
         else
             conv%vec_size = cc%t_size
         endif
 
         ! Load convergence pointers. These are used to allow the Jacobi
         ! iterator to work on any method
+
         conv%vec_ptr => cc%t_vec
+        conv%filename = run%h5_master_file
+        conv%iter_dset_name = 'cc_iter_mat'
+        conv%vec_dset_name = 't_vec'
         conv%vec_unit = t_unit
         conv%vecs_unit = t_vecs_unit
 
@@ -138,6 +146,9 @@ contains
         ! Load convergence pointers. These are used to allow the Jacobi
         ! iterator to work on any method
         conv%vec_ptr => cc%l_vec
+        conv%filename = run%h5_master_file
+        conv%iter_dset_name = 'lcc_iter_mat'
+        conv%vec_dset_name = 'l_vec'
         conv%vec_unit = l_unit
         conv%vecs_unit = l_vecs_unit
 
@@ -168,7 +179,7 @@ contains
         use cc_utils, only: residuum, open_t4_files
         use proc_pointers, only: update_ptr, calculate_energy_ptr
         use solver_types, only: conv_t
-        use utils, only: get_walltime_sec
+        use utils, only: get_wall_time
 
         type(sys_t), intent(in) :: sys
         type(run_t), intent(in) :: run
@@ -183,9 +194,9 @@ contains
 
         ! Start main CC loop timing
         conv%failed = .false.
-        prev_time = get_walltime_sec()
+        prev_time = get_wall_time()
 
-        call init_vecs(conv)
+        call init_vecs(conv, run%diis_space)
 
         do iter=1, run%max_iter
 
@@ -208,7 +219,7 @@ contains
             call write_vecs(conv, iter, run%diis_space)
 
             ! Calculate residuum
-            res = residuum(iter, run%diis_space, conv%vecs_unit, conv%vec_size)
+            res = residuum(conv, iter, run%diis_space)
 
             ! Do DIIS
             if (mod(iter, run%diis_space + 1) == 0) then
@@ -218,7 +229,7 @@ contains
 
             ! Print iteration information
 
-            new_time = get_walltime_sec()
+            new_time = get_wall_time()
             call print_iteration(iter, e_cor_new, energy_diff, res, prev_time, new_time)
             prev_time = new_time
 

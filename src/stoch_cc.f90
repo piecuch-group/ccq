@@ -47,7 +47,7 @@ contains
         call init_hbar(sys, cc, 3)
 
         ! [TODO] invoke actual contraction
-        call update_stoch_hbar(sys, cc, run)
+        !call update_stoch_hbar(sys, cc, run)
         call contract_h_slater(sys, cc, t3_amps_in, t3_amps_out)
         call contract_hbar_slater(sys, cc, t3_amps_in, t3_amps_out)
         call dealloc_hbar(cc)
@@ -160,8 +160,8 @@ contains
         use system, only: sys_t
         use cc_types, only: cc_t
 
-        use debug_tools, only: debug_t_vector
-!
+        !use debug_tools, only: debug_t_vector
+
         type(sys_t), intent(in) :: sys
         type(cc_t), intent(in) :: cc
         real(p), allocatable, intent(in) :: t3_amps_in(:)
@@ -186,7 +186,7 @@ contains
         cc_energy = calculate_unsorted_energy(sys, cc)
 
         ! [TMPDEBUG]
-        call debug_t_vector(sys, cc)
+        !call debug_t_vector(sys, cc)
         !occ_list = (/1,2,3,4/)
         !unocc_list = (/5,6,7,8/)
         occ_list = (/4,5,6,7/)
@@ -749,41 +749,41 @@ contains
         !enddo
 
 
-        v3(sys%occ_a+1:sys%orbs, sys%occ_a+1:sys%orbs, sys%occ_a+1:sys%orbs, &
-            sys%froz+1:sys%occ_a, sys%froz+1:sys%occ_a, sys%froz+1:sys%occ_a) &
-            => t3_vec_tmp(cc%pos(6):cc%pos(7)-1)
+        !v3(sys%occ_a+1:sys%orbs, sys%occ_a+1:sys%orbs, sys%occ_a+1:sys%orbs, &
+        !    sys%froz+1:sys%occ_a, sys%froz+1:sys%occ_a, sys%froz+1:sys%occ_a) &
+        !    => t3_vec_tmp(cc%pos(6):cc%pos(7)-1)
 
-        call t3A_update_stoch(N0,N1,N2,N3,K1,K2,K3,K4,0.0_p,V3, &
-            sys%ints%f_a,sys%ints%f_b,sys%ints%v_aa,sys%ints%v_bb,sys%ints%v_ab, &
-            t(K1A),t(K1B),t(K2A),t(K2B),t(K2C), &
-            t(k3a),t(k3b),t(k3c),t(k3d),cc%stoch%o3)
+        !call t3A_update_stoch(N0,N1,N2,N3,K1,K2,K3,K4,0.0_p,V3, &
+        !    sys%ints%f_a,sys%ints%f_b,sys%ints%v_aa,sys%ints%v_bb,sys%ints%v_ab, &
+        !    t(K1A),t(K1B),t(K2A),t(K2B),t(K2C), &
+        !    t(k3a),t(k3b),t(k3c),t(k3d),cc%stoch%o3)
 
-        v3(sys%occ_b+1:sys%orbs, sys%occ_a+1:sys%orbs, sys%occ_a+1:sys%orbs, &
-            sys%froz+1:sys%occ_b, sys%froz+1:sys%occ_a, sys%froz+1:sys%occ_a) &
-            => t3_vec_tmp(cc%pos(7):cc%pos(8)-1)
+        !v3(sys%occ_b+1:sys%orbs, sys%occ_a+1:sys%orbs, sys%occ_a+1:sys%orbs, &
+        !    sys%froz+1:sys%occ_b, sys%froz+1:sys%occ_a, sys%froz+1:sys%occ_a) &
+        !    => t3_vec_tmp(cc%pos(7):cc%pos(8)-1)
 
-        call t3B_update_stoch(N0,N1,N2,N3,K1,K2,K3,K4,0.0_p,V3, &
-            sys%ints%f_a,sys%ints%f_b,sys%ints%v_aa,sys%ints%v_bb,sys%ints%v_ab, &
-            t(K1A),t(K1B),t(K2A),t(K2B),t(K2C), &
-            t(k3a),t(k3b),t(k3c),t(k3d),cc%stoch%o3)
+        !call t3B_update_stoch(N0,N1,N2,N3,K1,K2,K3,K4,0.0_p,V3, &
+        !    sys%ints%f_a,sys%ints%f_b,sys%ints%v_aa,sys%ints%v_bb,sys%ints%v_ab, &
+        !    t(K1A),t(K1B),t(K2A),t(K2B),t(K2C), &
+        !    t(k3a),t(k3b),t(k3c),t(k3d),cc%stoch%o3)
 
-        v3(sys%occ_b+1:sys%orbs, sys%occ_b+1:sys%orbs, sys%occ_a+1:sys%orbs, &
-            sys%froz+1:sys%occ_b, sys%froz+1:sys%occ_b, sys%froz+1:sys%occ_a) &
-            => t3_vec_tmp(cc%pos(8):cc%pos(9)-1)
+        !v3(sys%occ_b+1:sys%orbs, sys%occ_b+1:sys%orbs, sys%occ_a+1:sys%orbs, &
+        !    sys%froz+1:sys%occ_b, sys%froz+1:sys%occ_b, sys%froz+1:sys%occ_a) &
+        !    => t3_vec_tmp(cc%pos(8):cc%pos(9)-1)
 
-        call t3C_update_stoch(N0,N1,N2,N3,K1,K2,K3,K4,0.0_p,V3, &
-            sys%ints%f_a,sys%ints%f_b,sys%ints%v_aa,sys%ints%v_bb,sys%ints%v_ab, &
-            t(K1A),t(K1B),t(K2A),t(K2B),t(K2C), &
-            t(k3a),t(k3b),t(k3c),t(k3d),cc%stoch%o3)
+        !call t3C_update_stoch(N0,N1,N2,N3,K1,K2,K3,K4,0.0_p,V3, &
+        !    sys%ints%f_a,sys%ints%f_b,sys%ints%v_aa,sys%ints%v_bb,sys%ints%v_ab, &
+        !    t(K1A),t(K1B),t(K2A),t(K2B),t(K2C), &
+        !    t(k3a),t(k3b),t(k3c),t(k3d),cc%stoch%o3)
 
-        v3(sys%occ_b+1:sys%orbs, sys%occ_b+1:sys%orbs, sys%occ_b+1:sys%orbs, &
-            sys%froz+1:sys%occ_b, sys%froz+1:sys%occ_b, sys%froz+1:sys%occ_b) &
-            => t3_vec_tmp(cc%pos(9):cc%pos(10)-1)
+        !v3(sys%occ_b+1:sys%orbs, sys%occ_b+1:sys%orbs, sys%occ_b+1:sys%orbs, &
+        !    sys%froz+1:sys%occ_b, sys%froz+1:sys%occ_b, sys%froz+1:sys%occ_b) &
+        !    => t3_vec_tmp(cc%pos(9):cc%pos(10)-1)
 
-        call t3D_update_stoch(N0,N1,N2,N3,K1,K2,K3,K4,0.0_p,V3, &
-            sys%ints%f_a,sys%ints%f_b,sys%ints%v_aa,sys%ints%v_bb,sys%ints%v_ab, &
-            t(K1A),t(K1B),t(K2A),t(K2B),t(K2C), &
-            t(k3a),t(k3b),t(k3c),t(k3d),cc%stoch%o3)
+        !call t3D_update_stoch(N0,N1,N2,N3,K1,K2,K3,K4,0.0_p,V3, &
+        !    sys%ints%f_a,sys%ints%f_b,sys%ints%v_aa,sys%ints%v_bb,sys%ints%v_ab, &
+        !    t(K1A),t(K1B),t(K2A),t(K2B),t(K2C), &
+        !    t(k3a),t(k3b),t(k3c),t(k3d),cc%stoch%o3)
 
     end subroutine update_stoch_t1_t2
 

@@ -26,7 +26,7 @@ contains
         use const, only: p
         use printing, only: print_calc_params, print_date, print_summary
 
-        use ext_cor, only: ext_cor_driver
+        use external_correction, only: ext_cor_driver
         use solver, only: solve_cc, solve_lcc
         use hbar_gen, only: hbar2
         use mm_correct, only: crcc23
@@ -88,6 +88,7 @@ contains
         use system, only: sys_t, run_t
         use cc_utils, only: open_t4_files
         use cc_types, only: cc_t, init_p_space_slater
+        use hdf5_io, only: init_h5_file
         use integrals, only: load_ints, load_sorted_ints
         use basis_types, only: init_basis_strings
         use excitations, only: init_excitations
@@ -101,7 +102,7 @@ contains
         if (run%sorted_ints) then
             call get_t_sizes_act(sys, cc)
         else
-            call get_t_sizes(sys, cc)
+            call get_t_sizes(sys, cc, run%calc_type)
         endif
 
         ! Load integrals
@@ -113,6 +114,9 @@ contains
         ! Initialize determinant and excitation systems
         call init_basis_strings(sys%basis)
         call init_excitations(sys%basis)
+
+        ! Initialize HDF5 master file
+        call init_h5_file(run%h5_master_file)
 
         ! Initialize vectors
         if (run%lvl_q) call open_t4_files(sys, run)
@@ -173,6 +177,7 @@ contains
 
         use const, only: p, t_unit, l_unit
         use errors, only: stop_all
+        use hdf5_io, only: init_dset
         use system, only: run_t
         use cc_types, only: cc_t
 
@@ -187,6 +192,12 @@ contains
 
             ! Open binary file
             open(t_unit,file="t_vec_"//trim(run%uuid)//".bin",form='unformatted')
+            ! [TODO] this should not be here. The proper way of initializing vectors should be prepared
+            if (run%calc_type == 'CCSD' .or. run%ext_cor) then
+                call init_dset(run%h5_master_file, 't_vec', [cc%pos(6) - 1])
+            else
+                call init_dset(run%h5_master_file, 't_vec', [cc%t_size])
+            endif
         endif
 
         ! T2 vector coming from MC
@@ -204,6 +215,7 @@ contains
 
             ! Open binary file
             open(l_unit,file="l_vec_"//trim(run%uuid)//".bin",form='unformatted')
+            call init_dset(run%h5_master_file, 'l_vec', [cc%t_size])
         endif
 
     end subroutine init_vecs

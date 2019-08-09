@@ -3,6 +3,7 @@ module ext_cor_types
     use const, only: i0, dp
 
     type ext_cor_t
+        integer :: doubles_nconf
         integer(i0), allocatable :: doubles_conf(:,:)
         real(dp), allocatable :: doubles_proj(:)
 

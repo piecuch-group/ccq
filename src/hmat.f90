@@ -40,7 +40,7 @@ contains
     end function get_z
 
 
-    function get_v(v_aa, v_ab, v_bb, i, j, a, b) result(v_int)
+    pure function get_v(v_aa, v_ab, v_bb, i, j, a, b) result(v_int)
 
         ! Get two-body matrix element <ij|v|ab>
 

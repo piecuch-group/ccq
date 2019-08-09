@@ -11,10 +11,13 @@
 BUILD_DIR := build
 BIN_DIR := bin
 DEPEND_DIR := $(BUILD_DIR)/depend
-VPATH := src:src/cc:src/ext_cor:src/cc_opt_ccsdt:src/hbar:src/lcc:src/mm_cor:src/external:src/utils
+VPATH := src:src/cc:src/ext_cor:src/hbar:src/lcc:src/mm_cor:src/external:src/utils
 
 # Include architecture configuration file
 include config.mk
+ifeq ($(findstring DISABLE_OPT_T3, $(CPPFLAGS)),)
+		VPATH := $(VPATH):src/cc_opt_ccsdt
+endif
 
 
 # Program naming
@@ -119,7 +122,7 @@ debug: FFLAGS = $(FFLAGS_DEBUG)
 debug: $(BIN_DIR)/$(PROGRAM)
 
 test:
-	cd $(TEST_DIR) && pytest -v
+	cd $(TEST_DIR) && pytest -v --tb=line
 
 # Dependencies
 # -------------------

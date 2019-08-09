@@ -120,7 +120,7 @@ contains
                     do f=sys%occ_a+1,sys%orbs
                         e1a1a = e1a1a + 0.50_p * sys%ints%v_aa(e,f,m,n) * t1a(f,n)*t1a(e,m)
                         ! [TMPDEBUG]
-                        print '(4i4,3es24.10)', e, f, m, n,sys%ints%v_aa(e,f,m,n), t1a(f,n), t1a(e,m)
+                        !print '(4i4,3es24.10)', e, f, m, n,sys%ints%v_aa(e,f,m,n), t1a(f,n), t1a(e,m)
                     enddo
                 enddo
             enddo

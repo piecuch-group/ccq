@@ -203,7 +203,7 @@ contains
 
     end function get_excitation
 
-    function get_excitation_spin_integrate(nel, basis, f1, f2) result(excitation)
+    pure function get_excitation_spin_integrate(nel, basis, f1, f2) result(excitation)
 
         use basis_types, only: basis_t
 
@@ -222,6 +222,7 @@ contains
         ind_alpha_to = 0
         ind_beta_from = 0
         ind_beta_to = 0
+
 
         excitation = get_excitation(nel, basis, f1, f2)
         do i=1, excitation%nexcit

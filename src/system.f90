@@ -133,6 +133,8 @@ module system
         type(config_t) :: config
         logical :: keep_bin
 
+        character(len=255) :: h5_master_file
+
         character(len=255) :: ext_cor_file
         character(len=255) :: sym_file
 

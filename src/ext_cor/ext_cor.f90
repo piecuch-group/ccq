@@ -1,4 +1,4 @@
-module ext_cor
+module external_correction
 
     implicit none
 
@@ -61,7 +61,7 @@ contains
 
         use ext_cor_types, only: vec3_t
 
-        type(vec3_t) :: vec3
+        type(vec3_t), intent(inout) :: vec3
 
         deallocate(vec3%o1_a)
         deallocate(vec3%o1_b)
@@ -79,7 +79,8 @@ contains
 
     subroutine ext_cor_driver(sys, run, cc)
 
-        ! Generates CC vector with ampltitudes obtained from an external method.
+        ! Generates CC vector with ampltitudes obtained from an external method. This routine is the main driver of external
+        ! correction feature.
 
         ! In:
         !   sys: system information including molecular data, integrals, etc.
@@ -100,6 +101,11 @@ contains
         use cc_utils, only: antisymmetrize
         use cluster_analysis, only: analyze_t3
 
+        ! [TMPDEBUG]
+        use ext_cor_types, only: ext_cor_t
+
+        type(ext_cor_t) :: test_ext
+
         type(sys_t), intent(in) :: sys
         type(run_t), intent(in) :: run
         type(cc_t), intent(inout) :: cc
@@ -111,33 +117,35 @@ contains
         logical :: rm_dscnctd = .false.
         integer :: i_err
 
-        call read_sym(run%sym_file, sys%orbs)
 
-        write(io, '(a)') 'Cluster analysis'
-        write(io, '(a)') '----------------'
+        ! Initialize data required for the cluster analysis
+        call read_sym(run%sym_file, sys%orbs)
         call gen_f_ref(sys, f_ref)
 
+        ! Starting cluster analysis
+        write(io, '(a)') 'Cluster analysis'
+        write(io, '(a)') '----------------'
         call print_date('  cluster analysis started on:')
 
-        ! Allocate vectors
-        write(io, '(2x,a)') '=> Up to C3'
-        write(io, '(4x,a)') '=> Initializing arrays'
+        ! Allocate C and T vectors up to three body terms
+        write(io, '(2x,a)') '=> Starting cluster analysis up to three body terms'
+        write(io, '(4x,a)') '=> Initializing C and T arrays'
         call alloc_vec3_t(sys, c_vec)
         call alloc_vec3_t(sys, t_vec)
 
-        ! Read up to C3 coefficients
+        ! Read FCIQMC coefficients of up to triply excited determinants
         write(io, '(4x,a)') "=> Reading and decoding FCIQMC vector configurations on:"
-        write(io, '(6x,a)') trim(run%ext_cor_file)
-        call find_fciqmc_c3(sys, f_ref, run%ext_cor_file, c_vec, coef_norm)
+        write(io, '(8x,a)') trim(run%ext_cor_file)
+        call parse_fciqmc_c3(sys, f_ref, run%ext_cor_file, c_vec, coef_norm)
 
-        ! Cluster analyze
+        ! Cluster analyze up to three body components
         write(io, '(4x,a)') "=> Starting cluster analysis"
         call antisymmetrize(sys, c_vec)
         !call analyze_t3(sys, c_vec, t_vec, run%rhf, rm_dscnctd)
         call analyze_t3(sys, c_vec, t_vec, .false., rm_dscnctd)
         call antisymmetrize(sys, t_vec)
 
-        ! Put up to T_3 from the external correction in the T vector
+        ! Copy the new T vector into the CC vector for the next calculation
         write(io, '(4x,a/)') "=> Writing amplitudes"
         t_vec%o1_a = c_vec%o1_a
         t_vec%o1_b = c_vec%o1_b
@@ -153,18 +161,19 @@ contains
 
         ! [TODO] might not be needed
         ! Write to CC vector
-        write(io, '(4x,a/)') '=> Writing T2 files'
+        write(io, '(4x,a)') '=> Updating T2 files'
         call update_t2_cluster(sys, cc%ext_cor, f_ref)
+        call substract_disc(sys, cc)
 
         cc%en_cor = calculate_unsorted_energy(sys, cc)
-        write(io, '(2x,a27,2x,f16.10/)') 'External correlation energy', cc%en_cor
+        write(io, '(/2x,a27,2x,f16.10/)') 'External correlation energy', cc%en_cor
 
         call print_date('  cluster analysis ended on:')
         write(io, '(a)') ''
 
     end subroutine ext_cor_driver
 
-    subroutine find_fciqmc_c3(sys, f_ref, filename, c_vec, coef_norm)
+    subroutine parse_fciqmc_c3(sys, f_ref, filename, c_vec, coef_norm)
 
         ! Translate configurations and walker populations to excitations and
         ! intermediately-renormalized CI coefficients
@@ -200,8 +209,10 @@ contains
         type(excit_t) :: excit
         integer :: excit_rank
         real(p) :: coef
+        real(p) :: read_coef
         integer :: ios
         integer :: line(2)
+        integer :: c_id
         integer :: occ_list(sys%nel)
 
         logical :: t_exists
@@ -216,7 +227,7 @@ contains
 
         open(walk_unit, file=trim(filename), status='old')
         do
-            read(walk_unit, *, iostat=ios) line, occ_list(1:sys%nel-sys%froz*2)
+            read(walk_unit, *, iostat=ios) c_id, read_coef, occ_list(1:sys%nel-sys%froz*2)
             if (ios /= 0) exit
 
             ! Encode occupation list into bitform representation
@@ -232,9 +243,9 @@ contains
             excit = get_excitation_spin_integrate(sys%nel, sys%basis, f_ref, f_walk)
             ! Check permutation sign. This part is tricky.
             if (excit%perm) then
-                coef = -real(line(2), p)
+                coef = -real(read_coef, p)
             else
-                coef = real(line(2), p)
+                coef = real(read_coef, p)
             endif
 
             associate(excit_rank_a=>excit%nexcit_alpha, from_a=>excit%from_a, from_b=>excit%from_b, &
@@ -309,7 +320,92 @@ contains
         c_vec%o3_abb = c_vec%o3_abb / coef_norm
         c_vec%o3_bbb = c_vec%o3_bbb / coef_norm
 
-    end subroutine find_fciqmc_c3
+    end subroutine parse_fciqmc_c3
+
+    subroutine substract_disc(sys, cc)
+
+        use const, only: i0, p
+        use contract_doubles_ext_cor, only: drive_doubles_contraction
+        use system, only: sys_t
+        use cc_types, only: cc_t
+        use cc_utils, only: antisymmetrize_t2
+        use printing, only: io
+        use utils, only: get_wall_time
+
+        type(sys_t), intent(in) :: sys
+        type(cc_t), intent(inout) :: cc
+
+        integer :: i, j, a, b
+        integer :: ii, jj, aa, bb
+
+        real(p) :: start_time, end_time
+
+        real(p), allocatable :: v2a(:,:,:,:)
+        real(p), allocatable :: v2b(:,:,:,:)
+        real(p), allocatable :: v2c(:,:,:,:)
+
+
+        write(io, '(4x,a)') '=> Contracting non-linear terms'
+        start_time = get_wall_time()
+        call drive_doubles_contraction(sys, cc, v2a, v2b, v2c)
+        end_time = get_wall_time()
+        write(io, '(4x,a,f10.2,a)') '=> Contraction took', end_time - start_time, ' seconds'
+
+        call antisymmetrize_t2(sys, cc%ext_cor%t2a, cc%ext_cor%t2c)
+        call antisymmetrize_t2(sys, v2a, v2c)
+
+        do i=sys%froz+1, sys%occ_a
+            do j=sys%froz+1, sys%occ_a
+                do a=sys%occ_a+1, sys%orbs
+                    do b=sys%occ_a+1, sys%orbs
+
+                        ii = i - sys%froz
+                        jj = j - sys%froz
+                        aa = a - sys%occ_a
+                        bb = b - sys%occ_a
+
+                        cc%ext_cor%t2a(bb,aa,jj,ii) = cc%ext_cor%t2a(bb,aa,jj,ii) - v2a(b,a,j,i)
+
+                    enddo
+                enddo
+            enddo
+        enddo
+
+        do i=sys%froz+1, sys%occ_a
+            do j=sys%froz+1, sys%occ_b
+                do a=sys%occ_a+1, sys%orbs
+                    do b=sys%occ_b+1, sys%orbs
+
+                        ii = i - sys%froz
+                        jj = j - sys%froz
+                        aa = a - sys%occ_a
+                        bb = b - sys%occ_b
+
+                        cc%ext_cor%t2b(bb,aa,jj,ii) = cc%ext_cor%t2b(bb,aa,jj,ii) - v2b(b,a,j,i)
+
+                    enddo
+                enddo
+            enddo
+        enddo
+
+        do i=sys%froz+1, sys%occ_b
+            do j=sys%froz+1, sys%occ_b
+                do a=sys%occ_b+1, sys%orbs
+                    do b=sys%occ_b+1, sys%orbs
+
+                        ii = i - sys%froz
+                        jj = j - sys%froz
+                        aa = a - sys%occ_b
+                        bb = b - sys%occ_b
+
+                        cc%ext_cor%t2c(bb,aa,jj,ii) = cc%ext_cor%t2c(bb,aa,jj,ii) - v2c(b,a,j,i)
+
+                    enddo
+                enddo
+            enddo
+        enddo
+
+    end subroutine substract_disc
 
     subroutine ext_cor_4(sys, cc, f_ref, filename, coef_norm, c_vec)
 
@@ -322,8 +418,9 @@ contains
         use printing, only: io
         use system, only: sys_t
         use cc_types, only: cc_t
-        use process_t4, only: gen_doubles_conf, contract_t4, find_disc_t4
-
+        use process_t4, only: gen_doubles_conf, &
+            update_doubles_projection, update_doubles_projection_old
+        use utils, only: get_wall_time
 
         type(sys_t), intent(in) :: sys
         type(cc_t), intent(inout) :: cc
@@ -332,62 +429,80 @@ contains
         real(p), intent(in) :: coef_norm
         type(vec3_t), intent(in) :: c_vec
 
-        integer, parameter :: init_c4 = 100000
-        integer(i0), allocatable :: c4_confs(:,:)
-        type(dictionary_t) :: c4_hash
+        type(dictionary_t) :: doubles_conf_hash
 
+        real(p) :: c4_amp
+
+        real(p) :: prev_time
+
+        real(p) :: read_coef
+        integer :: idx
         integer :: occ_list(sys%nel)
         integer(i0) :: f_t4(sys%basis%string_len)
-        integer :: ndoubles_conf
-        integer :: line(2), c4_coef
+        integer(i0) :: f_doub(sys%basis%string_len)
+        integer :: doubles_nconf
         integer :: cnt_c4 = 0
+        integer :: c_id
         integer :: ios
         integer :: ierr
         integer :: excit_rank
 
 
-        allocate(c4_confs(sys%basis%string_len, init_c4), stat=ierr)
-        call check_allocate('c4_confs', init_c4, ierr)
-        call c4_hash%init(init_c4)
-
+        ! Generate doubly excited determinants required to calculate the
+        ! matrix elements of <ijab | [V_N, T_4] |phi>
+        ! [TODO] we might be able to move this?
         write(io, '(4x,a)') '=> Creating twobody configurations'
         call gen_doubles_conf(sys, cc%ext_cor%doubles_conf, f_ref)
-        ndoubles_conf = size(cc%ext_cor%doubles_conf, 2)
+        doubles_nconf = size(cc%ext_cor%doubles_conf, 2)
+        write(io, '(8x,a,i8,a)') '=> ', doubles_nconf,' double excitations'
+        cc%ext_cor%doubles_nconf = doubles_nconf
 
-        allocate(cc%ext_cor%doubles_proj(ndoubles_conf), stat=ierr)
+        ! Create a hash table for finding indices by mapping determinants
+        ! to indices
+        call doubles_conf_hash%init(doubles_nconf)
+        do idx=1, doubles_nconf
+            f_doub = cc%ext_cor%doubles_conf(:,idx)
+            call doubles_conf_hash%set(f_doub, idx)
+        enddo
+
+        ! Allocate the array that holds the  <ijab | [V_N, T_4] |phi>
+        ! projection.
+        allocate(cc%ext_cor%doubles_proj(doubles_nconf), stat=ierr)
         cc%ext_cor%doubles_proj = 0.0_p
 
         ! Load all quadruply excited determinants in CIQMC
         open(walk_unit, file=trim(filename), status='old')
 
         write(io, '(4x,a)') '=> Starting loop over stochastic quadruply excited determinants'
+        prev_time = get_wall_time()
         do
-            read(walk_unit, *, iostat=ios) line, occ_list(1:sys%nel-sys%froz*2)
+
+            ! Read Slater determinant
+            read(walk_unit, *, iostat=ios) c_id, read_coef, occ_list(1:sys%nel-sys%froz*2)
             if (ios /= 0) exit
 
-            c4_coef = line(2)
-
+            ! Shift occupation list due to frozen orbitals that
+            ! need to be taken into account for the CC code
             call shift_occ_list(sys%froz*2, sys%nel, occ_list)
             call encode_det(sys%basis, occ_list, f_t4)
             excit_rank = get_excitation_level(f_ref, f_t4)
 
+            ! Skip non quadruply excited determinants
             if (excit_rank /= 4) cycle
 
-            cnt_c4 = cnt_c4 + 1
-            c4_confs(:,cnt_c4) = f_t4
-            call c4_hash%set(f_t4, cnt_c4)
-            call contract_t4(sys, cc, f_ref, f_t4, c_vec, c4_coef, coef_norm)
-        enddo
+            ! Update the array holding the projections <ijab | [V_N, C_4] |phi>
+            c4_amp = read_coef / coef_norm
+            if (c4_amp /= 0.0_p) then
+                cnt_c4 = cnt_c4 + 1
+                call update_doubles_projection_old(sys, cc%ext_cor%doubles_conf, &
+                    f_t4, c4_amp, cc%ext_cor%doubles_proj)
+            endif
 
+        enddo
         close(walk_unit)
 
-        write(io, '(4x,a)') '=> Starting loop over disconnected quadruply excited determinants'
-        !call find_disc_t4(sys, cc, f_ref, cnt_c4, c4_confs, c_vec)
-        call find_disc_t4(sys, cc, f_ref, cnt_c4, c4_hash, c_vec)
-
-        deallocate(c4_confs, stat=ierr)
-        call check_deallocate('c4_confs', ierr)
-
+        write(io, '(8x,a,i8,a,f8.2,a)') '=>', cnt_c4, ' amplitudes proccesed in ', &
+            get_wall_time()-prev_time, ' seconds'
 
     end subroutine ext_cor_4
 
@@ -550,4 +665,4 @@ contains
 
     end subroutine write_t3
 
-end module ext_cor
+end module external_correction

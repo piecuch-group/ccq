@@ -11,6 +11,7 @@ contains
 
         use const, only: p, t_vecs_unit
         use errors, only: stop_all
+        use hdf5_io, only: get_chunk_daxpy
         use system, only: run_t
         use cc_types, only: cc_t
         use solver_types, only: conv_t
@@ -31,77 +32,63 @@ contains
         real(p) :: accum
         real(p) ddot, axpy
 
-        ! Allocate
+
         allocate(B(run%diis_space+1,run%diis_space+1))
-        B=0.0_p
-        allocate(vec_aux_1(conv%vec_size))
-        allocate(vec_aux_2(conv%vec_size))
-        allocate(vec_aux_3(conv%vec_size))
 
-        max_t_size = conv%vec_size
+        call construct_b_mat(conv, run%diis_space, B)
 
-        do indx = 1, run%diis_space
-
-            ! Generate difference vector
-            !read(t_vecs_unit, rec=indx) vec_aux_1
-            !read(t_vecs_unit, rec=indx+1) vec_aux_2
-            call read_vecs(conv, indx,  vec_aux_1)
-            call read_vecs(conv, indx+1,  vec_aux_2)
-
-            vec_aux_3 = vec_aux_2 - vec_aux_1
-
-            do indy = 1, run%diis_space
-
-                ! Generate difference vector
-                !read(t_vecs_unit, rec=indy) vec_aux_1
-                !read(t_vecs_unit, rec=indy+1) vec_aux_2
-                call read_vecs(conv, indy,  vec_aux_1)
-                call read_vecs(conv, indy+1,  vec_aux_2)
-
-                vec_aux_2 = vec_aux_2 - vec_aux_1
-
-                accum = 0.0_p
-                accum = ddot(max_t_size, vec_aux_3, 1, vec_aux_2, 1)
-
-                B(indx,indy) = B(indx,indy) + accum
-            enddo
-        enddo
-
-        deallocate(vec_aux_2, vec_aux_3)
-
-        ! Set DIIS matrix boundaries
-        b(:,run%diis_space+1) = -1.0_p
-        b(run%diis_space+1,:) = -1.0_p
-
-        !allocate(L(iDIIS+1),C(iDIIS+1))
         allocate(ipiv(run%diis_space+1))
         allocate(c(run%diis_space+1))
 
-        c=0.0_p
-        c(run%diis_space+1) = -1.0_p
+        C=0.0_p
+        C(run%diis_space+1) = -1.0_p
 
         ! Solve system of equations
-        call dgesv(run%diis_space+1, 1, B, run%diis_space+1, ipiv, c, run%diis_space+1, info)
+        call dgesv(run%diis_space+1, 1, B, run%diis_space+1, ipiv, C, run%diis_space+1, info)
+        if (info /= 0) call stop_all('calc_diis', 'DIIS error in DGESV.')
 
-        if (info /= 0) call stop_all('calc_diis', 'DIIS error.')
+        conv%vec_ptr(1:conv%vec_size) = 0.0_p
+        call get_chunk_daxpy(conv%filename, conv%iter_dset_name, conv%vec_ptr, C, run%diis_space)
 
-        conv%vec_ptr(1:max_t_size) = 0.0_p
-        do indx = 1, run%diis_space
-            !read(t_vecs_unit, rec=indx) vec_aux_1
-            call read_vecs(conv, indx, vec_aux_1)
-
-            call daxpy(max_t_size, C(indx), vec_aux_1, 1, conv%vec_ptr, 1)
-
-        enddo
-
-        deallocate(vec_aux_1)
         deallocate(ipiv, c, b)
 
     end subroutine calc_diis
 
+    subroutine construct_b_mat(conv, diis_space, B)
+
+        use const, only: p
+        use hdf5_io, only: get_chunk_diff_dot_in_mat
+        use solver_types, only: conv_t
+
+        type(conv_t), intent(in) :: conv
+        integer, intent(in) :: diis_space
+        real(p), allocatable, intent(inout) :: B(:,:)
+
+        integer :: idx, idy
+
+        ! Allocate
+        B=0.0_p
+
+        call get_chunk_diff_dot_in_mat(conv%filename, conv%iter_dset_name, &
+            B, diis_space)
+
+        ! Fill the lower triangular part
+        do idx=1, diis_space
+            do idy=idx+1, diis_space
+                B(idy, idx) = B(idx, idy)
+            enddo
+        enddo
+
+        ! Set DIIS matrix boundaries
+        B(:,diis_space+1) = -1.0_p
+        B(diis_space+1,:) = -1.0_p
+
+    end subroutine construct_b_mat
+
     subroutine write_vecs(conv, iter, diis_space)
 
-        use const, only: t_vecs_unit
+        use const, only: t_vecs_unit, dp
+        use hdf5_io, only: write_column_in_mat, write_vector
         use solver_types, only: conv_t
 
         type(conv_t), intent(in) :: conv
@@ -110,71 +97,29 @@ contains
 
         integer :: indx_rec, i_chunk, i
 
+        ! Write latest vector in its corresponding dataset
+        call write_vector(conv%filename, conv%vec_dset_name, &
+             conv%vec_ptr(1:conv%vec_size), conv%vec_size)
+
+
+        ! Write vector in the iteration history
         indx_rec = mod(iter, diis_space + 1)
         if (indx_rec == 0) indx_rec = diis_space + 1
-
-        if (chunks == 0) then
-            write(conv%vecs_unit, rec=indx_rec) conv%vec_ptr(1:conv%vec_size)
-        else
-            do i_chunk=0, chunks
-                if (i_chunk < chunks) then
-                    write(conv%vecs_unit, rec=((indx_rec - 1) * chunks) + i_chunk + 1) &
-                        conv%vec_ptr(i_chunk*max_len+1:(i_chunk+1)*max_len)
-                else
-                    write(conv%vecs_unit, rec=((indx_rec - 1) * chunks) + i_chunk + 1) &
-                        conv%vec_ptr(i_chunk*max_len+1:i_chunk*max_len + chunk_size)
-                endif
-
-            enddo
-        endif
+        call write_column_in_mat(conv%filename, conv%iter_dset_name, &
+            conv%vec_ptr(1:conv%vec_size), conv%vec_size, indx_rec)
 
 
     end subroutine write_vecs
 
-    subroutine read_vecs(conv, indx,  vec)
-
-        use const, only: p
-        use solver_types, only: conv_t
-
-
-        type(conv_t), intent(in) :: conv
-        integer, intent(in) :: indx
-        real(p), allocatable, intent(inout) :: vec(:)
-
-        integer :: i_chunk
-
-
-        if (chunks == 0) then
-            read(conv%vecs_unit, rec=indx) vec
-        else
-            do i_chunk=0, chunks
-                if (i_chunk < chunks) then
-                    read(conv%vecs_unit, rec=((indx - 1) * chunks) + i_chunk + 1) &
-                        vec(i_chunk*max_len+1:(i_chunk+1)*max_len)
-                else
-                    read(conv%vecs_unit, rec=((indx - 1) * chunks) + i_chunk + 1) &
-                        vec(i_chunk*max_len+1:i_chunk*max_len + chunk_size)
-                endif
-            enddo
-        endif
-
-    end subroutine read_vecs
-
-    subroutine init_vecs(conv)
+    subroutine init_vecs(conv, diis_space)
 
         use solver_types, only: conv_t
+        use hdf5_io, only: init_dset
 
         type(conv_t), intent(in) :: conv
+        integer, intent(in) :: diis_space
 
-        chunks = int(conv%vec_size / max_len)
-        chunk_size = conv%vec_size - max_len * chunks
-
-        if (chunks == 0) then
-            open(conv%vecs_unit, file='iter_vecs.bin', form='unformatted', recl=conv%vec_size*8, access='direct')
-        else
-            open(conv%vecs_unit, file='iter_vecs.bin', form='unformatted', recl=max_len*8, access='direct')
-        endif
-
+        call init_dset(conv%filename, conv%iter_dset_name, [conv%vec_size, diis_space + 1])
 
     end subroutine init_vecs
 
