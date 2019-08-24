@@ -1,6 +1,6 @@
-# Brief makfile for modern fortran projects
+# Brief Makefile for modern fortran projects
 #
-# Inspired in James Spencer's
+# Inspired (almost the same as) in James Spencer's
 # http://github.com/jsspencer/generic_makefile
 #
 # 2019, J. Emiliano Deustua
