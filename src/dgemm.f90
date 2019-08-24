@@ -1,5 +1,9 @@
 subroutine egemm(K1,K2,K3,A,B,C)
 
+    ! BLAS DGEMM wrapper.
+
+    ! [TODO] This has to become a module.
+    ! Also, add  compatibility with sp?
     use const, only: dp, int_64
 
     implicit none

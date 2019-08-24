@@ -9,7 +9,7 @@ contains
 
     subroutine analyze_t3(sys, c_vec, t_vec, rhf, rm_dscnctd)
 
-        ! Perform the cluster analysis
+        ! Perform the cluster analysis of up to triply excited cluster components.
         !
         ! In:
         !   c*: all CI coeffcients up to quadruples
@@ -17,7 +17,7 @@ contains
         ! In/Out:
         !   t*: all cluster amplitudes up to quadruples
 
-        use const, only: dp
+        use const, only: p
         use ext_cor_types, only: vec3_t
         use symmetry, only: is_sym
         use system, only: sys_t
@@ -34,7 +34,7 @@ contains
 
 
         ! Place holders
-        real(dp) :: c1c3, c12c2, c22, c13
+        real(p) :: c1c3, c12c2, c22, c13
         integer :: ex_orbs(8)
 
         ! Indices
@@ -275,16 +275,16 @@ contains
         ! In/Out:
         !   t*: all cluster amplitudes up to quadruples
 
-        use const, only: dp
+        use const, only: p
         use excitations, only: excit_t
         use ext_cor_types, only: vec3_t
 
         ! T amplitudes
-        real(dp) :: t4_amp
+        real(p) :: t4_amp
 
         ! CI coefficients
         type(vec3_t), intent(in) :: c_vec
-        real(dp), intent(in) :: c4
+        real(p), intent(in) :: c4
         type(excit_t), intent(in) :: excit
 
 
@@ -293,7 +293,7 @@ contains
         integer :: a, b, c, d
 
         ! Place holders
-        real(dp) :: c1c3, c12c2, c22, c13
+        real(p) :: c1c3, c12c2, c22, c13
 
 
         i = excit%from_a(1)
@@ -459,16 +459,16 @@ contains
         ! In/Out:
         !   t*: all cluster amplitudes up to quadruples
 
-        use const, only: dp
+        use const, only: p
         use excitations, only: excit_t
         use ext_cor_types, only: vec3_t
 
         ! T amplitudes
-        real(dp) :: t4_amp
+        real(p) :: t4_amp
 
         ! CI coefficients
         type(vec3_t), intent(in) :: c_vec
-        real(dp), intent(in) :: c4
+        real(p), intent(in) :: c4
         type(excit_t), intent(in) :: excit
 
         ! Indices
@@ -476,7 +476,7 @@ contains
         integer :: a, b, c, d
 
         ! Place holders
-        real(dp) :: c1c3, c12c2, c22, c13
+        real(p) :: c1c3, c12c2, c22, c13
 
         i = excit%from_a(1)
         j = excit%from_a(2)
@@ -563,16 +563,16 @@ contains
         ! In/Out:
         !   t*: all cluster amplitudes up to quadruples
 
-        use const, only: dp
+        use const, only: p
         use excitations, only: excit_t
         use ext_cor_types, only: vec3_t
 
         ! T amplitudes
-        real(dp) :: t4_amp
+        real(p) :: t4_amp
 
         ! CI coefficients
         type(vec3_t), intent(in) :: c_vec
-        real(dp), intent(in) :: c4
+        real(p), intent(in) :: c4
         type(excit_t), intent(in) :: excit
 
 
@@ -581,7 +581,7 @@ contains
         integer :: a, b, c, d
 
         ! Place holders
-        real(dp) :: c1c3, c12c2, c22, c13
+        real(p) :: c1c3, c12c2, c22, c13
 
 
         i = excit%from_a(1)
@@ -672,16 +672,16 @@ contains
         ! In/Out:
         !   t*: all cluster amplitudes up to quadruples
 
-        use const, only: dp
+        use const, only: p
         use excitations, only: excit_t
         use ext_cor_types, only: vec3_t
 
         ! T amplitudes
-        real(dp) :: t4_amp
+        real(p) :: t4_amp
 
         ! CI coefficients
         type(vec3_t), intent(in) :: c_vec
-        real(dp), intent(in) :: c4
+        real(p), intent(in) :: c4
         type(excit_t), intent(in) :: excit
 
 
@@ -690,7 +690,7 @@ contains
         integer :: a, b, c, d
 
         ! Place holders
-        real(dp) :: c1c3, c12c2, c22, c13
+        real(p) :: c1c3, c12c2, c22, c13
 
         i = excit%from_a(1)
         j = excit%from_b(1)
@@ -767,7 +767,7 @@ contains
 
     pure function analyze_t4_bbbb(c_vec, excit, c4) result(t4_amp)
 
-        ! Perform the cluster analysis
+        ! Perform the cluster analysis of T4 bbbb
         !
         ! In:
         !   c*: all CI coeffcients up to quadruples
@@ -775,16 +775,16 @@ contains
         ! In/Out:
         !   t*: all cluster amplitudes up to quadruples
 
-        use const, only: dp
+        use const, only: p
         use excitations, only: excit_t
         use ext_cor_types, only: vec3_t
 
         ! T amplitudes
-        real(dp) :: t4_amp
+        real(p) :: t4_amp
 
         ! CI coefficients
         type(vec3_t), intent(in) :: c_vec
-        real(dp), intent(in) :: c4
+        real(p), intent(in) :: c4
         type(excit_t), intent(in) :: excit
 
 
@@ -793,7 +793,7 @@ contains
         integer :: a, b, c, d
 
         ! Place holders
-        real(dp) :: c1c3, c12c2, c22, c13
+        real(p) :: c1c3, c12c2, c22, c13
 
         i = excit%from_b(1)
         j = excit%from_b(2)

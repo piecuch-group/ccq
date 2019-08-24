@@ -170,7 +170,7 @@ contains
 
     subroutine jacobi_iter(sys, run, cc, conv)
 
-        use const, only: dp, p, t_unit, t_vecs_unit
+        use const, only: p, dp, t_unit, t_vecs_unit
         use diis, only: calc_diis, write_vecs, init_vecs
         use printing, only: io, print_iteration, print_date
         use cc_utils, only: residuum
@@ -274,10 +274,10 @@ contains
 
     function check_convergence(conv, tol) result(res)
 
-        use const, only: dp
+        use const, only: p
 
-        real(dp), intent(in) :: conv(:)
-        real(dp), intent(in) :: tol
+        real(p), intent(in) :: conv(:)
+        real(p), intent(in) :: tol
 
         logical :: res
 

@@ -1,6 +1,6 @@
 module system
 
-    use const, only: p, dp, sp, line_len
+    use const, only: p, sp, line_len
     use basis_types, only: basis_t
 
     type ints_t
@@ -82,8 +82,8 @@ module system
         type(ints_t) :: ints
 
         ! Initial energies
-        real(dp) :: en_repul
-        real(dp) :: en_ref
+        real(p) :: en_repul
+        real(p) :: en_ref
 
     end type sys_t
 
@@ -97,12 +97,15 @@ module system
 
     type run_t
         ! Solver information
-        real(dp) :: shift
-        real(dp) :: tol
+        real(p) :: shift
+        real(p) :: tol
         integer :: diis_space
         logical :: restart
         integer :: max_iter
         logical :: rhf
+
+        ! Parallel
+        integer :: num_threads = 0
 
 
         ! Calculation ID

@@ -1,5 +1,7 @@
 module printing
 
+    ! This module deals with printing and outputting information
+
     use, intrinsic :: iso_fortran_env, only: output_unit
 
     implicit none
@@ -10,11 +12,17 @@ contains
 
     subroutine init_print(run)
 
+        ! Initialize printing
+
+        ! In:
+        !   run: information about the current run configuration 
+
         use const, only: log_unit
         use system, only: run_t
 
         type(run_t), intent(in) :: run
 
+        ! Open output file if it is provided in the configuration file
         if (trim(run%output_file) /= '' .and. trim(run%output_file) /= 'stdout') then
             open(log_unit, file=trim(run%output_file), status='unknown')
             io = log_unit
@@ -24,6 +32,7 @@ contains
 
     subroutine close_print()
 
+        ! Close file on exit
         if (io /= output_unit) close(io)
 
     end subroutine close_print
@@ -96,7 +105,8 @@ contains
         write(io,'(2x,a20,1x,a)') 'Working dir', trim(cwd)
         write(io,'(2x,a20,1x,a)') 'User', trim(user)
         write(io,'(2x,a20,1x,a)') 'Date', trim(date)
-        write(io,'(2x,a20,1x,a/)') 'UUID', trim(uuid(1:36))
+        write(io,'(2x,a20,1x,a)') 'UUID', trim(uuid(1:36))
+        write(io,'(2x,a20,1x,i4/)') 'OMP threads', run%num_threads
 
         call flush(io)
 
@@ -104,7 +114,6 @@ contains
 
     subroutine print_calc_params(sys, run, cc)
 
-        use const, only: dp
         use system, only: sys_t, run_t
         use cc_types, only: cc_t
 
@@ -231,21 +240,21 @@ contains
 
     subroutine print_iteration(iter, ecor, energy_diff, res, prev_time, new_time)
 
-        use const, only: dp
+        use const, only: p
 
         integer, intent(in) :: iter
-        real(dp), intent(in) :: ecor
-        real(dp), intent(in) :: energy_diff
-        real(dp), intent(in) :: res
-        real(dp), intent(in) :: prev_time, new_time
-        real(dp) :: cputime
+        real(p), intent(in) :: ecor
+        real(p), intent(in) :: energy_diff
+        real(p), intent(in) :: res
+        real(p), intent(in) :: prev_time, new_time
+        real(p) :: cputime
 
-        real(dp) :: nsec
+        real(p) :: nsec
         integer :: nmin
 
-        nsec=new_time - prev_time
-        nmin=int(nsec) / 60
-        nsec=nsec-real(nmin, dp)*60.0_dp
+        nsec = new_time - prev_time
+        nmin = int(nsec) / 60
+        nsec = nsec-real(nmin, p)*60.0_p
 
         write(io,'(2x,i4,3(f15.10),i5,'' min'',f5.1,'' s'')') iter,ecor,energy_diff, res,nmin,nsec
 
@@ -256,18 +265,19 @@ contains
     subroutine print_help()
 
         ! Print the help dialog
+
         print '(a)', 'Usage: ccq [OPTIONS] FILE'
         print '(a)', 'Coupled-cluster program that performs calculations with up to quadruply'
         print '(a/)', 'excited cluster components.'
 
         print '(a)', 'Options:'
-        print '(a8,a16,4x,a)', '-o,', '--output', "output file, where the calculation's information will be written"
-        print '(a8,a16,4x,a)', '-h,', '--help', "print this help menu"
+        print '(4x,a8,a16,4x,a)', '-o,', '--output', "output file, where the calculation's information will be written"
+        print '(4x,a8,a16,4x,a)', '-h,', '--help', "print this help menu"
 
         print '(/a)', 'ccq repository online: <https://gitlab.msu.edu/piecuch-group/ccq/>'
         print '(a)', "Program written in Piecuch's group at MSU: <https://www2.chemistry.msu.edu/faculty/piecuch/>"
 
-        call exit()
+        call exit(0)
 
     end subroutine print_help
 

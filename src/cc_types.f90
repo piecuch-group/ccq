@@ -1,6 +1,6 @@
 module cc_types
 
-    use const, only: p, sp, dp, int_32, i0
+    use const, only: p, sp, int_32, i0
     use ext_cor_types, only: ext_cor_t
 
     type acc_t
@@ -10,7 +10,7 @@ module cc_types
         real(sp) :: t2t2_t3(3)
         real(sp) :: t2t3_t3(5)
 
-        real(dp), allocatable :: t2_mc(:)
+        real(p), allocatable :: t2_mc(:)
     end type acc_t
 
     type hbar_t

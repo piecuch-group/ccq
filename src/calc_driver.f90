@@ -94,6 +94,8 @@ contains
         use excitations, only: init_excitations
         use cc_utils, only: get_t_sizes, get_t_sizes_act
 
+        use omp_lib, only: omp_set_num_threads
+
         type(sys_t), intent(inout) :: sys
         type(run_t), intent(in) :: run
         type(cc_t), intent(inout) :: cc
@@ -127,6 +129,8 @@ contains
         !if (run%stoch) call init_p_space(sys, cc%stoch)
         if (run%stoch) call init_p_space_slater(sys, 'p_space_det', 3, cc%stoch)
 
+        ! Initialize OpenMP threads
+        if (run%num_threads /= 0) call omp_set_num_threads(run%num_threads)
 
     end subroutine init_system
 

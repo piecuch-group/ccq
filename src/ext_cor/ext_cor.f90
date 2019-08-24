@@ -517,7 +517,7 @@ contains
         ! In/Out:
         !   cc: coupled-cluster information with updated T vector (cc%t_vec) amplitudes
 
-        use const, only: dp
+        use const, only: p
         use system, only: sys_t
         use cc_types, only: cc_t
         use ext_cor_types, only: vec3_t
@@ -530,7 +530,7 @@ contains
 
         integer :: i, j, k, l
         integer :: a, b, c, d
-        real(dp), pointer :: t3(:) => null()
+        real(p), pointer :: t3(:) => null()
 
         integer :: indx
 

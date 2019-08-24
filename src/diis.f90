@@ -87,7 +87,7 @@ contains
 
     subroutine write_vecs(conv, iter, diis_space)
 
-        use const, only: t_vecs_unit, dp
+        use const, only: t_vecs_unit, p
         use hdf5_io, only: write_column_in_mat, write_vector
         use solver_types, only: conv_t
 

@@ -4,6 +4,7 @@ module parser
 
     implicit none
 
+    ! Interface to a UUID generation file written in C
     interface
         subroutine gen_uuid(uuid) bind(c)
             use, intrinsic :: iso_c_binding, only: c_char
@@ -17,6 +18,7 @@ contains
     subroutine get_opts(sys, run)
 
         ! Read command line options
+
         ! In:
         !    command line arguments from system shell
         ! In/Out:
@@ -583,23 +585,27 @@ contains
         integer :: ios
 
         ! Run configuration options
+        ! [TODO] sort by alphabetical order
         select case (option)
         case ('sorted_ints')
             read(val, *, iostat=ios) run%sorted_ints
-            if (ios /= 0) call stop_all('get_run_opts', 'CONFIGURATION ERROR: rhf must logical')
+            if (ios /= 0) call stop_all('get_run_opts', 'CONFIGURATION ERROR: rhf must be logical')
 
         case ('rhf')
             read(val, *, iostat=ios) run%rhf
-            if (ios /= 0) call stop_all('get_run_opts', 'CONFIGURATION ERROR: rhf must logical')
+            if (ios /= 0) call stop_all('get_run_opts', 'CONFIGURATION ERROR: rhf must be logical')
 
         case ('shift')
-            read(val, *) run%shift
+            read(val, *, iostat=ios) run%shift
+            if (ios /= 0) call stop_all('get_run_opts', 'CONFIGURATION ERROR: shift must be real')
 
         case ('max_iterations', 'max_iter')
-            read(val, *) run%max_iter
+            read(val, *, iostat=ios) run%max_iter
+            if (ios /= 0) call stop_all('get_run_opts', 'CONFIGURATION ERROR: max_iterations must be an integer')
 
         case ('diis_space', 'diis')
-            read(val, *) run%diis_space
+            read(val, *, iostat=ios) run%diis_space
+            if (ios /= 0) call stop_all('get_run_opts', 'CONFIGURATION ERROR: diis_space must be an integer')
 
         case ('tolerance', 'tol', 'itol')
             read(val, '(i10)', iostat=ios) itol
@@ -631,6 +637,11 @@ contains
 
         case ('output_bin')
             run%bin_file = val
+
+        case ('num_threads')
+            real(val, *, iostat=ios) run%num_threads
+            if (ios /= 0) call stop_all('get_run_opts', 'CONFIGURATION ERROR: num_threads must be an integer')
+
         end select
 
 

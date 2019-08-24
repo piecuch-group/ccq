@@ -1,10 +1,15 @@
 module integrals
 
+    ! This module is responsible for reading files, constructing arrays,
+    ! and managing erverything related to molecular integrals coming from
+    ! HF calculations.
+
     implicit none
 
 contains
 
-    ! [TODO] add interfaces to more standard integral files
+    ! [TODO] add interfaces to more standard integral files (i.e. FCIDUMP, that
+    ! according to some people has become the "quantum chemistry standard")
 
     subroutine load_e1int(orbs, filename, e1int)
 
@@ -67,12 +72,15 @@ contains
         integer :: ios
 
         ! <ij|1/r_12|ab>
-        ! NOTE: integral file is in Chemist notation, hence a and j are swapped
+        ! NOTE: integral file is in Chemist notation, hence a and j are swapped.
+        ! The Chemist notation is never used in coupled-cluster codes. Be ware!
 
         open(tmp_unit, file=trim(filename), status="old")
         do
 
             read(tmp_unit, *, iostat=ios) i, a, j, b, hh
+
+            ! If the entry has no indices that means that it is the repulsion energy
             if (i+a+j+b == 0) then
                 en_repul = hh
                 exit
@@ -280,18 +288,19 @@ contains
 
     end subroutine unload_ints
 
-    ! Sorted integral section
+    !---- Sorted integral section
 
     subroutine load_sorted_ints(sys, run)
 
         ! This routine sorts integrals into unique cases.
+
         ! In:
         !    sys: system information
         !    run: runtime configurations
         ! Out:
         !    sorted integrals in sys%ints
 
-        use const, only: p, dp, tmp_unit, part_ints_a_unit, part_ints_b_unit, part_ints_c_unit
+        use const, only: p, tmp_unit, part_ints_a_unit, part_ints_b_unit, part_ints_c_unit
         use system, only: sys_t, run_t
 
         type(sys_t), intent(inout) :: sys
@@ -326,6 +335,7 @@ contains
             allocate(sys%ints%fbhp(occ_b+1:orbs,froz+1:occ_b))
             allocate(sys%ints%fbpp(occ_b+1:orbs,occ_b+1:orbs))
 
+            ! Integral sorting according to Jun Shen
             allocate(sys%ints%vahhhh(froz+1:occ_a,froz+1:occ_a,froz+1:occ_a,froz+1:occ_a))
             allocate(sys%ints%vahhhp(occ_a+1:orbs,froz+1:occ_a,froz+1:occ_a,froz+1:occ_a))
             allocate(sys%ints%vahhpp(occ_a+1:orbs,occ_a+1:orbs,froz+1:occ_a,froz+1:occ_a))
@@ -346,7 +356,7 @@ contains
             allocate(sys%ints%vchphp(occ_b+1:orbs,froz+1:occ_b,occ_b+1:orbs,froz+1:occ_b))
             allocate(sys%ints%vchppp(occ_b+1:orbs,occ_b+1:orbs,occ_b+1:orbs,froz+1:occ_b))
 
-            ! active-space
+            ! Active-space dependent integrals
             allocate(sys%ints%vaappp(occ_a+1:orbs,occ_a+1:orbs,occ_a+1:orbs,occ_a+1:sys%act_unocc_a))
             allocate(vappp(occ_a+1:orbs,occ_a+1:orbs,occ_a+1:orbs))
 
@@ -427,6 +437,8 @@ contains
             sys%ints%vchppp(occ_b+1:orbs, occ_b+1:orbs, occ_b+1:orbs, froz+1:occ_b) = &
                 v_bb(occ_b+1:orbs, occ_b+1:orbs, occ_b+1:orbs, froz+1:occ_b)
 
+
+            ! [TODO] maybe move this to a more adequate place (e.g. system data?)
             unocc_a = orbs - occ_a
             unocc_b = orbs - occ_b
 
@@ -506,7 +518,7 @@ contains
 
     subroutine unload_sorted_ints(sys)
 
-        use const, only: dp, part_ints_a_unit, part_ints_b_unit, part_ints_c_unit
+        use const, only: part_ints_a_unit, part_ints_b_unit, part_ints_c_unit
         use system, only: sys_t
 
         type(sys_t), intent(inout) :: sys
