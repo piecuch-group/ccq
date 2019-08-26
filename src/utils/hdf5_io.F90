@@ -303,7 +303,7 @@ module hdf5_io
 
             character(len=*), intent(in) :: filename
             character(len=*), intent(in) :: dset_name
-            real(dp), pointer, intent(in) :: vector(:)
+            real(dp), intent(in) :: vector(:)
             integer, intent(in) :: col_size
             integer, intent(in) :: col_indx
 
@@ -504,6 +504,7 @@ module hdf5_io
             if (mod_size /= 0) then
 
                 allocate(v1(mod_size))
+                allocate(v2(mod_size))
 
                 ! Create in-memory datasapce. Because it is a vector, it is rank-1
                 call h5screate_simple_f(rank_1d, [int(mod_size, hsize_t)], memspace, ierr)
@@ -521,14 +522,14 @@ module hdf5_io
                     call h5dread_f(dset_id, kinds%dp, v1, [int(size_chunk, hsize_t)], ierr, &
                         memspace, dspace_id)
 
-                    call daxpy(mod_size, C(col_indx), v1, 1, &
-                        vector( &
-                        (full_chunks * size_chunk) + 1: &
-                        (full_chunks * size_chunk) + mod_size), &
-                        1)
+                    v2(1:mod_size) = vector((full_chunks * size_chunk) + 1:(full_chunks * size_chunk) + mod_size)
+
+                    call daxpy(mod_size, C(col_indx), v1, 1, v2, 1)
+                    vector((full_chunks * size_chunk) + 1:(full_chunks * size_chunk) + mod_size) = v2(1:mod_size)
                 enddo
 
                 deallocate(v1)
+                deallocate(v2)
 
             endif
 

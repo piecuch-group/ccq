@@ -289,36 +289,47 @@ contains
 
         integer :: a, b, c
         integer :: i, j, k
+        integer :: ub_occ_a, ub_unocc_a
+        integer :: ub_occ_b, ub_unocc_b
+        integer :: lb_occ_a, lb_unocc_a
+        integer :: lb_occ_b, lb_unocc_b
+
+        ub_occ_a = ubound(t2a, 4)
+        ub_occ_b = ubound(t2c, 4)
+        ub_unocc_a = ubound(t2a, 2)
+        ub_unocc_b = ubound(t2c, 2)
+
+        lb_occ_a = lbound(t2a, 4)
+        lb_occ_b = lbound(t2c, 4)
+        lb_unocc_a = lbound(t2a, 2)
+        lb_unocc_b = lbound(t2c, 2)
 
 
-        associate(froz=>sys%froz, occ_a=>sys%occ_a, occ_b=>sys%occ_b, total=>sys%orbs)
 
 
-            do i=froz+1, occ_a
-                do j=i+1, occ_a
-                    do a=1, total-occ_a
-                        do b=a+1, total-occ_a
-                            t2a(b,a,i,j)=-t2a(b,a,j,i) !(ij)
-                            t2a(a,b,j,i)=-t2a(b,a,j,i) !(ab)
-                            t2a(a,b,i,j)=t2a(b,a,j,i) !(ab)(ij)
-                        enddo
+        do i=lb_occ_a, ub_occ_a
+            do j=i+1, ub_occ_a
+                do a=lb_unocc_a, ub_unocc_a
+                    do b=a+1, ub_unocc_a
+                        t2a(b,a,i,j)=-t2a(b,a,j,i) !(ij)
+                        t2a(a,b,j,i)=-t2a(b,a,j,i) !(ab)
+                        t2a(a,b,i,j)=t2a(b,a,j,i) !(ab)(ij)
                     enddo
                 enddo
             enddo
+        enddo
 
-            do i=froz+1, occ_b
-                do j=i+1, occ_b
-                    do a=1, total-occ_b
-                        do b=a+1, total-occ_b
-                            t2c(b,a,i,j)=-t2c(b,a,j,i) !(ij)
-                            t2c(a,b,j,i)=-t2c(b,a,j,i) !(ab)
-                            t2c(a,b,i,j)=t2c(b,a,j,i) !(ab)(ij)
-                        enddo
+        do i=lb_occ_b, ub_occ_b
+            do j=i+1, ub_occ_b
+                do a=lb_unocc_b, ub_unocc_b
+                    do b=a+1, ub_unocc_b
+                        t2c(b,a,i,j)=-t2c(b,a,j,i) !(ij)
+                        t2c(a,b,j,i)=-t2c(b,a,j,i) !(ab)
+                        t2c(a,b,i,j)=t2c(b,a,j,i) !(ab)(ij)
                     enddo
                 enddo
             enddo
-
-        end associate
+        enddo
 
     end subroutine antisymmetrize_t2
 

@@ -2887,6 +2887,8 @@ contains
             t1A,t1B,t2A,t2B,t2C, &
             t3A,t3B,t3C,t3D)
 
+        use utils, only: get_wall_time
+
         integer :: n0,n1,n2,n3
         integer :: k1,k2,k3,k4
         integer :: i,j,a,b
@@ -2912,6 +2914,7 @@ contains
         real(kind=8) :: V2C(N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2)
 
         real(kind=8),allocatable::accum(:,:)
+        real(kind=8) :: start_all, end_all, start_time, end_time
 
         real(kind=8) :: e2a, e2b, e2c
         real(kind=8) :: e1a1a, e1a1b, e1b1b
@@ -2953,6 +2956,8 @@ contains
 
         allocate(accum(N1+1:N3,N0+1:N1))
         accum = 0.0d0
+        start_all = get_wall_time()
+        start_time = get_wall_time()
 
         print *, 'Q1'
 
@@ -2973,7 +2978,12 @@ contains
         X1=0.0d0
         X1=X1+0.250*Q1
         deallocate(Q1)
-        print *, 'end Q1'
+
+        end_time = get_wall_time()
+
+        print '(a,f16.2,a)', 'end Q1', end_time - start_time, ' seconds'
+
+        start_time = get_wall_time()
 
         allocate(D1(N0+1:N2,N0+1:N1,N2+1:N3,N1+1:N3))
         call reorder2143(N0,N3,N0,N3,N0,N3,N0,N3, &
@@ -2990,7 +3000,9 @@ contains
 
         X1=X1+Q2
         deallocate(Q2)
-        print *, 'end Q2'
+        end_time = get_wall_time()
+        print '(a,f16.2,a)', 'end Q2', end_time - start_time, ' seconds'
+        start_time = get_wall_time()
 
         allocate(D1(N0+1:N2,N0+1:N2,N2+1:N3,N2+1:N3))
         call reorder2143(N0,N3,N0,N3,N0,N3,N0,N3, &
@@ -3009,7 +3021,8 @@ contains
         accum = accum + x1
         deallocate(Q3)
         deallocate(X1)
-        print *, 'end Q3'
+        end_time = get_wall_time()
+        print '(a,f16.2,a)', 'end Q3', end_time - start_time, ' seconds'
 
         allocate(D1(N0+1:N1,N0+1:N1,N1+1:N3,N1+1:N3))
         call reorder2143(N0,N3,N0,N3,N0,N3,N0,N3, &
@@ -3315,6 +3328,12 @@ contains
         accum = accum + x3
         deallocate(X3)
 
+        end_all = get_wall_time()
+
+        print '(a,f16.2,a)', 'end Q3', end_all - start_all, ' seconds'
+
+        start_time = get_wall_time()
+
 
         ! [TODO] scaling stuff should go somewhere independend
         ! Scaling of T_2
@@ -3370,6 +3389,11 @@ contains
         end forall
 
         deallocate(accum)
+
+        end_time = get_wall_time()
+
+        print '(a,f16.2,a)', 'end adhoc', end_time - start_time, ' seconds'
+
 
     end subroutine t2A_disconnected
 
@@ -3828,9 +3852,9 @@ contains
             e1a1a, e1a1b, e1b1b)
 
         integer, intent(in) :: froz, occ_a, occ_b, orbs
-        real(p), intent(in) :: v_aa(occ_a+1:orbs,occ_a+1:orbs,occ_a+1:orbs,occ_a+1:orbs)
-        real(p), intent(in) :: v_ab(occ_b+1:orbs,occ_a+1:orbs,occ_b+1:orbs,occ_a+1:orbs)
-        real(p), intent(in) :: v_bb(occ_b+1:orbs,occ_b+1:orbs,occ_b+1:orbs,occ_b+1:orbs)
+        real(p), intent(in) :: v_aa(froz+1:orbs,froz+1:orbs,froz+1:orbs,froz+1:orbs)
+        real(p), intent(in) :: v_ab(froz+1:orbs,froz+1:orbs,froz+1:orbs,froz+1:orbs)
+        real(p), intent(in) :: v_bb(froz+1:orbs,froz+1:orbs,froz+1:orbs,froz+1:orbs)
         real(p), intent(in) :: t1a(occ_a+1:orbs,froz+1:occ_a)
         real(p), intent(in) :: t1b(occ_b+1:orbs,froz+1:occ_b)
         real(p), intent(inout) :: e1a1a, e1a1b, e1b1b
@@ -3880,9 +3904,9 @@ contains
             e2a, e2b, e2c)
 
         integer, intent(in) :: froz, occ_a, occ_b, orbs
-        real(p), intent(in) :: v_aa(occ_a+1:orbs,occ_a+1:orbs,occ_a+1:orbs,occ_a+1:orbs)
-        real(p), intent(in) :: v_ab(occ_b+1:orbs,occ_a+1:orbs,occ_b+1:orbs,occ_a+1:orbs)
-        real(p), intent(in) :: v_bb(occ_b+1:orbs,occ_b+1:orbs,occ_b+1:orbs,occ_b+1:orbs)
+        real(p), intent(in) :: v_aa(froz+1:orbs,froz+1:orbs,froz+1:orbs,froz+1:orbs)
+        real(p), intent(in) :: v_ab(froz+1:orbs,froz+1:orbs,froz+1:orbs,froz+1:orbs)
+        real(p), intent(in) :: v_bb(froz+1:orbs,froz+1:orbs,froz+1:orbs,froz+1:orbs)
         real(p), intent(in) :: t2a(occ_a+1:orbs,occ_a+1:orbs,froz+1:occ_a,froz+1:occ_a)
         real(p), intent(in) :: t2b(occ_b+1:orbs,occ_a+1:orbs,froz+1:occ_b,froz+1:occ_a)
         real(p), intent(in) :: t2c(occ_b+1:orbs,occ_b+1:orbs,froz+1:occ_b,froz+1:occ_b)
