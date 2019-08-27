@@ -109,9 +109,9 @@ contains
 
         ! Load integrals
         call load_ints(sys, run)
-        if (run%sorted_ints) then
+        !if (run%sorted_ints) then
             call load_sorted_ints(sys, run)
-        endif
+        !endif
 
         ! Initialize determinant and excitation systems
         call init_basis_strings(sys%basis)

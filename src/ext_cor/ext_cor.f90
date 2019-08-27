@@ -535,6 +535,7 @@ contains
         integer :: indx
 
         t3 => cc%t_vec
+        print *, size(cc%t_vec)
 
         associate(froz=>sys%froz, occ_a=>sys%occ_a, occ_b=>sys%occ_b, total=>sys%orbs)
 

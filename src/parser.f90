@@ -639,7 +639,7 @@ contains
             run%bin_file = val
 
         case ('num_threads')
-            real(val, *, iostat=ios) run%num_threads
+            read(val, *, iostat=ios) run%num_threads
             if (ios /= 0) call stop_all('get_run_opts', 'CONFIGURATION ERROR: num_threads must be an integer')
 
         end select

@@ -662,4 +662,192 @@ contains
 
     end subroutine get_t_sizes_act
 
+    subroutine reorder_stripe(rank, mat_shape, mat_size, perm_str, A, B)
+
+        integer, intent(in) :: rank
+        integer, intent(in) :: mat_shape(:)
+        integer, intent(in) :: mat_size
+        character(len=*), intent(in) :: perm_str
+        real(kind=8), intent(in) :: A(mat_size)
+        real(kind=8), intent(inout) :: B(mat_size)
+
+        integer, allocatable :: perm(:)
+
+        integer :: ident(rank)
+
+        integer :: stride_a(rank)
+        integer :: stride_a_inner
+        integer :: size_outer, size_inner
+        integer :: offset_a, offset_b
+
+        integer :: i, j, j_tmp
+        integer :: current_index
+
+        perm = gen_perm_array(perm_str)
+
+        do i=1, rank
+            ident(i) = i
+        enddo
+
+        if (all(ident == perm)) then
+            print *, 'ident'
+            B = A
+            return
+        endif
+
+        stride_a(1) = 1
+        do i=2, rank
+            stride_a(i) = stride_a(i-1) * mat_shape(i-1)
+        enddo
+        !print *, 'size a',  size(a)
+        !print *, 'stide_a', stride_a
+        !print *, 'mat_shape', mat_shape
+
+        size_outer = 1
+        do i=1, rank
+            if (i /= perm(1)) size_outer = size_outer * mat_shape(i)
+        enddo
+        !print *, 'size_outer', size_outer
+
+        size_inner = mat_shape(perm(1))
+
+        !$omp parallel default(none), &
+        !$omp shared(size_outer, rank, mat_shape, perm, stride_a, size_inner, a, b), &
+        !$omp private(i, j, j_tmp, offset_a, offset_b, current_index, stride_a_inner)
+
+        !$omp do
+        do j=0, size_outer-1
+            offset_a = 0
+
+            j_tmp = j
+
+            do i=2, rank
+
+                current_index = modulo(j_tmp, mat_shape(perm(i)))
+                j_tmp = j_tmp / mat_shape(perm(i))
+                offset_a = offset_a + (current_index * stride_a(perm(i)))
+
+            enddo
+
+            offset_b = j * size_inner
+            stride_a_inner = stride_a(perm(1))
+
+            do i=0, size_inner-1
+                b(offset_b + i + 1) = a(offset_a + (i * stride_a_inner) + 1)
+                !b(offset_b + i + 1) = 3.0d0
+            enddo
+
+
+        enddo
+        !$omp end do
+
+        !$omp end parallel
+
+
+    end subroutine reorder_stripe
+
+    subroutine sum_stripe(rank, mat_shape, mat_size, perm_str, beta, A, B)
+
+        integer, intent(in) :: rank
+        integer, intent(in) :: mat_shape(:)
+        integer, intent(in) :: mat_size
+        character(len=*), intent(in) :: perm_str
+        real(kind=4), intent(in) :: beta
+        real(kind=8), intent(inout) :: A(mat_size)
+        real(kind=8), intent(in) :: B(mat_size)
+
+        integer, allocatable :: perm(:)
+
+        integer :: ident(rank)
+
+        integer :: stride_a(rank)
+        integer :: stride_a_inner
+        integer :: size_outer, size_inner
+        integer :: offset_a, offset_b
+
+        integer :: i, j, j_tmp
+        integer :: current_index
+
+        perm = gen_perm_array(perm_str)
+
+        do i=1, rank
+            ident(i) = i
+        enddo
+
+        if (all(ident == perm)) then
+            print *, 'ident'
+            A = A + beta * B
+            return
+        endif
+
+        stride_a(1) = 1
+        do i=2, rank
+            stride_a(i) = stride_a(i-1) * mat_shape(i-1)
+        enddo
+        !print *, 'size a',  size(a)
+        !print *, 'stide_a', stride_a
+        !print *, 'mat_shape', mat_shape
+
+        size_outer = 1
+        do i=1, rank
+            if (i /= perm(1)) size_outer = size_outer * mat_shape(i)
+        enddo
+        !print *, 'size_outer', size_outer
+
+
+        size_inner = mat_shape(perm(1))
+
+        !$omp parallel default(none), &
+        !$omp shared(size_outer, rank, mat_shape, perm, stride_a, size_inner, a, b, beta), &
+        !$omp private(i, j, j_tmp, offset_a, offset_b, current_index, stride_a_inner)
+
+        !$omp do
+        do j=0, size_outer-1
+            offset_a = 0
+
+            j_tmp = j
+
+            do i=2, rank
+
+                current_index = modulo(j_tmp, mat_shape(perm(i)))
+                j_tmp = j_tmp / mat_shape(perm(i))
+                offset_a = offset_a + (current_index * stride_a(perm(i)))
+
+            enddo
+
+            offset_b = j * size_inner
+            stride_a_inner = stride_a(perm(1))
+
+            do i=0, size_inner-1
+                a(offset_a + (i * stride_a_inner) + 1) = a(offset_a + (i * stride_a_inner) + 1) &
+                    + beta * b(offset_b + i + 1)
+            enddo
+
+
+        enddo
+        !$omp end do
+
+        !$omp end parallel
+
+
+    end subroutine sum_stripe
+
+    function gen_perm_array(perm) result(perm_array)
+
+        integer, allocatable :: perm_array(:)
+        character(len=*), intent(in) :: perm
+
+        integer :: perm_rank
+        integer :: i, idx
+
+        perm_rank = len_trim(perm)
+        allocate(perm_array(perm_rank))
+
+        do i=1, perm_rank
+            idx = iachar(perm(i:i)) - 48
+            perm_array(i) = idx
+        enddo
+
+    end function gen_perm_array
+
 end module cc_utils
