@@ -742,7 +742,7 @@ contains
         run%ext_cor = .false.
         run%ext_cor_sd = .true.
 
-        runt%num_threads = 1
+        run%num_threads = 1
 
         ! CC
         cc%acc%t2t2_t2 = 1.0_sp

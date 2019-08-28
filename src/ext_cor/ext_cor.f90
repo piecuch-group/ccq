@@ -165,7 +165,7 @@ contains
         ! Write externally corrected methods to HDF5, just in case
         write(io, '(4x,a)') '=> Writing externally corrected data to HDF5'
         call init_dset(run%h5_master_file, 'ext_cor_t', [cc%t_size])
-        call write_vector(conv%filename, 'ext_cor_t', cc%t_vec, cc%t_size)
+        call write_vector(run%h5_master_file, 'ext_cor_t', cc%t_vec, cc%t_size)
 
         call init_dset(run%h5_master_file, 'ext_cor_vt4a', shape(cc%ext_cor%t2a))
         call write_matrix(run%h5_master_file, 'ext_cor_vt4a', cc%ext_cor%t2a, &
@@ -434,8 +434,7 @@ contains
         use printing, only: io
         use system, only: sys_t
         use cc_types, only: cc_t
-        use process_t4, only: gen_doubles_conf, &
-            update_doubles_projection, update_doubles_projection_old
+        use process_t4, only: gen_doubles_conf, update_doubles_projection
         use utils, only: get_wall_time
 
         type(sys_t), intent(in) :: sys
@@ -510,8 +509,8 @@ contains
             c4_amp = read_coef / coef_norm
             if (c4_amp /= 0.0_p) then
                 cnt_c4 = cnt_c4 + 1
-                call update_doubles_projection_old(sys, cc%ext_cor%doubles_conf, &
-                    f_t4, c4_amp, cc%ext_cor%doubles_proj)
+                call update_doubles_projection(sys, cc%ext_cor%doubles_conf, &
+                    f_t4, c4_amp, cc%ext_cor%doubles_proj, doubles_conf_hash, f_ref)
             endif
 
         enddo

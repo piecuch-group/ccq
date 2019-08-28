@@ -88,6 +88,16 @@ module hdf5_io
 
         subroutine init_dset(filename, dset_name, dims)
 
+            ! Initialize dataset in a HDF5 file
+
+            ! In:
+            !   filename: name of the already initialized HDF5 file
+            !   dset_name: name of the dataset
+            !   dims: dimensions of the dataset (a.k.a. shape)
+
+            ! Out:
+            !   dataset initialized in HDF5 file
+
             use const, only: int_32, int_64
             use system, only: run_t
 
@@ -129,7 +139,6 @@ module hdf5_io
             call h5close_f(ierr)
 
         end subroutine init_dset
-
 
         subroutine init_h5_file(filename)
 
@@ -275,7 +284,6 @@ module hdf5_io
             ! Write to dataset
             call h5dwrite_f(dset_id, H5T_NATIVE_DOUBLE, vector, [int(vector_size, hsize_t)], ierr)
 
-
             ! Close dataset, dataspace, and file
             call h5sclose_f(dspace_id, ierr)
             call h5dclose_f(dset_id, ierr)
@@ -285,7 +293,7 @@ module hdf5_io
 
         end subroutine write_vector_from_scratch
 
-        subroutine write_mat_from_scratch(filename, dset_name, mat, mat_dims)
+        subroutine write_mat_from_scratch(filename, dset_name, mat, mat_dims, mat_size)
 
             use const, only: int_32, int_64, dp
             use system, only: run_t
@@ -294,162 +302,9 @@ module hdf5_io
 
             character(len=*), intent(in) :: filename
             character(len=*), intent(in) :: dset_name
-            real(dp), intent(in) :: mat(:)
+            real(dp), intent(in) :: mat(mat_size)
             integer, intent(in) :: mat_dims(:)
-
-            integer(hid_t) :: fid
-            integer(hid_t) :: dset_id, dspace_id
-            integer(int_32) :: ierr
-            type(hdf5_kinds_t) :: kinds
-            integer(hsize_t), allocatable :: mat_dims_in(:)
-            integer(int_32) :: rank
-
-            rank = size(mat_dims)
-            allocate(mat_dims_in(rank))
-            mat_dims_in = int(mat_dims, hsize_t)
-
-            ! According to HANDE this has to be called everytime. HDF5 is tricky...
-            call h5open_f(ierr)
-            call hdf5_kinds_init(kinds)
-
-            ! Open file in R/W mode
-            call h5fcreate_f(trim(filename), H5F_ACC_TRUNC_F, fid, ierr)
-
-            call h5screate_simple_f(rank, mat_dims_in, dspace_id, ierr)
-
-            call h5dcreate_f(fid, dset_name, kinds%dp, dspace_id, &
-                 dset_id, ierr)
-
-            ! Write to dataset
-            call h5dwrite_f(dset_id, kinds%dp, mat, mat_dims_in, ierr)
-
-
-            ! Close dataset, dataspace, and file
-            call h5sclose_f(dspace_id, ierr)
-            call h5dclose_f(dset_id, ierr)
-            call h5fclose_f(fid, ierr)
-
-            call h5close_f(ierr)
-
-            deallocate(mat_dims_in)
-
-        end subroutine write_mat_from_scratch
-
-        subroutine write_column_in_mat(filename, dset_name, vector, col_size, col_indx)
-
-            use const, only: int_32, int_64, dp
-            use system, only: run_t
-
-            use hdf5, only: h5open_f, h5fopen_f, h5dopen_f, &
-                h5dwrite_f, h5dget_space_f, &
-                h5screate_simple_f, h5sselect_hyperslab_f, &
-                h5sclose_f, h5dclose_f, h5fclose_f, h5close_f, &
-                H5F_ACC_RDWR_F, H5S_SELECT_SET_F
-
-
-            character(len=*), intent(in) :: filename
-            character(len=*), intent(in) :: dset_name
-            real(dp), intent(in) :: vector(:)
-            integer, intent(in) :: col_size
-            integer, intent(in) :: col_indx
-
-            integer(int_32), parameter :: rank = 2_int_32
-            integer(int_32), parameter :: rank_1d = 1_int_32
-            integer(hid_t) :: fid
-            integer(hid_t) :: dspace_id, dset_id
-            integer(hid_t) :: memspace
-            integer(int_32) :: ierr
-            type(hdf5_kinds_t) :: kinds
-
-            integer :: i
-
-            ! According to HANDE this has to be called everytime. HDF5 is tricky...
-            call h5open_f(ierr)
-            call hdf5_kinds_init(kinds)
-
-            ! Open file in R/W mode
-            call h5fopen_f(trim(filename), H5F_ACC_RDWR_F, fid, ierr)
-
-            ! Open dataset
-            call h5dopen_f(fid, trim(dset_name), dset_id, ierr)
-            call h5dget_space_f(dset_id, dspace_id, ierr)
-
-            ! Create in-memory datasapce. Because it is a vector, it is rank-1
-            call h5screate_simple_f(rank_1d, [int(col_size, hsize_t)], memspace, ierr)
-
-            ! Select the file's hyperslab
-            call h5sselect_hyperslab_f(dspace_id, H5S_SELECT_SET_F, &
-                [0_hsize_t, int(col_indx - 1, hsize_t)], &
-                [int(col_size, hsize_t), 1_hsize_t], ierr)
-
-            call h5dwrite_f(dset_id, kinds%dp, vector, [int(col_size, hsize_t)], ierr, &
-                memspace, dspace_id)
-
-
-            ! Close dataset, dataspace, and file
-            call h5sclose_f(dspace_id, ierr)
-            call h5sclose_f(memspace, ierr)
-
-            call h5dclose_f(dset_id, ierr)
-            call h5fclose_f(fid, ierr)
-
-            call h5close_f(ierr)
-
-        end subroutine write_column_in_mat
-
-        subroutine write_vector_from_scratch(filename, dset_name, vector, vector_size)
-
-            use const, only: int_32, int_64, dp
-            use system, only: run_t
-
-            use hdf5
-
-            character(len=*), intent(in) :: filename
-            character(len=*), intent(in) :: dset_name
-            real(dp), intent(in) :: vector(:)
-            integer, intent(in) :: vector_size
-
-            integer(hid_t) :: fid
-            integer(hid_t) :: dset_id, dspace_id
-            integer(int_32) :: ierr
-            type(hdf5_kinds_t) :: kinds
-
-            ! According to HANDE this has to be called everytime. HDF5 is tricky...
-            call h5open_f(ierr)
-            call hdf5_kinds_init(kinds)
-
-            ! Open file in R/W mode
-            call h5fcreate_f(trim(filename), H5F_ACC_TRUNC_F, fid, ierr)
-
-            call h5screate_simple_f(1_int_32, [int(vector_size, hsize_t)], dspace_id, ierr)
-
-            call h5dcreate_f(fid, dset_name, H5T_NATIVE_DOUBLE, dspace_id, &
-                 dset_id, ierr)
-
-            ! Write to dataset
-            call h5dwrite_f(dset_id, H5T_NATIVE_DOUBLE, vector, [int(vector_size, hsize_t)], ierr)
-
-
-            ! Close dataset, dataspace, and file
-            call h5sclose_f(dspace_id, ierr)
-            call h5dclose_f(dset_id, ierr)
-            call h5fclose_f(fid, ierr)
-
-            call h5close_f(ierr)
-
-        end subroutine write_vector_from_scratch
-
-        subroutine write_mat_from_scratch(filename, dset_name, mat, mat_dims)
-
-            use const, only: int_32, int_64, dp
-            use system, only: run_t
-
-            use hdf5
-
-            character(len=*), intent(in) :: filename
-            character(len=*), intent(in) :: dset_name
-            real(dp), intent(in) :: mat(:)
-            integer, intent(in) :: mat_dims(:)
+            integer, intent(in) :: mat_size
 
             integer(hid_t) :: fid
             integer(hid_t) :: dset_id, dspace_id
