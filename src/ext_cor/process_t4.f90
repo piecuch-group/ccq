@@ -76,7 +76,7 @@ contains
 
     end subroutine gen_doubles_conf
 
-    pure subroutine update_doubles_projection(sys, doubles_conf, t4_conf, t4_amp, &
+    subroutine update_doubles_projection(sys, doubles_conf, t4_conf, t4_amp, &
             doubles_projection, doubles_conf_hash, f_ref)
 
         use const, only: p, i0

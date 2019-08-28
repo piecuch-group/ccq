@@ -51,7 +51,7 @@ module det_hash
 
     interface
         ! Interfaces to hashing algorithms written in C.
-        pure function MurmurHash2(key, N, seed) result(hash) bind(c, name='MurmurHash2')
+        function MurmurHash2(key, N, seed) result(hash) bind(c, name='MurmurHash2')
             ! In:
             !    key: data to be hashed.
             !    seed: random(ish!) number to seed the hash.
@@ -61,16 +61,16 @@ module det_hash
             !    32-bit hash of data.
             use, intrinsic:: iso_c_binding
             integer(c_int32_t) :: hash
-            type(c_ptr), value :: key
-            integer(c_int), value :: N
-            integer(c_int32_t), value :: seed
+            type(c_ptr), intent(in), value :: key
+            integer(c_int), intent(in), value :: N
+            integer(c_int32_t), intent(in), value :: seed
         end function MurmurHash2
     end interface
 
 contains
 
     !function murmurhash_bit_string(f, N, seed) result(hash)
-    pure function murmurhash_bit_string(f, N) result(hash)
+    function murmurhash_bit_string(f, N) result(hash)
 
         ! Wrapper around MurmurHash2.
 
@@ -144,7 +144,7 @@ contains
 
     ! Testing
     ! [TMPDEBUG]
-    pure function get_val(s, dict_size, dict) result(val)
+    function get_val(s, dict_size, dict) result(val)
 
         integer :: val
 

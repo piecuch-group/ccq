@@ -166,47 +166,47 @@ contains
             !do i=k3a, k3b-1
             !    if (dabs(t(i)) > 1.0d-5) print *, t(i)
             !enddo
-            if (run%stoch) call update_stoch_t3(sys, run, cc)
+            !if (run%stoch) call update_stoch_t3(sys, run, cc)
             !if (run%stoch) then
-            if (.false.) then
+            !if (.false.) then
 
-            allocate(V3(N1+1:N3,N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1,N0+1:N1))
-            V3=0.0_p
+            !allocate(V3(N1+1:N3,N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1,N0+1:N1))
+            !V3=0.0_p
 
-            call t3A_update_stoch(N0,N1,N2,N3,K1,K2,K3,K4,run%shift,V3,&
-                FockR,FockB,IntR,IntB,IntM,&
-                t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),&
-                t(k3a),t(k3b),t(k3c),t(k3d),cc%stoch%o3)
-            deallocate(V3)
+            !call t3A_update_stoch(N0,N1,N2,N3,K1,K2,K3,K4,run%shift,V3,&
+            !    FockR,FockB,IntR,IntB,IntM,&
+            !    t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),&
+            !    t(k3a),t(k3b),t(k3c),t(k3d),cc%stoch%o3)
+            !deallocate(V3)
 
-            allocate(V3(N2+1:N3,N1+1:N3,N1+1:N3,N0+1:N2,N0+1:N1,N0+1:N1))
-            V3=0.0_p
+            !allocate(V3(N2+1:N3,N1+1:N3,N1+1:N3,N0+1:N2,N0+1:N1,N0+1:N1))
+            !V3=0.0_p
 
-            call t3B_update_stoch(N0,N1,N2,N3,K1,K2,K3,K4,run%shift,V3,&
-                FockR,FockB,IntR,IntB,IntM,&
-                t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),&
-                t(k3a),t(k3b),t(k3c),t(k3d),cc%stoch%o3)
-            deallocate(V3)
+            !call t3B_update_stoch(N0,N1,N2,N3,K1,K2,K3,K4,run%shift,V3,&
+            !    FockR,FockB,IntR,IntB,IntM,&
+            !    t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),&
+            !    t(k3a),t(k3b),t(k3c),t(k3d),cc%stoch%o3)
+            !deallocate(V3)
 
-            allocate(V3(N2+1:N3,N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N2,N0+1:N1))
-            V3=0.0_p
+            !allocate(V3(N2+1:N3,N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N2,N0+1:N1))
+            !V3=0.0_p
 
-            call t3C_update_stoch(N0,N1,N2,N3,K1,K2,K3,K4,run%shift,V3,&
-                FockR,FockB,IntR,IntB,IntM,&
-                t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),&
-                t(k3a),t(k3b),t(k3c),t(k3d),cc%stoch%o3)
-            deallocate(V3)
+            !call t3C_update_stoch(N0,N1,N2,N3,K1,K2,K3,K4,run%shift,V3,&
+            !    FockR,FockB,IntR,IntB,IntM,&
+            !    t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),&
+            !    t(k3a),t(k3b),t(k3c),t(k3d),cc%stoch%o3)
+            !deallocate(V3)
 
-            allocate(V3(N2+1:N3,N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2,N0+1:N2))
-            V3=0.0_p
+            !allocate(V3(N2+1:N3,N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2,N0+1:N2))
+            !V3=0.0_p
 
-            call t3D_update_stoch(N0,N1,N2,N3,K1,K2,K3,K4,run%shift,V3,&
-                FockR,FockB,IntR,IntB,IntM,&
-                t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),&
-                t(k3a),t(k3b),t(k3c),t(k3d),cc%stoch%o3)
-            deallocate(V3)
+            !call t3D_update_stoch(N0,N1,N2,N3,K1,K2,K3,K4,run%shift,V3,&
+            !    FockR,FockB,IntR,IntB,IntM,&
+            !    t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),&
+            !    t(k3a),t(k3b),t(k3c),t(k3d),cc%stoch%o3)
+            !deallocate(V3)
 
-            endif
+            !endif
 
             if (.not. run%ext_cor .and. .not. run%stoch) then
                 if(run%lvl_t)then

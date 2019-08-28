@@ -1,6 +1,6 @@
 module system
 
-    use const, only: p, sp, line_len
+    use const, only: int_32, p, sp, line_len
     use basis_types, only: basis_t
 
     type ints_t
@@ -105,7 +105,7 @@ module system
         logical :: rhf
 
         ! Parallel
-        integer :: num_threads = 0
+        integer(int_32) :: num_threads = 1_int_32
 
 
         ! Calculation ID

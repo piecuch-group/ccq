@@ -702,7 +702,7 @@ contains
         !    run: runtime information
         !    cc: cc information
 
-        use const, only: sp, dp
+        use const, only: int_32, sp, dp
         use system, only: sys_t, run_t
         use cc_types, only: cc_t
 
@@ -742,7 +742,7 @@ contains
         run%ext_cor = .false.
         run%ext_cor_sd = .true.
 
-        run%num_threads = 1
+        run%num_threads = 1_int_32
 
         ! CC
         cc%acc%t2t2_t2 = 1.0_sp
