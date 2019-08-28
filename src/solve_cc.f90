@@ -211,10 +211,6 @@ contains
             conv%conv(3) = energy_diff
             conv%en_cor = e_cor_new
 
-            ! Write T vector on a file
-            rewind(conv%vec_unit)
-            write(conv%vec_unit) conv%vec_ptr
-
             ! Write T vecs
             call write_vecs(conv, iter, run%diis_space)
 
@@ -227,8 +223,7 @@ contains
                 call calc_diis(run, conv)
             endif
 
-            ! Print iteration information
-
+            ! Print the current iteration's information
             new_time = get_wall_time()
             call print_iteration(iter, e_cor_new, energy_diff, res, prev_time, new_time)
             prev_time = new_time
@@ -248,7 +243,8 @@ contains
 
             ! Abort if out of iterations
             if (iter == run%max_iter) then
-                write(io, '(a)') 'FAILED TO CONVERGE. KEEPING LAST T VECTOR.'
+                write(io, '(a)') 'FAILED TO CONVERGE IN', run%max_iter , &
+                     ' ITERATIONS. KEEPING LAST T VECTOR.'
                 conv%failed = .true.
             endif
         enddo

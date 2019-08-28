@@ -37,9 +37,11 @@ contains
 
     end subroutine close_print
 
-    subroutine print_header(uuid)
+    subroutine print_header(run)
 
-        character(len=37), intent(in) :: uuid
+        use system, only: run_t
+
+        type(run_t), intent(in) :: run
 
         character(len=255) :: hostname
         character(len=255) :: cmd
@@ -106,7 +108,8 @@ contains
         write(io,'(2x,a20,1x,a)') 'Working dir', trim(cwd)
         write(io,'(2x,a20,1x,a)') 'User', trim(user)
         write(io,'(2x,a20,1x,a)') 'Date', trim(date)
-        write(io,'(2x,a20,1x,a/)') 'UUID', trim(uuid(1:36))
+        write(io,'(2x,a20,1x,a)') 'UUID', trim(run%uuid(1:36))
+        write(io,'(2x,a20,1x,i4/)') 'Threads', run%num_threads
 
         call flush(io)
 

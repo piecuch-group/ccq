@@ -8,10 +8,14 @@ contains
 
     subroutine drive_doubles_contraction(sys, cc, v2a, v2b, v2c)
 
-        use system, only: sys_t
+        use const, only: dp
         use cc_types, only: cc_t
+        use system, only: sys_t
+
         use errors, only: stop_all
         use printing, only: io
+
+        use utils, only: get_wall_time
 
 
         type(sys_t), intent(in) :: sys
@@ -21,17 +25,7 @@ contains
         real(p), allocatable, intent(out) :: v2b(:,:,:,:)
         real(p), allocatable, intent(out) :: v2c(:,:,:,:)
 
-        !real(p), allocatable :: t1a(:,:)
-        !real(p), allocatable :: t1b(:,:)
-
-        !real(p), allocatable :: t2a(:,:,:,:)
-        !real(p), allocatable :: t2b(:,:,:,:)
-        !real(p), allocatable :: t2c(:,:,:,:)
-
-        !real(p), allocatable :: t3a(:,:,:,:,:,:)
-        !real(p), allocatable :: t3b(:,:,:,:,:,:)
-        !real(p), allocatable :: t3c(:,:,:,:,:,:)
-        !real(p), allocatable :: t3d(:,:,:,:,:,:)
+        real(dp) :: start_time, end_time
 
         real(p), pointer :: t1a(:,:) => null()
         real(p), pointer :: t1b(:,:) => null()
@@ -88,70 +82,6 @@ contains
 
 
         write(io, '(12x,a)') '=> Allocating arrays'
-        !allocate(t1a(sys%occ_a+1:sys%orbs, &
-        !    sys%froz+1:sys%occ_a))
-        !t1a(sys%occ_a+1:sys%orbs, &
-        !    sys%froz+1:sys%occ_a) = &
-        !    reshape(cc%t_vec(cc%pos(1):cc%pos(2)-1), &
-        !    [k3, k1])
-
-        !allocate(t1b(sys%occ_b+1:sys%orbs, &
-        !    sys%froz+1:sys%occ_b))
-        !t1b(sys%occ_b+1:sys%orbs, &
-        !    sys%froz+1:sys%occ_b) = &
-        !    reshape(cc%t_vec(cc%pos(2):cc%pos(3)-1), &
-        !    [k4, k2])
-
-        !allocate(t2a(sys%occ_a+1:sys%orbs, sys%occ_a+1:sys%orbs, &
-        !    sys%froz+1:sys%occ_a, sys%froz+1:sys%occ_a))
-        !t2a(sys%occ_a+1:sys%orbs, sys%occ_a+1:sys%orbs, &
-        !    sys%froz+1:sys%occ_a, sys%froz+1:sys%occ_a) = &
-        !    reshape(cc%t_vec(cc%pos(3):cc%pos(4)-1), &
-        !    [k3,k3,k1,k1])
-
-        !allocate(t2b(sys%occ_b+1:sys%orbs, sys%occ_a+1:sys%orbs, &
-        !    sys%froz+1:sys%occ_b, sys%froz+1:sys%occ_a))
-        !t2b(sys%occ_b+1:sys%orbs, sys%occ_a+1:sys%orbs, &
-        !    sys%froz+1:sys%occ_b, sys%froz+1:sys%occ_a) = &
-        !    reshape(cc%t_vec(cc%pos(4):cc%pos(5)-1), &
-        !    [k4,k3,k2,k1])
-
-        !allocate(t2c(sys%occ_b+1:sys%orbs, sys%occ_b+1:sys%orbs, &
-        !    sys%froz+1:sys%occ_b, sys%froz+1:sys%occ_b))
-        !t2c(sys%occ_b+1:sys%orbs, sys%occ_b+1:sys%orbs, &
-        !    sys%froz+1:sys%occ_b, sys%froz+1:sys%occ_b) = &
-        !    reshape(cc%t_vec(cc%pos(5):cc%pos(6)-1), &
-        !    [k4,k4,k2,k2])
-
-        !allocate(t3a(sys%occ_a+1:sys%orbs, sys%occ_a+1:sys%orbs, sys%occ_a+1:sys%orbs, &
-        !    sys%froz+1:sys%occ_a, sys%froz+1:sys%occ_a, sys%froz+1:sys%occ_a))
-        !t3a(sys%occ_a+1:sys%orbs, sys%occ_a+1:sys%orbs, sys%occ_a+1:sys%orbs, &
-        !    sys%froz+1:sys%occ_a, sys%froz+1:sys%occ_a, sys%froz+1:sys%occ_a) = &
-        !    reshape(cc%t_vec(cc%pos(6):cc%pos(7)-1), &
-        !    [k3,k3,k3,k1,k1,k1])
-
-        !allocate(t3b(sys%occ_b+1:sys%orbs, sys%occ_a+1:sys%orbs, sys%occ_a+1:sys%orbs, &
-        !    sys%froz+1:sys%occ_b, sys%froz+1:sys%occ_a, sys%froz+1:sys%occ_a))
-        !t3b(sys%occ_b+1:sys%orbs, sys%occ_a+1:sys%orbs, sys%occ_a+1:sys%orbs, &
-        !    sys%froz+1:sys%occ_b, sys%froz+1:sys%occ_a, sys%froz+1:sys%occ_a) = &
-        !    reshape(cc%t_vec(cc%pos(7):cc%pos(8)-1), &
-        !    [k4,k3,k3,k2,k1,k1])
-
-        !allocate(t3c(sys%occ_b+1:sys%orbs, sys%occ_b+1:sys%orbs, sys%occ_a+1:sys%orbs, &
-        !    sys%froz+1:sys%occ_b, sys%froz+1:sys%occ_b, sys%froz+1:sys%occ_a))
-        !t3c(sys%occ_b+1:sys%orbs, sys%occ_b+1:sys%orbs, sys%occ_a+1:sys%orbs, &
-        !    sys%froz+1:sys%occ_b, sys%froz+1:sys%occ_b, sys%froz+1:sys%occ_a) = &
-        !    reshape(cc%t_vec(cc%pos(8):cc%pos(9)-1), &
-        !    [k4,k4,k3,k2,k2,k1])
-
-        !allocate(t3d(sys%occ_b+1:sys%orbs, sys%occ_b+1:sys%orbs, sys%occ_b+1:sys%orbs, &
-        !    sys%froz+1:sys%occ_b, sys%froz+1:sys%occ_b, sys%froz+1:sys%occ_b))
-        !t3d(sys%occ_b+1:sys%orbs, sys%occ_b+1:sys%orbs, sys%occ_b+1:sys%orbs, &
-        !    sys%froz+1:sys%occ_b, sys%froz+1:sys%occ_b, sys%froz+1:sys%occ_b) = &
-        !    reshape(cc%t_vec(cc%pos(9):cc%pos(10)-1), &
-        !    [k4,k4,k4,k2,k2,k2])
-
-
         t1a(sys%occ_a+1:sys%orbs, &
             sys%froz+1:sys%occ_a) &
             => cc%t_vec(cc%pos(1):cc%pos(2)-1)
@@ -214,21 +144,28 @@ contains
                 allocate(V2C(N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2))
                 V2C=0.0d0
 
-                write(io, '(12x,a)') '=> T2A disconnected'
+                write(io, '(12x,a)') '=> <ijab| [V_N, (T4 - C4)]D | phi> alpha spin'
+                start_time = get_wall_time()
                 call t2A_disconnected(n0,n1,n2,n3, &
                     k1,k2,k3,k4,v2a,v2b,v2c, &
                     fockr, fockb, intr,intb,intm, &
                     t1a, t1b, t2a, t2b, t2c, &
                     t3a, t3b, t3c, t3d)
+                end_time = get_wall_time()
+                write(io, '(16x,a,f10.2,a)') '=> Took', end_time - start_time, ' seconds'
 
-                write(io, '(12x,a)') '=> T2B disconnected'
+                write(io, '(12x,a)') '=> <ijab| [V_N, (T4 - C4)]D | phi> beta spin'
+                start_time = get_wall_time()
                 call t2B_disconnected(n0,n1,n2,n3, &
                     k1,k2,k3,k4,v2b,v2c, &
                     fockr, fockb, intr,intb,intm, &
                     t1a, t1b, t2a, t2b, t2c, &
                     t3a, t3b, t3c, t3d)
+                end_time = get_wall_time()
+                write(io, '(16x,a,f10.2,a)') '=> Took', end_time - start_time, ' seconds'
 
-                write(io, '(12x,a)') '=> T2A update'
+                write(io, '(12x,a)') '=> <ijab| (V_N, (T4 - C4))C | phi> alpha-alpha spin'
+                start_time = get_wall_time()
                 call t2A_update(N0,N1,N2,N3,V2A, &
                     K1,K2,K3,K4, &
                     FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,&
@@ -238,14 +175,11 @@ contains
                     VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,&
                     t1a, t1b, t2a, t2b, t2c, &
                     t3a, t3b, t3c, t3d)
-                !call t2A_update(N0,N1,N2,N3,K1,K2,K3,K4,shift,V2A, &
-                !    FockR,FockB,IntR,IntB,IntM, &
-                !    t1a, t1b, t2a, t2b, t2c, &
-                !    t3a, t3b, t3c, t3d)
+                end_time = get_wall_time()
+                write(io, '(16x,a,f10.2,a)') '=> Took', end_time - start_time, ' seconds'
 
-
-
-                write(io, '(12x,a)') '=> T2B update'
+                write(io, '(12x,a)') '=> <ijab| (V_N, (T4 - C4))C | phi> alpha-beta spin'
+                start_time = get_wall_time()
                 call t2B_update(N0,N1,N2,N3,V2B, &
                     K1,K2,K3,K4, &
                     FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,&
@@ -255,13 +189,11 @@ contains
                     VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,&
                     t1a, t1b, t2a, t2b, t2c, &
                     t3a, t3b, t3c, t3d)
-                !call t2B_update(N0,N1,N2,N3,K1,K2,K3,K4,shift,V2B, &
-                !    FockR,FockB,IntR,IntB,IntM, &
-                !    t1a, t1b, t2a, t2b, t2c, &
-                !    t3a, t3b, t3c, t3d)
+                end_time = get_wall_time()
+                write(io, '(16x,a,f10.2,a)') '=> Took', end_time - start_time, ' seconds'
 
-
-                write(io, '(12x,a)') '=> T2C update'
+                write(io, '(12x,a)') '=> <ijab| (V_N, (T4 - C4))C | phi> beta-beta spin'
+                start_time = get_wall_time()
                 call t2C_update(N0,N1,N2,N3,V2C, &
                     K1,K2,K3,K4, &
                     FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,&
@@ -271,21 +203,10 @@ contains
                     VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,&
                     t1a, t1b, t2a, t2b, t2c, &
                     t3a, t3b, t3c, t3d)
-                !call t2C_update(N0,N1,N2,N3,K1,K2,K3,K4,shift,V2C, &
-                !    FockR,FockB,IntR,IntB,IntM, &
-                !    t1a, t1b, t2a, t2b, t2c, &
-                !    t3a, t3b, t3c, t3d)
-
+                end_time = get_wall_time()
+                write(io, '(16x,a,f10.2,a)') '=> Took', end_time - start_time, ' seconds'
 
             end associate
-
-            !v2a = 1.0_p
-            !v2b = 1.0_p
-            !v2c = 1.0_p
-
-            !deallocate(t1a,t1b)
-            !deallocate(t2a,t2b,t2c)
-            !deallocate(t3a,t3b,t3c,t3d)
 
         end subroutine drive_doubles_contraction
 
@@ -2625,7 +2546,6 @@ contains
                 t1A,t1B,t2A,t2B,t2C, &
                 t3A,t3B,t3C,t3D)
 
-            use utils, only: get_wall_time
             use cc_utils, only: reorder_stripe
 
             integer :: n0,n1,n2,n3
@@ -2653,7 +2573,6 @@ contains
             real(kind=8) :: V2C(N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2)
 
             real(kind=8),allocatable::accum(:,:)
-            real(kind=8) :: start_all, end_all, start_time, end_time
 
             real(kind=8) :: e2a, e2b, e2c
             real(kind=8) :: e1a1a, e1a1b, e1b1b
@@ -2683,7 +2602,6 @@ contains
             real(kind=8),allocatable::Q35(:,:)
             real(kind=8),allocatable::Q36(:,:)
             real(kind=8),allocatable::Q37(:,:)
-            real(kind=8),allocatable::Q38(:,:)
             real(kind=8),allocatable::Q39(:,:)
             real(kind=8),allocatable::Q40(:,:)
             real(kind=8),allocatable::Q41(:,:)
@@ -2695,10 +2613,6 @@ contains
 
             allocate(accum(N1+1:N3,N0+1:N1))
             accum = 0.0d0
-            start_all = get_wall_time()
-            start_time = get_wall_time()
-
-            print *, 'Q1'
 
             allocate(D1(N0+1:N1,N0+1:N1,N1+1:N3,N1+1:N3))
             call reorder2143(N0,N3,N0,N3,N0,N3,N0,N3, &
@@ -2719,12 +2633,6 @@ contains
             X1=X1+0.250*Q1
             deallocate(Q1)
 
-            end_time = get_wall_time()
-
-            print '(a,f16.2,a)', 'end Q1', end_time - start_time, ' seconds'
-
-            start_time = get_wall_time()
-
             allocate(D1(N0+1:N2,N0+1:N1,N2+1:N3,N1+1:N3))
             call reorder2143(N0,N3,N0,N3,N0,N3,N0,N3, &
                 N0,N2,N0,N1,N2,N3,N1,N3,IntM,D1)
@@ -2741,9 +2649,6 @@ contains
 
             X1=X1+Q2
             deallocate(Q2)
-            end_time = get_wall_time()
-            print '(a,f16.2,a)', 'end Q2', end_time - start_time, ' seconds'
-            start_time = get_wall_time()
 
             allocate(D1(N0+1:N2,N0+1:N2,N2+1:N3,N2+1:N3))
             call reorder2143(N0,N3,N0,N3,N0,N3,N0,N3, &
@@ -2763,8 +2668,6 @@ contains
             accum = accum + x1
             deallocate(Q3)
             deallocate(X1)
-            end_time = get_wall_time()
-            print '(a,f16.2,a)', 'end Q3', end_time - start_time, ' seconds'
 
             allocate(D1(N0+1:N1,N0+1:N1,N1+1:N3,N1+1:N3))
             call reorder2143(N0,N3,N0,N3,N0,N3,N0,N3, &
@@ -3070,13 +2973,6 @@ contains
             accum = accum + x3
             deallocate(X3)
 
-            end_all = get_wall_time()
-
-            print '(a,f16.2,a)', 'end Q3', end_all - start_all, ' seconds'
-
-            start_time = get_wall_time()
-
-
             ! [TODO] scaling stuff should go somewhere independend
             ! Scaling of T_2
             call v_t2(n0, n1, n2, n3, &
@@ -3131,11 +3027,6 @@ contains
             end forall
 
             deallocate(accum)
-
-            end_time = get_wall_time()
-
-            print '(a,f16.2,a)', 'end adhoc', end_time - start_time, ' seconds'
-
 
         end subroutine t2A_disconnected
 

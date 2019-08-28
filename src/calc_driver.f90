@@ -130,7 +130,7 @@ contains
         if (run%stoch) call init_p_space_slater(sys, 'p_space_det', 3, cc%stoch)
 
         ! Initialize OpenMP threads
-        if (run%num_threads /= 0) call omp_set_num_threads(run%num_threads)
+        call omp_set_num_threads(run%num_threads)
 
     end subroutine init_system
 
@@ -194,8 +194,6 @@ contains
             allocate(cc%t_vec(cc%t_size))
             cc%t_vec=0.0_p
 
-            ! Open binary file
-            open(t_unit,file="t_vec_"//trim(run%uuid)//".bin",form='unformatted')
             ! [TODO] this should not be here. The proper way of initializing vectors should be prepared
             if (run%calc_type == 'CCSD' .or. run%ext_cor) then
                 call init_dset(run%h5_master_file, 't_vec', [cc%pos(6) - 1])

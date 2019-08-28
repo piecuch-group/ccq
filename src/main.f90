@@ -27,7 +27,7 @@ program main
     call init_print(run)
 
     ! Print settings and info to the output
-    call print_header(run%uuid)
+    call print_header(run)
     if (run%config%echo) call print_config(run%config)
 
     ! Run calculations
