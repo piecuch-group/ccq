@@ -32,12 +32,19 @@ contains
 
     subroutine close_print()
 
-        ! Close file on exit
+        ! Close io file on exit
+
         if (io /= output_unit) close(io)
 
     end subroutine close_print
 
     subroutine print_header(run)
+
+        ! Print ccq information. This includes information about
+        ! the compilation, the host, authors, etc.
+
+        ! In:
+        !   run: runtime configuration data
 
         use system, only: run_t
 
@@ -117,6 +124,16 @@ contains
 
     subroutine print_calc_params(sys, run, cc)
 
+        ! Print calculation parameters. This includes
+        ! molecular system data, CC settings, and other
+        ! parameters and configurations related to the QM
+        ! calculations.
+
+        ! In:
+        !   sys: molecular system data
+        !   run: runtime configuration data
+        !   cc: CC data, including vectors
+
         use system, only: sys_t, run_t
         use cc_types, only: cc_t
 
@@ -181,6 +198,12 @@ contains
 
     subroutine print_cct3(sys, cc)
 
+        ! Print the summary of CC(t;3) calculations
+
+        ! In:
+        !   sys: molecular system data
+        !   cc: CC data, including vectors, energy, etc.
+
         use system, only: sys_t
         use cc_types, only: cc_t
 
@@ -201,6 +224,13 @@ contains
 
     subroutine print_summary(sys, run, cc)
 
+        ! Print ccq calculation summary
+
+        ! In:
+        !   sys: molecular system data
+        !   run: runtime configuratoin data
+        !   cc: CC data, including vectors, energy, etc.
+
         use system, only: sys_t, run_t
         use cc_types, only: cc_t
 
@@ -218,14 +248,18 @@ contains
 
     end subroutine print_summary
 
+    subroutine print_date(msg)
 
-    subroutine print_date(note)
+        ! Print the date of now plus a message
 
-        character(len=*), intent(in) :: note
+        ! In:
+        !   msg: message to be printed next to the date
+
+        character(len=*), intent(in) :: msg
         character(len=30) :: date
 
         call fdate(date)
-        write (io,'(/a/)') trim(note)//' '//trim(date)
+        write (io,'(/a/)') trim(msg)//' '//trim(date)
 
         call flush(io)
 
@@ -233,7 +267,8 @@ contains
 
     subroutine print_iter_head()
 
-        ! Print the iteration table header
+        ! Print the iteration table header at the
+        ! beginning of the iterative procedure
 
         write(io,'(/2x,a4,3(a15),a16)') 'It.',  'E (Corr)', 'dE', 'Residuum', 'Wall Time'
         write(io,'(2x,65("-"))')
@@ -242,6 +277,19 @@ contains
     end subroutine print_iter_head
 
     subroutine print_iteration(iter, ecor, energy_diff, res, prev_time, new_time)
+
+        ! Print the results of the current Jacobi iteration
+
+        ! In:
+        !   iter: iteration number
+        !   ecor: correlation energy
+        !   energy_diff: correlation energy difference
+        !                between iterations
+        !   res: residuum
+        !   prev_time: time of the previous iteration
+        !   new_time: time of the current iteration.
+        !             This and prev_time are used to
+        !             calculate the iteration's duration
 
         use const, only: p
 
@@ -255,11 +303,12 @@ contains
         real(p) :: nsec
         integer :: nmin
 
+        ! Convert time in seconds to time in min:sec
         nsec = new_time - prev_time
         nmin = int(nsec) / 60
         nsec = nsec-real(nmin, p)*60.0_p
 
-        write(io,'(2x,i4,3(f15.10),i5,'' min'',f5.1,'' s'')') iter,ecor,energy_diff, res,nmin,nsec
+        write(io,'(2x,i4,3(f15.10),i5,'' min'',f5.1,'' s'')') iter, ecor, energy_diff, res, nmin, nsec
 
         call flush(io)
 
@@ -267,7 +316,7 @@ contains
 
     subroutine print_help()
 
-        ! Print the help dialog
+        ! Print the help dialog if no options or input file is given
 
         print '(a)', 'Usage: ccq [OPTIONS] FILE'
         print '(a)', 'Coupled-cluster program that performs calculations with up to quadruply'
@@ -280,11 +329,16 @@ contains
         print '(/a)', 'ccq repository online: <https://gitlab.msu.edu/piecuch-group/ccq/>'
         print '(a)', "Program written in Piecuch's group at MSU: <https://www2.chemistry.msu.edu/faculty/piecuch/>"
 
-        call exit(0)
+        call exit(1)
 
     end subroutine print_help
 
     subroutine print_config(config)
+
+        ! Echo configuration file to the output file
+
+        ! In:
+        !   config: configuration file split into lines
 
         use system, only: config_t
 

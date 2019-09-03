@@ -1,10 +1,77 @@
 module energy
 
+    ! This module is responsible for calculating energies
+    ! including correlation energies, correction energies,
+    ! Hartre--Fock energies, etc.
+
     implicit none
 
 contains
 
+    function calc_hf_energy(sys, e1int, e2int ) result(hf_energy)
+
+        ! Calculate Hartree--Fock energy
+
+        ! In:
+        !   sys: molecular system data
+        !   e1int: onebody integrals (Z)
+        !   e2int: twobody integrals (V)
+
+        ! Out:
+        !   hf_energy: Hartree--Fock energy (without nuclear repulsion)
+
+        use const, only: p
+        use system, only: sys_t
+
+        real(p) :: hf_energy
+        type(sys_t), intent(in) :: sys
+        real(p), allocatable, intent(in) :: e1int(:,:)
+        real(p), allocatable, intent(in) :: e2int(:,:,:,:)
+
+        integer :: i, j
+
+        associate(froz=>sys%froz, occ_a=>sys%occ_a, occ_b=>sys%occ_b, orbs=>sys%orbs)
+            ! Calculate reference energy
+            hf_energy = 0.0_p
+            do i=1,occ_a
+                hf_energy = hf_energy + e1int(i,i)
+            enddo
+            do i=1,occ_b
+                hf_energy = hf_energy + e1int(i,i)
+            enddo
+
+            do i=1,occ_a
+                do j=1,occ_b
+                    hf_energy = hf_energy + e2int(i,j,i,j)
+                enddo
+            enddo
+
+            do i=1,occ_a
+                do j=1,occ_a
+                    hf_energy = hf_energy + 0.5_p * (e2int(i,j,i,j)-e2int(i,j,j,i))
+                enddo
+            enddo
+
+            do i=1,occ_b
+                do j=1,occ_b
+                    hf_energy = hf_energy + 0.5_p * (e2int(i,j,i,j)-e2int(i,j,j,i))
+                enddo
+            enddo
+
+        end associate
+
+    end function calc_hf_energy
+
     function calculate_left_energy(sys, cc) result(energy)
+
+        ! Calculate the energy of a Lambda CC state
+
+        ! In:
+        !   sys: molecular system information
+        !   cc: CC vectors
+
+        ! Out:
+        !   energy: Lambda CC energy
 
         use const, only: p
         use system, only: sys_t
@@ -29,9 +96,11 @@ contains
     function calculate_unsorted_energy(sys, cc) result(energy)
 
         ! Calculate the CC correlation energy.
+
         ! In:
         !    sys: system data
         !    cc: coupled cluster data (amplitudes are needed)
+
         ! Out:
         !    energy: system's correlation energy
 
@@ -161,9 +230,11 @@ contains
     function calculate_sorted_energy(sys, cc) result(energy)
 
         ! Calculate the CC correlation energy using sorted integrals.
+
         ! In:
         !    sys: system data
         !    cc: coupled cluster data (amplitudes are needed)
+
         ! Out:
         !    energy: system's correlation energy
 

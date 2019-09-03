@@ -1,12 +1,16 @@
 module mm_correct
 
+    ! This module contains functions and routines that
+    ! handle the method-of-moments correction to CC
+    ! equations
+
     implicit none
 
 contains
 
     subroutine crcc23(sys, run, cc)
 
-        use const, only: p, l_unit
+        use const, only: p
         use system, only: sys_t, run_t
         use cc_types, only: cc_t
         use printing, only: print_date, print_cct3

@@ -1,7 +1,7 @@
 ccq Coupled-Cluster Program
 ===========================
 
-``ccq`` is a coupled-cluster (CC) code capable of running calculations with up to
+``ccq`` is a coupled-cluster (CC) software package capable of running calculations with up to
 quadruple excitations. Notable methods included are CCSDT, CCSDTQ, as well as
 their active-space counterparts, CCSDt, CCSDtq, and CCSDTq, and ACC-type
 methods. Also, externally corrected CC is available
@@ -41,6 +41,15 @@ nel:
 nvir:
    number of virtual orbitals (unoccupied spin-orbitals)
 
+multiplicity:
+   spin multiplicity
+
+onebody:
+   path to the onebody.inp integral file as provided by CC_PACKAGE
+
+twobody:
+   path to the twobody.inp integral file as provided by CC_PACKAGE
+
 
 Runtime options
 ^^^^^^^^^^^^^^^
@@ -60,7 +69,21 @@ max_iterations:
 
 calc_type:
    select calcualtion type. Currently the supported calculations are CCSD,
-   CCSDT, CCSDTQ, CADFCIQMC, and DCSD-MC.
+   CCSDT, CCSDTQ, CCSDt, CC(t;3), CADFCIQMC, and DCSD-MC.
+
+label:
+   project label. Will be shown in the output. Useful to help identify the calculation.
+
+num_threads:
+   number of threads to use in the shared-memory parallel sections (default is 1)
+
+sym_file:
+   symmetry file containing the spatial symmetries of the molecular orbitals. The first
+   value of the file is the point group (C1 is 1; C2v, 3; D2h, 4)
+
+rhf:
+   force a closed-shell calculation (default is .false.)
+
 
 Active space options
 ^^^^^^^^^^^^^^^^^^^^
@@ -75,6 +98,7 @@ act_ind_t:
 
 act_ind_q:
    number of active indices in a quadruply excited cluster
+
 
 ACC options
 ^^^^^^^^^^^
@@ -94,4 +118,3 @@ t2t2_t3:
 
 t2t3_t3:
    T_2 * T_3 projected on triples. Takes 5 values.
-

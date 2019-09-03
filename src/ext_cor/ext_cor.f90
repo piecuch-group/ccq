@@ -101,7 +101,7 @@ contains
         use cc_utils, only: antisymmetrize
         use cluster_analysis, only: analyze_t3
 
-        use hdf5_io, only: init_dset, write_vector, write_matrix
+        use hdf5_io, only: write_ext_cor_vecs
 
         type(sys_t), intent(in) :: sys
         type(run_t), intent(in) :: run
@@ -164,20 +164,7 @@ contains
 
         ! Write externally corrected methods to HDF5, just in case
         write(io, '(4x,a)') '=> Writing externally corrected data to HDF5'
-        call init_dset(run%h5_master_file, 'ext_cor_t', [cc%t_size])
-        call write_vector(run%h5_master_file, 'ext_cor_t', cc%t_vec, cc%t_size)
-
-        call init_dset(run%h5_master_file, 'ext_cor_vt4a', shape(cc%ext_cor%t2a))
-        call write_matrix(run%h5_master_file, 'ext_cor_vt4a', cc%ext_cor%t2a, &
-             shape(cc%ext_cor%t2a), size(cc%ext_cor%t2a))
-
-        call init_dset(run%h5_master_file, 'ext_cor_vt4b', shape(cc%ext_cor%t2b))
-        call write_matrix(run%h5_master_file, 'ext_cor_vt4b', cc%ext_cor%t2b, &
-             shape(cc%ext_cor%t2b), size(cc%ext_cor%t2b))
-
-        call init_dset(run%h5_master_file, 'ext_cor_vt4c', shape(cc%ext_cor%t2c))
-        call write_matrix(run%h5_master_file, 'ext_cor_vt4c', cc%ext_cor%t2c, &
-             shape(cc%ext_cor%t2c), size(cc%ext_cor%t2c))
+        call write_ext_cor_vecs(run, cc)
 
         ! Calculate externally corrected correlation energy
         cc%en_cor = calculate_unsorted_energy(sys, cc)

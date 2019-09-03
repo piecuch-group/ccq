@@ -12,9 +12,11 @@ contains
     subroutine solve_cc(sys, run, cc, failed)
 
         ! Solve ground-state CC equations
+
         ! In:
         !    sys: system information
         !    run: runtime information
+
         ! In/Out:
         !    cc: coupled-cluster information (including T vector, energies, etc.)
         !    failed: a boolean flag used to signal the calc driver that convergence
@@ -101,9 +103,11 @@ contains
         ! Solve left ground-state CC equations. It calculates the
         ! linear de-excitation amplitudes that match the CC ground-state
         ! energy.
+
         ! In:
         !    sys: system information
         !    run: runtime information
+
         ! In/Out:
         !    cc: coupled-cluster information (including T vector, energies, etc.)
         !    failed: a boolean flag used to signal the calc driver that convergence
@@ -170,13 +174,23 @@ contains
 
     subroutine jacobi_iter(sys, run, cc, conv)
 
+        ! Actual solver routine where the target vector is solved
+        ! using Jacobi iterations
+
+        ! In:
+        !   sys: molecular system data
+        !   run: runtime configuration data
+
+        ! In/Out
+        !   cc: CC vector and data
+        !   conv: convergence data
+
         use const, only: p, dp, t_unit, t_vecs_unit
-        use diis, only: calc_diis, write_vecs, init_vecs
+        use diis, only: calc_diis, write_vecs, init_vecs, residuum, clean_up_files
         use printing, only: io, print_iteration, print_date
-        use cc_utils, only: residuum
         use system, only: sys_t, run_t
         use cc_types, only: cc_t
-        use cc_utils, only: residuum, open_t4_files
+        use cc_utils, only: open_t4_files
         use proc_pointers, only: update_ptr, calculate_energy_ptr
         use solver_types, only: conv_t
         use utils, only: get_wall_time
@@ -249,33 +263,49 @@ contains
             endif
         enddo
 
-        close(conv%vecs_unit, status='delete')
+        ! Cleanup DIIS files
+        call clean_up_files(conv, run%diis_space)
 
     end subroutine jacobi_iter
 
     function check_sig() result(exists)
 
-        use const, only: end_unit
+        ! Check for external commands while the program
+        ! is running. This function will read a file
+        ! "cc.comm" and perform operations based on what
+        ! is in the file
+
+        use const, only: tmp_unit
 
         logical :: exists
 
         inquire(file='cc.comm', exist=exists)
+        ! [TODO] right now the "cc.comm" only causes the program
+        ! to stop. In the future, this should do more things (i.e.
+        ! change the DIIS space, change convergence, etc.)
         if (exists) then
-            open(end_unit, file='cc.comm', status='old')
-            close(end_unit, status='delete')
+            open(tmp_unit, file='cc.comm', status='old')
+            close(tmp_unit, status='delete')
         endif
 
     end function check_sig
 
-
     function check_convergence(conv, tol) result(res)
+
+        ! Check whether the iterative procedure has converged
+
+        ! In:
+        !   conv: convergence data
+        !   tol: convergence tolerance
+
+        ! Out:
+        !   res: logical value indicating convergence
 
         use const, only: p
 
+        logical :: res
         real(p), intent(in) :: conv(:)
         real(p), intent(in) :: tol
-
-        logical :: res
 
         if (all(dabs(conv) < tol)) then
             res = .true.
@@ -284,6 +314,5 @@ contains
         endif
 
     end function check_convergence
-
 
 end module solver

@@ -37,7 +37,7 @@ contains
 
         logical :: cc_failed = .false.
 
-        ! Start wall clock
+        ! Start main wall clock
         call print_date('  ccq started on:')
         call init_system(sys, run, cc)
 
@@ -45,9 +45,8 @@ contains
         ! Print calculation options parameters
         call print_calc_params(sys, run, cc)
 
-        ! Externally corrected
-        ! --------------------
-
+        ! Externally corrected CC methods
+        ! -------------------------------
         if (run%ext_cor) then
             call ext_cor_driver(sys, run, cc)
         endif
@@ -73,8 +72,6 @@ contains
             call crcc23(sys, run, cc)
         endif
 
-        ! ---------------------
-
         ! Wrap up
         call clean_system(sys, run, cc, cc_failed)
         call print_summary(sys, run, cc)
@@ -85,14 +82,17 @@ contains
 
     subroutine init_system(sys, run, cc)
 
+        ! Initialize system for CC calculations
+
         use system, only: sys_t, run_t
         use cc_utils, only: open_t4_files
         use cc_types, only: cc_t, init_p_space_slater
-        use hdf5_io, only: init_h5_file
         use integrals, only: load_ints, load_sorted_ints
         use basis_types, only: init_basis_strings
         use excitations, only: init_excitations
         use cc_utils, only: get_t_sizes, get_t_sizes_act
+
+        use hdf5_io, only: init_h5_file
 
         use omp_lib, only: omp_set_num_threads
 
@@ -109,9 +109,8 @@ contains
 
         ! Load integrals
         call load_ints(sys, run)
-        !if (run%sorted_ints) then
-            call load_sorted_ints(sys, run)
-        !endif
+        ! [TODO] everything should be sorted in the future
+        call load_sorted_ints(sys, run)
 
         ! Initialize determinant and excitation systems
         call init_basis_strings(sys%basis)
@@ -120,7 +119,7 @@ contains
         ! Initialize HDF5 master file
         call init_h5_file(run%h5_master_file)
 
-        ! Initialize vectors
+        ! Initialize CC vectors
         if (run%lvl_q) call open_t4_files(sys, run)
         call init_vecs(run, cc)
 
@@ -136,27 +135,23 @@ contains
 
     subroutine clean_system(sys, run, cc, cc_failed)
 
-        use const, only: t_unit, t_vecs_unit, l_unit
+        use const, only: tmp_unit
         use system, only: sys_t, run_t
         use cc_types, only: cc_t
         use integrals, only: unload_ints, unload_sorted_ints
         use basis_types, only: dealloc_basis_t
         use excitations, only: end_excitations
         use cc_utils, only: close_t4_files
-        use hdf5_io, only: write_calc_data
 
         type(sys_t), intent(inout) :: sys
         type(run_t), intent(in) :: run
         type(cc_t), intent(inout) :: cc
         logical, intent(in) :: cc_failed
 
-        close(t_unit, status='delete')
-        close(l_unit, status='delete')
+        integer :: idx
 
         ! Close T vec file
-        if (run%keep_bin .or. cc_failed) then
-            call write_calc_data(sys, run, cc)
-        endif
+        ! [TODO] cleanup: write bin files and deal with failure to converge
 
         if (run%lvl_q) call close_t4_files(sys, run%keep_bin, cc_failed)
 
@@ -179,17 +174,18 @@ contains
 
     subroutine init_vecs(run, cc)
 
-        use const, only: p, t_unit, l_unit
+        use const, only: p, t_unit
+        use cc_types, only: cc_t
         use errors, only: stop_all
         use hdf5_io, only: init_dset
         use system, only: run_t
-        use cc_types, only: cc_t
 
         type(run_t), intent(in) :: run
         type(cc_t), intent(inout) :: cc
+
         logical :: t_exists
 
-        ! T vector
+        ! Initialize T vector
         if (.not. allocated(cc%t_vec)) then
             allocate(cc%t_vec(cc%t_size))
             cc%t_vec=0.0_p
@@ -216,11 +212,9 @@ contains
             if (.not. allocated(cc%l_vec)) allocate(cc%l_vec(cc%l_size))
 
             ! Open binary file
-            open(l_unit,file="l_vec_"//trim(run%uuid)//".bin",form='unformatted')
             call init_dset(run%h5_master_file, 'l_vec', [cc%t_size])
         endif
 
     end subroutine init_vecs
 
 end module calc_driver
-

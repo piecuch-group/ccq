@@ -1,5 +1,8 @@
 module hbar_gen
 
+    ! This module contains code to generate and manage
+    ! the similarity transformed Hamiltonian
+
     implicit none
 
 contains

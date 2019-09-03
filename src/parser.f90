@@ -21,6 +21,7 @@ contains
 
         ! In:
         !    command line arguments from system shell
+
         ! In/Out:
         !    sys: system information
         !    run: runtime information
@@ -100,6 +101,7 @@ contains
 
         ! In/Out:
         !     run: runtime configuration (specifically the config file path)
+
         ! Out:
         !     sys: system information
         !     cc: coupled-cluster information
@@ -167,6 +169,7 @@ contains
             ! Load flag keywords (i.e. keywords that if present
             ! represent a true value, if missing false)
             if (indx == 0 ) then
+
                 select case (line)
                 case ('restart', 'rest')
                     run%restart = .true.
@@ -183,7 +186,7 @@ contains
                 val = trim(adjustl(line(indx+1:)))
 
                 ! Molecular system parameters.
-                ! All calues are loaded locally in order to be able to check
+                ! All values are loaded locally in order to be able to check
                 ! for errors. [TODO] improve
                 select case (option)
                 case ('core', 'nfroz', 'frozen', 'froz')
@@ -291,14 +294,14 @@ contains
 
     end subroutine get_config
 
-
     subroutine get_calc_macros(sys, run, cc)
 
         ! Get calculation type from input file and set default
         ! configurations and parameters
-        !
+
         ! In/Out:
         !     run: runtime information. Specifically the config file
+
         ! Out:
         !     sys: system information
         !     run: runtime information
@@ -430,10 +433,11 @@ contains
     subroutine get_acc_opts(sys, run, cc, option, val)
 
         ! Get ACC-type methods specific configuration parameters
-        !
+
         ! In:
         !     option: option keyword from the config file
         !     val: option's value
+
         ! Out:
         !     sys: system information
         !     run: runtime information
@@ -475,10 +479,11 @@ contains
     subroutine get_act_opts(sys, run, cc, option, val)
 
         ! Get active-space-type calculation configuration parameters
-        !
+
         ! In:
         !     option: option keyword from the config file
         !     val: option's value
+
         ! Out:
         !     sys: system information
         !     run: runtime information
@@ -525,10 +530,11 @@ contains
     subroutine get_ext_cor_opts(sys, run, cc, option, val)
 
         ! Get externally correction configuration parameters
-        !
+
         ! In:
         !     option: option keyword from the config file
         !     val: option's value
+
         ! Out:
         !     sys: system information
         !     run: runtime information
@@ -566,10 +572,11 @@ contains
     subroutine get_run_opts(run, option, val)
 
         ! Get generic runtime information options
-        !
+
         ! In:
         !     option: option keyword from the config file
         !     val: option's value
+
         ! Out:
         !     run: runtime information
 
@@ -647,7 +654,6 @@ contains
 
     end subroutine get_run_opts
 
-
     subroutine load_config_file(config)
 
         ! Load config file into memory
@@ -696,7 +702,7 @@ contains
     subroutine set_default_options(sys, run, cc)
 
         ! Set default options and configuration parameters
-        !
+
         ! In/Out:
         !    sys: system information
         !    run: runtime information

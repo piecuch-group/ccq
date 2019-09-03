@@ -1,11 +1,8 @@
 module const
 
-    type e_op_t
-        integer :: a, b
-        integer :: aa, ab, bb
-        integer :: aaa, aab, abb, bbb
-        integer :: aaaa, aaab, aabb, abbb, bbbb
-    end type e_op_t
+    ! This module holds all constant values in ccq.
+    ! For example, integer and real types, numerical constants,
+    ! file units, etc.
 
     ! 32-bit (4-byte) integer.
     integer, parameter :: int_32 = selected_int_kind(6)
@@ -35,6 +32,7 @@ module const
     ! Maximum parameters
     integer, parameter :: max_p_space = 50000000
     integer, parameter :: line_len = 255
+    integer, parameter :: c_len = 500
 
     ! File units
     integer, parameter :: part_ints_a_unit = 130
@@ -50,9 +48,8 @@ module const
     integer, parameter :: l_unit = 422
     integer, parameter :: l_vecs_unit = 423
     integer, parameter :: hbar_unit = 488
-    integer, parameter :: end_unit = 489
-    integer, parameter :: walk_unit = 490
-    integer, parameter :: sym_unit = 491
+    integer, parameter :: walk_unit = 489
+    integer, parameter :: sym_unit = 490
 
     ! Adapt for Ilias old scheme
     integer, parameter :: ta = 29
@@ -60,8 +57,5 @@ module const
     integer, parameter :: tc = 31
     integer, parameter :: td = 32
     integer, parameter :: te = 33
-
-    ! Helpers
-    type(e_op_t), parameter :: e_op = e_op_t(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14)
 
 end module const

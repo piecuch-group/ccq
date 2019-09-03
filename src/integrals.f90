@@ -97,7 +97,18 @@ contains
 
     subroutine load_ints(sys, run)
 
+        ! Load one and twobody integrals from CC_PACKAGE
+        ! onebody.inp and twobody.inp files
+
+        ! In:
+        !    run: runtime configuration and data
+
+        ! In/Out:
+        !    sys: molecular system data. On return, the
+        !         integrals will be loaded on sys%ints
+        
         use const, only: p
+        use energy, only: calc_hf_energy
         use checking, only: check_allocate
         use errors, only: stop_all
         use system, only: sys_t, run_t
@@ -174,8 +185,19 @@ contains
 
     end subroutine load_ints
 
-
     subroutine gen_fock_operator(sys, e1int, e2int)
+
+        ! Generate the Fock operator out of onebody (Z) and
+        ! twobody (V) integrals
+
+        ! In:
+        !   e1int: onebody integrals (Z)
+        !   e2int: twobody integrals (V)
+
+        ! In/Out:
+        !   sys: molecular system data. On return, this parameter
+        !        will be loaded with the Fock operator (F), such
+        !        that F = Z + G
 
         use const, only: p
         use system, only: sys_t
@@ -229,51 +251,13 @@ contains
 
     end subroutine gen_fock_operator
 
-    function calc_hf_energy(sys, e1int, e2int ) result(hf_energy)
-
-        use const, only: p
-        use system, only: sys_t
-
-        real(p) :: hf_energy
-        type(sys_t), intent(in) :: sys
-        real(p), allocatable, intent(in) :: e1int(:,:)
-        real(p), allocatable, intent(in) :: e2int(:,:,:,:)
-
-        integer :: i, j
-
-        associate(froz=>sys%froz, occ_a=>sys%occ_a, occ_b=>sys%occ_b, orbs=>sys%orbs)
-            ! Calculate reference energy
-            hf_energy = 0.0_p
-            do i=1,occ_a
-                hf_energy = hf_energy + e1int(i,i)
-            enddo
-            do i=1,occ_b
-                hf_energy = hf_energy + e1int(i,i)
-            enddo
-
-            do i=1,occ_a
-                do j=1,occ_b
-                    hf_energy = hf_energy + e2int(i,j,i,j)
-                enddo
-            enddo
-
-            do i=1,occ_a
-                do j=1,occ_a
-                    hf_energy = hf_energy + 0.5_p * (e2int(i,j,i,j)-e2int(i,j,j,i))
-                enddo
-            enddo
-
-            do i=1,occ_b
-                do j=1,occ_b
-                    hf_energy = hf_energy + 0.5_p * (e2int(i,j,i,j)-e2int(i,j,j,i))
-                enddo
-            enddo
-
-        end associate
-
-    end function calc_hf_energy
-
     subroutine unload_ints(sys)
+
+        ! Unload and deallocate all unsorted integrals
+
+        ! In:
+        !   sys: molecular system data
+
 
         use system, only: sys_t
 
@@ -517,6 +501,11 @@ contains
     end subroutine load_sorted_ints
 
     subroutine unload_sorted_ints(sys)
+
+        ! Unload and deallocate all sorted integrals
+
+        ! In:
+        !   sys: molecular system data
 
         use const, only: part_ints_a_unit, part_ints_b_unit, part_ints_c_unit
         use system, only: sys_t

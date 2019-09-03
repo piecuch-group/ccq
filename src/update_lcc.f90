@@ -1,12 +1,15 @@
 module update_lcc
 
+    ! Module holding the update routines analog to
+    ! update_cc, but for the lambda  CC state
+
     implicit none
 
 contains
 
     subroutine update_l2(sys, run, cc)
 
-        use const, only: p, l_unit
+        use const, only: p
         use system, only: sys_t, run_t
         use cc_types, only: cc_t
 

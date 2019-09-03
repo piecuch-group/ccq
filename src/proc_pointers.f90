@@ -1,5 +1,7 @@
 module proc_pointers
 
+    ! This module holds procedure pointers.
+
     implicit none
 
     abstract interface

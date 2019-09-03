@@ -1,6 +1,14 @@
-subroutine egemm(K1,K2,K3,A,B,C)
+subroutine egemm(k1,k2,k3,A,B,C)
 
     ! BLAS DGEMM wrapper.
+
+    ! In:
+    !   k1, k2, k3: matrix dimensions. k3 is the dimension
+    !               being contracted
+    !   A, B: input matrices
+
+    ! In/Out:
+    !   C: dgemm result
 
     ! [TODO] This has to become a module.
     ! Also, add  compatibility with sp?
@@ -20,7 +28,18 @@ subroutine egemm(K1,K2,K3,A,B,C)
 
 end subroutine egemm
 
-subroutine egemm1(K1,K3,A,B,C)
+subroutine egemm1(k1,k3,A,B,C)
+
+    ! BLAS DGEMV wrappeer.
+
+    ! In:
+    !   k1, k3: matrix dimensions. k3 is the dimension
+    !               being contracted
+    !   A: input matrix
+    !   B: input vector
+
+    ! In/Out:
+    !   C: dgemv result.
 
     use const, only: dp, int_64
 

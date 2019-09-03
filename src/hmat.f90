@@ -15,6 +15,7 @@ contains
         !    ints: system's integrals
         !    i: ith spin-orbital
         !    a: ath spin-orbital
+
         ! Out:
         !    z_int: one-body operator matrix element
 
@@ -50,6 +51,7 @@ contains
         !    j: jth spin-orbital
         !    a: ath spin-orbital
         !    b: bth spin-orbital
+
         ! Out:
         !    v_int: two-body operator matrix element
 

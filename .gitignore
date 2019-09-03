@@ -6,6 +6,7 @@ JOBS/
 
 # Editors
 tags
+.vscode
 
 # Prerequisites
 *.d

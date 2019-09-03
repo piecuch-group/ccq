@@ -12,5 +12,8 @@ FFLAGS_DEBUG := -O0 -fcheck=all -fdefault-integer-8 -m64 -I${MKLROOT}/include -I
 
 # Linking
 LDFLAGS :=
-LIBS := -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_gf_ilp64.a ${MKLROOT}/lib/intel64/libmkl_gnu_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -lgomp -lpthread -lm -ldl -luuid -lhdf5_fortran
+LIBS := -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_gf_ilp64.a \
+		${MKLROOT}/lib/intel64/libmkl_gnu_thread.a \
+		${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group \
+		-lgomp -lpthread -lm -ldl -luuid -lhdf5_fortran
 

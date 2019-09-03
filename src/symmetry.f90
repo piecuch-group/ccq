@@ -3,8 +3,8 @@ module symmetry
     ! Module for point-group symmetry considerations
 
     implicit none
+
     integer :: mo_sym(1:200)
-    !integer, dimension(8,8,4) :: char_table
     integer :: char_table(8,8)
     integer :: group_dim
     integer :: target_sym = 1
@@ -15,6 +15,7 @@ contains
     subroutine read_sym(filename, orbs)
 
         ! Read symmetry file and choose character tables
+
         ! In:
         !   filename: file containing molecular orbital symmetries
 
@@ -98,8 +99,21 @@ contains
     end subroutine read_sym
 
     function is_sym(ex_orbs, norbs)
+
+        ! Check whether the existation is fully symmetric
+
+        ! In:
+        !   ex_orbs: orbitals involved in the excitation
+        !   norbs: number of orbitals in the excitation.
+        !          norbs/2 is the excitation rank
+
+        ! Out:
+        !   is_sym: logical value. If true, the excitation
+        !           is fully symmetric.
+
         integer, intent(in) :: ex_orbs(8)
         integer, intent(in) :: norbs
+
         integer :: tmp_sym(8)
         integer :: test_ag = 1
         integer :: i, i_sym
@@ -113,15 +127,12 @@ contains
         enddo
 
         is_sym = .true.
-        !print *, 'Debug PG', ex_orbs(1:norbs)
         do i_sym=1, group_dim
-            !print '(2i4)', tmp_sym(i_sym), char_table(target_sym,i_sym)
             if (tmp_sym(i_sym) /= char_table(target_sym,i_sym)) then
                 is_sym = .false.
                 exit
             endif
         enddo
-        !print *, is_sym
 
     end function is_sym
 

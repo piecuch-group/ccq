@@ -1,5 +1,10 @@
 module system
 
+    ! Module holding the system types. These include
+    ! sys_t which holds the molecular system information,
+    ! run_t, which contains information about the runtime configuration
+    ! ints_t, which hold the molecular integrals, etc.
+
     use const, only: int_32, p, sp, line_len
     use basis_types, only: basis_t
 
@@ -146,6 +151,5 @@ module system
         character(len=255) :: twobody_file
         character(len=255) :: bin_file
     end type run_t
-
 
 end module system

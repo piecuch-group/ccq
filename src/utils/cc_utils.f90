@@ -4,38 +4,6 @@ module cc_utils
 
 contains
 
-    function residuum(conv, iter, diis_space)
-
-        use const, only: p
-        use solver_types, only: conv_t
-
-        use hdf5_io, only: get_chunk_residuum
-
-
-        type(conv_t), intent(in) :: conv
-        integer, intent(in) :: iter
-        integer, intent(in) :: diis_space
-
-        real(p) :: residuum
-        integer :: indx1, indx2
-
-
-        indx1 = mod(iter - 1, diis_space + 1)
-        if (indx1 == 0) indx1 = diis_space + 1
-
-        indx2 = mod(iter, diis_space + 1)
-        if (indx2 == 0) indx2 = diis_space + 1
-
-
-        residuum = get_chunk_residuum(conv%filename, conv%iter_dset_name, &
-             indx1, indx2)
-
-        !residuum = 0.0_p
-
-        residuum = dsqrt(residuum)
-
-    end function residuum
-
     subroutine antisym_p_space(froz, occ_a, occ_b, orbs, p_space)
 
         integer, intent(in) :: froz, occ_a, occ_b, orbs
@@ -520,55 +488,58 @@ contains
         type(cc_t), intent(inout) :: cc
         character(len=*), intent(in) :: calc_type
 
-        integer :: k1, k2, k3, k4
-        integer :: k1a, k1b, k2a, k2b, k2c, k3a, k3b, k3c, k3d, t_size
+        integer :: occs_a, occs_b
+        integer :: unoccs_a, unoccs_b
 
-        K1 = sys%occ_a-sys%froz
-        K3 = sys%orbs-sys%occ_a
-        K2 = sys%occ_b-sys%froz
-        K4 = sys%orbs-sys%occ_b
+        integer :: t_size
 
-        ! Zero positions to prevent issues
+        occs_a = sys%occ_a-sys%froz
+        unoccs_a = sys%orbs-sys%occ_a
+
+        occs_b = sys%occ_b-sys%froz
+        unoccs_b = sys%orbs-sys%occ_b
+
+        ! Zero positions
         cc%pos = 0
+        t_size = 0
 
         ! T1A
-        t_size = 0
         cc%pos(1) = t_size+1
 
         ! T1B
-        t_size = t_size+K1*K3
+        t_size = t_size + occs_a * unoccs_a
         cc%pos(2) = t_size+1
 
         ! T2A
-        t_size = t_size+K2*K4
+        t_size = t_size + occs_b * unoccs_b
         cc%pos(3) = t_size+1
 
         ! T2B
-        t_size = t_size+K1*K1*K3*K3
+        t_size = t_size + (occs_a**2) * (unoccs_a**2)
         cc%pos(4) = t_size+1
 
         ! T2C
-        t_size = t_size+K2*K2*K4*K4
+        t_size = t_size + occs_a * occs_b * unoccs_a * unoccs_b
         cc%pos(5) = t_size+1
 
         ! T3A
-        t_size = t_size+K1*K2*K3*K4
+        t_size = t_size + (occs_b**2) * (unoccs_b**2)
         cc%pos(6) = t_size+1
 
         ! T3B
-        t_size = t_size+K3*K3*K3*K1*K1*K1
+        t_size = t_size + (occs_a**3) * (unoccs_a**3)
         cc%pos(7) = t_size+1
 
         ! T3C
-        t_size = t_size+K4*K4*K4*K2*K2*K2
+        t_size = t_size + (occs_a**2) * occs_b * (unoccs_a**2) * unoccs_b
         cc%pos(8) = t_size+1
 
         ! T3D
-        t_size = t_size+K3*K4*K3*K1*K2*K1
+        t_size = t_size + (occs_b**2) * occs_a * (unoccs_b**2) * unoccs_a
         cc%pos(9) = t_size+1
 
         ! T max
-        t_size = t_size+K4*K4*K3*K2*K2*K1
+        t_size = t_size + (occs_b**3) * (unoccs_b**3)
         cc%pos(10) = t_size+1
 
         ! [TODO] make this work. Currently, everything is being passed to the

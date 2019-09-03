@@ -1,12 +1,24 @@
 ! [TODO] This module is basically a compatibility layer has to be improved
 module update_cc
 
+    ! Module used for wrapping the automatically generated CC
+    ! routines. This is the module where one would want to add routines
+    ! in order to extend ccq's functionality (i.e. add new methods)
+
     implicit none
 
 contains
 
     subroutine update_clusters_t4(sys, run, cc)
+
         ! Update all cluster operators up to T_4 during the Jacobi iteration
+
+        ! In:
+        !   sys: molecular system data
+        !   run: runtime configuration data
+
+        ! In/Out:
+        !   cc: CC vector and data
 
         use const, only: sp, p, ta, tb, tc, td, te
         use system, only: sys_t, run_t
@@ -301,6 +313,16 @@ contains
     end subroutine update_clusters_t4
 
     subroutine update_clusters_t3_opt(sys, run, cc)
+
+        ! Update clusters up to T_3, including active-space variants
+        ! using the optimized sorted integral updates.
+
+        ! In:
+        !   sys: molecular system data
+        !   run: runtime configuration data
+
+        ! In/Out:
+        !   cc: CC vector and data
 
         use const, only: sp, p, ta, tb, tc, td, te, &
             part_ints_a_unit, part_ints_b_unit, part_ints_c_unit
@@ -2156,6 +2178,12 @@ contains
             t1diag1, t1diag2, t1diag3, t1diag4, &
             t2diag3, t2diag4, t2diag5, &
             t3diag1, t3diag2, t3diag3, t3diag4, t3diag5)
+
+        ! ACC compatibility routine. Used to help transition between
+        ! the new dervied type, acc, and the way Ilias wrote the
+        ! original code.
+        
+        ! [TODO] This subroutine should be deprecated at one point
 
         use const, only: sp
         use cc_types, only: acc_t

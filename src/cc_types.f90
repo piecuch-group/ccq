@@ -1,8 +1,12 @@
 module cc_types
 
+    ! This module holds the types defining all CC-related data.
+    ! For exmaple, T vector, L vector, Moments, ACC parameters, etc.
+
     use const, only: p, sp, int_32, i0
     use ext_cor_types, only: ext_cor_t
 
+    ! ACC parameters for scaling square powers of T
     type acc_t
         real(sp) :: t2t2_t2(5)
         real(sp) :: t3_t2(2)
@@ -13,6 +17,7 @@ module cc_types
         real(p), allocatable :: t2_mc(:)
     end type acc_t
 
+    ! Similarity transformed Hamiltonian
     type hbar_t
         real(p), allocatable :: a(:,:)
         real(p), allocatable :: b(:,:)
@@ -25,6 +30,7 @@ module cc_types
         real(p), allocatable :: bbb(:,:,:,:,:,:)
     end type hbar_t
 
+    ! [TODO] this is temporary
     type stoch_t
         ! Masks
         integer(int_32), allocatable :: o3(:,:,:,:,:,:)
@@ -40,6 +46,7 @@ module cc_types
         integer(i0), allocatable :: f_ref(:)
     end type stoch_t
 
+    ! Main CC data
     type cc_t
         ! CC vector
         real(p), allocatable :: t_vec(:)
@@ -130,6 +137,11 @@ contains
 
     subroutine dealloc_hbar(cc)
 
+        ! Deinitialize similarity transformed Hamiltonian arrays
+
+        ! In/Out:
+        !    cc: allocated hbar arrays
+
         type(cc_t), intent(inout) :: cc
 
         deallocate(cc%hbar%a)
@@ -137,6 +149,7 @@ contains
         deallocate(cc%hbar%aa)
         deallocate(cc%hbar%ab)
         deallocate(cc%hbar%bb)
+
         if (allocated(cc%hbar%aaa)) deallocate(cc%hbar%aaa)
         if (allocated(cc%hbar%aab)) deallocate(cc%hbar%aab)
         if (allocated(cc%hbar%abb)) deallocate(cc%hbar%abb)
@@ -145,6 +158,8 @@ contains
     end subroutine dealloc_hbar
 
     subroutine init_p_space(sys, p_mask)
+
+        ! [TODO] clean p_space work
 
         use const, only: tmp_unit
         use system, only: sys_t
@@ -175,6 +190,8 @@ contains
     end subroutine init_p_space
 
     subroutine init_p_space_slater(sys, filename, rank, stoch)
+
+        ! [TODO] clean p_space work
 
         use const, only: tmp_unit, i0, max_p_space
         use checking, only: check_allocate
