@@ -24,7 +24,7 @@ program main
     call get_config(sys, run, cc)
 
     ! Initialize printing system
-    call init_print(run)
+    call init_print(run%output_file)
 
     ! Print settings, configurations, host and compilationn
     ! formation to the output file

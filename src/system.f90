@@ -5,7 +5,7 @@ module system
     ! run_t, which contains information about the runtime configuration
     ! ints_t, which hold the molecular integrals, etc.
 
-    use const, only: int_32, p, sp, line_len
+    use const, only: int_32, p, sp, line_len, c_len
     use basis_types, only: basis_t
 
     type ints_t
@@ -66,6 +66,7 @@ module system
         integer :: mult
 
         ! Spin orbital molecular information
+        integer :: froz_spin
         integer :: nel
         integer :: nvirt
         integer :: nalpha
@@ -93,7 +94,7 @@ module system
     end type sys_t
 
     type config_t
-        character(len=255) :: filename
+        character(len=c_len) :: filename
         character(len=line_len) :: lines(200)
         integer :: file_size = 0
 
@@ -114,7 +115,7 @@ module system
 
 
         ! Calculation ID
-        character(len=255) :: label
+        character(len=c_len) :: label
         character(len=37) :: uuid
 
         ! Coupled-cluster level information
@@ -141,15 +142,18 @@ module system
         type(config_t) :: config
         logical :: keep_bin
 
-        character(len=255) :: h5_master_file
+        character(len=c_len) :: h5_master_file
 
-        character(len=255) :: ext_cor_file
-        character(len=255) :: sym_file
+        character(len=c_len) :: ext_cor_file
+        character(len=c_len) :: sym_file
 
-        character(len=255) :: output_file
-        character(len=255) :: onebody_file
-        character(len=255) :: twobody_file
-        character(len=255) :: bin_file
+        character(len=c_len) :: output_file
+        character(len=c_len) :: onebody_file
+        character(len=c_len) :: twobody_file
+        character(len=c_len) :: bin_file
+
+        character(len=c_len) :: fcidump
+
     end type run_t
 
 end module system

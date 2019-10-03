@@ -8,9 +8,6 @@ module integrals
 
 contains
 
-    ! [TODO] add interfaces to more standard integral files (i.e. FCIDUMP, that
-    ! according to some people has become the "quantum chemistry standard")
-
     subroutine load_e1int(orbs, filename, e1int)
 
         ! Load onebody molecular integrals
@@ -95,10 +92,83 @@ contains
 
     end subroutine load_e2int
 
+    subroutine load_fcidump(fcidump, e1int, e2int, hh)
+
+        ! Load integrals from a FCIDUMP file as opposed to the
+        ! onebody.inp and twobody.inp files from CC_PACKAGE
+
+        ! In:
+        !   fcidump: path to the FCIDUMP file
+
+        ! In/Out:
+        !   e1int: onebody integral array
+        !   e2int: twobody integral array
+        !   hh: internuclear repulsion energy
+
+        use const, only: tmp_unit, p, line_len
+
+        character(len=*), intent(in) :: fcidump
+        real(p), allocatable, intent(in out) :: e1int(:,:)
+        real(p), allocatable, intent(in out) :: e2int(:,:,:,:)
+        real(p), intent(in out) :: hh
+
+        character(len=line_len) :: cur_line
+        integer :: idx
+        integer :: ios
+        logical :: read_flag = .false.
+
+        integer :: i, j, a, b
+        real(p) :: val
+
+
+        open(tmp_unit, file=trim(fcidump), status="old")
+
+        do
+
+            ! Skip FCIDUMP header. The information contained in it has
+            ! been already parsed in parser.f90
+            if (.not. read_flag) then
+
+                read(tmp_unit, *) cur_line
+                idx = index(cur_line, "END")
+                if (idx /= 0) read_flag = .true.
+
+            else
+
+                ! Read integrals
+                read(tmp_unit, *, iostat=ios) val, i, a, j, b
+                if (ios /= 0) exit
+
+                if (i /= 0 .and. a /= 0 .and. j /= 0 .and. b /= 0) then
+                    ! Twobody integrals
+                    e2int(i, j, a, b) = val
+                    e2int(i, b, a, j) = val
+                    e2int(a, j, i, b) = val
+                    e2int(a, b, i, j) = val
+
+                else if (i /= 0 .and. a /= 0 .and. j + b == 0) then
+                    ! Onebody integrals
+                    e1int(i, a) = val
+                    e1int(a, i) = val
+
+                else if (i + a + j + b == 0) then
+                    ! Repulsion energy
+                    hh = val
+                endif
+
+            endif
+
+
+        enddo
+
+        close(tmp_unit)
+
+
+    end subroutine load_fcidump
+
     subroutine load_ints(sys, run)
 
-        ! Load one and twobody integrals from CC_PACKAGE
-        ! onebody.inp and twobody.inp files
+        ! Load one- and two-body integrals from a file/files.
 
         ! In:
         !    run: runtime configuration and data
@@ -106,7 +176,7 @@ contains
         ! In/Out:
         !    sys: molecular system data. On return, the
         !         integrals will be loaded on sys%ints
-        
+
         use const, only: p
         use energy, only: calc_hf_energy
         use checking, only: check_allocate
@@ -117,9 +187,7 @@ contains
         type(sys_t), intent(inout) :: sys
         type(run_t), intent(in) :: run
 
-        real(p), allocatable :: e1int(:,:)
         real(p), allocatable :: e2int(:,:,:,:)
-        real(p) :: hh
 
         integer :: ios
         integer :: indx
@@ -134,16 +202,24 @@ contains
         call check_allocate('sys%ints%e1int', sys%orbs * sys%orbs, ierr)
         sys%ints%e1int = 0.0_p
 
-        onebody_lines = count_file_lines(run%onebody_file)
-        orbs = -(1 - sqrt(real(1 + 8*onebody_lines))) / 2
-        if (int(orbs) /= sys%orbs) call stop_all('load_ints', "Number of orbitals doesn't match the number of integrals")
-        call load_e1int(sys%orbs, run%onebody_file, sys%ints%e1int)
 
         ! Initialize twobody electronic integrals array
         allocate(e2int(sys%orbs, sys%orbs, sys%orbs, sys%orbs), stat=ierr)
         call check_allocate('e2int', sys%orbs ** 4, ierr)
         e2int = 0.0_p
-        call load_e2int(sys%orbs, run%twobody_file, e2int, sys%en_repul)
+
+
+        if (trim(run%fcidump) /= '') then
+            call load_fcidump(run%fcidump, sys%ints%e1int, e2int, sys%en_repul)
+        else
+            onebody_lines = count_file_lines(run%onebody_file)
+            orbs = -(1 - sqrt(real(1 + 8*onebody_lines))) / 2
+            if (int(orbs) /= sys%orbs) call stop_all('load_ints', "Number of orbitals doesn't match the number of integrals")
+            call load_e1int(sys%orbs, run%onebody_file, sys%ints%e1int)
+
+            call load_e2int(sys%orbs, run%twobody_file, e2int, sys%en_repul)
+        endif
+
 
         associate(froz=>sys%froz, occ_a=>sys%occ_a, occ_b=>sys%occ_b, orbs=>sys%orbs)
 
@@ -184,6 +260,7 @@ contains
         end associate
 
     end subroutine load_ints
+
 
     subroutine gen_fock_operator(sys, e1int, e2int)
 
@@ -250,6 +327,7 @@ contains
         end associate
 
     end subroutine gen_fock_operator
+
 
     subroutine unload_ints(sys)
 

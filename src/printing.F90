@@ -10,21 +10,21 @@ module printing
 
 contains
 
-    subroutine init_print(run)
+    subroutine init_print(output_file)
 
         ! Initialize printing
 
         ! In:
-        !   run: information about the current run configuration 
+        !   run: information about this run's configuration
 
         use const, only: log_unit
         use system, only: run_t
 
-        type(run_t), intent(in) :: run
+        character(len=*) :: output_file
 
         ! Open output file if it is provided in the configuration file
-        if (trim(run%output_file) /= '' .and. trim(run%output_file) /= 'stdout') then
-            open(log_unit, file=trim(run%output_file), status='unknown')
+        if (trim(output_file) /= '' .and. trim(output_file) /= 'stdout') then
+            open(log_unit, file=trim(output_file), status='unknown')
             io = log_unit
         endif
 

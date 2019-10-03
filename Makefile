@@ -24,6 +24,10 @@ endif
 # --------------
 PROGRAM := ccq
 TEST_DIR := tests
+ENTRY := main.f90
+
+SHARED_LIBRARY := libccq.so
+STATIC_LIBRARY := libccq.a
 
 
 # Source handling
@@ -51,6 +55,13 @@ else
 F_DEPEND := $(DEPEND_DIR)/fortran.d
 endif
 
+# Library objects
+ENTRY_OBJ := $(call objects_path, $(ENTRY))
+LIB_OBJS := $(filter-out $(ENTRY_OBJ),$(OBJS))
+AR := ar
+ARFLAGS := -rcs
+
+
 # Enviroment data logging
 # -----------------------
 COMP_HOST := $(shell hostname --fqdn)
@@ -62,9 +73,13 @@ GIT_SHA1 := $(GIT_SHA1)$(shell test -z "$$(git status --porcelain 2>/dev/null)" 
 # Compilation macros
 .SUFFIXES:
 .SUFFIXES: $(EXTS)
-.PHONY: all clean cleanall debug test
+.PHONY: all lib clean cleanall debug test
 
 all: $(BIN_DIR)/$(PROGRAM)
+
+lib: FFLAGS += -fpic
+lib: CFLAGS += -fpic
+lib: $(BIN_DIR)/$(SHARED_LIBRARY) $(BIN_DIR)/$(STATIC_LIBRARY)
 
 
 # Fortran
@@ -90,7 +105,7 @@ $(BUILD_DIR)/%.o: %.f90
 # C
 # -
 $(BUILD_DIR)/%.o: %.c
-	$(CC) -c -o $@ $<
+	$(CC) -c $(CFLAGS) -o $@ $<
 
 
 # Goals
@@ -101,12 +116,17 @@ $(BUILD_DIR)/%.o: %.c
 $(BIN_DIR)/$(PROGRAM): $(OBJS) | $(BIN_DIR)
 	$(LD) -o $@ $(LDFLAGS) -I $(BUILD_DIR) $(OBJS) $(LIBS)
 
-
 $(BIN_DIR) $(BUILD_DIR) $(DEPEND_DIR):
 	mkdir -p $@
 
 $(F_DEPEND): $(F_FILES)
 	@tools/sfmakedepend --file - --silent --objdir \$$\(BUILD_DIR\) --moddir \$$\(BUILD_DIR\) --depend=mod $^ > $@
+
+$(BIN_DIR)/$(SHARED_LIBRARY): $(LIB_OBJS) | $(BIN_DIR)
+	$(LD) -shared -o $@ $(LDFLAGS) -I $(BUILD_DIR) $(LIB_OBJS) $(LIBS)
+
+$(BIN_DIR)/$(STATIC_LIBRARY): $(LIB_OBJS) | $(BIN_DIR)
+	$(AR) $(ARFLAGS) $@ $(LIB_OBJS)
 
 # Phonies
 # -------

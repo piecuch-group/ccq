@@ -118,19 +118,12 @@ contains
         type(cc_t), intent(inout) :: cc
 
 
-        integer :: nfroz, nocc_spin, nunocc_spin
-        integer :: act_occ, act_unocc
-        logical :: restart
-        integer :: itol
-
         character(len=line_len) :: line
         character(len=line_len) :: option
         character(len=line_len) :: val
 
 
-        logical :: t_exists
         integer :: indx, l_indx
-        integer :: ios
 
 
         ! Load input config file and store it in memory (to be printed
@@ -140,21 +133,9 @@ contains
         ! Set default options and parameters
         call set_default_options(sys, run, cc)
 
-        ! Get options and parameters required for each particular
-        ! calculation type.
-        call get_calc_macros(sys, run, cc)
-
-
-        ! Initial values for the molecular system
-        ! [TODO] find a better place for this
-        nfroz = 0
-        nocc_spin = -1
-        nunocc_spin = -1
-        act_occ = 0
-        act_unocc = 0
-
         ! Parse config file
         do l_indx=1, run%config%file_size
+
             line = run%config%lines(l_indx)
 
             ! Skip comments
@@ -169,116 +150,95 @@ contains
             ! Load flag keywords (i.e. keywords that if present
             ! represent a true value, if missing false)
             if (indx == 0 ) then
-
-                select case (line)
-                case ('restart', 'rest')
-                    run%restart = .true.
-
-                case ('print_config', 'echo')
-                    run%config%echo = .true.
-
-                end select
-
+                option = trim(adjustl(line))
+                val = ''
             else
-
-                ! Parse options
                 option = trim(adjustl(line(1:indx-1)))
                 val = trim(adjustl(line(indx+1:)))
-
-                ! Molecular system parameters.
-                ! All values are loaded locally in order to be able to check
-                ! for errors. [TODO] improve
-                select case (option)
-                case ('core', 'nfroz', 'frozen', 'froz')
-                    ! This is in spin orbital form
-                    read(val, *) nfroz
-
-                case ('nel', 'electrons')
-                    read(val, *) nocc_spin
-
-                case ('nvir', 'nvirt', 'virtuals')
-                    read(val, *) nunocc_spin
-
-                case ('multiplicity', 'mult')
-                    read(val, *) sys%mult
-
-                end select
-
-                ! Load specific options based on calculation type.
-                ! run%calc_type should have been loaded in
-                ! get_calc_macros.
-                select case (run%calc_type)
-                case ('CCSD', 'CCSDT', 'CCSDTQ', 'stoch-CC')
-                    call get_run_opts(run, option, val)
-
-                case ('CADFCIQMC', 'DCSD-MC')
-                    call get_run_opts(run, option, val)
-                    call get_ext_cor_opts(sys, run, cc, option, val)
-
-                case ('ACC')
-                    call get_run_opts(run, option, val)
-                    call get_acc_opts(sys, run, cc, option, val)
-
-                case ('CCSDt', 'CC(t;3)')
-                    call get_run_opts(run, option, val)
-                    call get_act_opts(sys, run, cc, option, val)
-
-                case ('dev')
-                    ! This is a special macro that lets one set every
-                    ! available option. Use at your own discretion.
-                    call get_run_opts(run, option, val)
-                    call get_ext_cor_opts(sys, run, cc, option, val)
-                    call get_act_opts(sys, run, cc, option, val)
-                    call get_acc_opts(sys, run, cc, option, val)
-
-                case default
-                    ! If no calc_type is given, stop.
-                    call stop_all('get_config', 'CONFIGURATION ERROR: calc_type keyword not found')
-
-                end select
             endif
+
+            ! Load key-value pair configurations
+            call get_sys_data(sys, option, val)
+            call get_run_opts(run, option, val)
+            call get_ext_cor_opts(sys, run, cc, option, val)
+            call get_act_opts(sys, run, cc, option, val)
 
         enddo
 
-        ! Update final numbers
-        ! Convert spin orbital number to spatial
-        ! [TODO] move this to a better place
-        sys%froz = nfroz / 2
-        sys%occ_a = (nfroz + nocc_spin) / 2
-        sys%occ_b = sys%occ_a - (sys%mult - 1) / 2
-        sys%orbs = (nfroz + nocc_spin + nunocc_spin) / 2
+        ! FCIDUMP override
+        if (trim(run%fcidump) /= '') call get_fcidump(sys, run%fcidump)
 
-        ! Set active space
-        sys%act_occ_b = max(sys%occ_b - sys%act_occ, sys%froz)
-        sys%act_occ_a = sys%act_occ_b + sys%occ_a - sys%occ_b
-        sys%act_unocc_a = min(sys%occ_a + sys%act_unocc, sys%orbs)
-        sys%act_unocc_b = sys%act_unocc_a + sys%occ_a - sys%occ_b
+        ! Update system data
+        call process_sys_data(sys)
 
-        sys%nel = sys%occ_a + sys%occ_b
-        sys%basis%nbasis = 2 * sys%orbs
-        sys%nvirt = sys%basis%nbasis - sys%nel
+        ! Validate configuration. Handle errors or exit if necessary
+        call validate_config(sys, run, cc)
+
+        ! Get options and parameters required for each particular
+        ! calculation type.
+        call get_calc_macros(sys, run, cc, run%calc_type)
+
+
+    end subroutine get_config
+
+    subroutine validate_config(sys, run, cc)
+
+        ! Validate configuration file. Exit with errors if required
+
+        ! In:
+        !   sys: molecular system data
+        !   run: runtime configuration
+        !   cc: coupled-cluster data
+
+        use system, only: sys_t, run_t, config_t
+        use cc_types, only: cc_t
+
+        use printing, only: io
+        use errors, only: stop_all
+
+        type(sys_t), intent(in) :: sys
+        type(run_t), intent(in) :: run
+        type(cc_t), intent(in) :: cc
+
+        logical :: t_exists
 
 
         ! Error checks
         ! [TODO] write a routine for this
-        if (nocc_spin == -1 .or. nunocc_spin == -1) then
-            call stop_all('get_config', 'CONFIGURATION ERROR: nel and nvirt keywords must be given.')
-        endif
 
-        inquire(file=trim(run%onebody_file), exist=t_exists)
-        if (.not. t_exists) call stop_all('get_config', 'CONFIGURATION ERROR: Onebody integral file not found')
+        ! If no calc_type is given, stop.
+        if (trim(run%calc_type) == '') call stop_all('parser', 'CONFIGURATION ERROR: calc_type keyword not found')
 
-        inquire(file=trim(run%twobody_file), exist=t_exists)
-        if (.not. t_exists) call stop_all('get_config', 'CONFIGURATION ERROR: Twobody integral file not found')
-        if (run%restart) then
-            inquire(file=trim(run%bin_file), exist=t_exists)
+
+        ! Make sure that the molecular system was set (at least number of electrons and virtuals)
+        if (sys%nel == -1 .or. sys%nvirt == -1) &
+            call stop_all('parser', 'CONFIGURATION ERROR: nel and nvirt have to be provided')
+
+
+        ! Check for the integral files
+        if (trim(run%fcidump) /= '') then
+            inquire(file=trim(run%fcidump), exist=t_exists)
+            if (.not. t_exists) &
+                call stop_all('get_config', 'CONFIGURATION ERROR: FCIDUMP file not found')
+        else
+            inquire(file=trim(run%onebody_file), exist=t_exists)
+            if (.not. t_exists) call stop_all('get_config', 'CONFIGURATION ERROR: Onebody integral file not found')
+
+            inquire(file=trim(run%twobody_file), exist=t_exists)
             if (.not. t_exists) call stop_all('get_config', 'CONFIGURATION ERROR: Twobody integral file not found')
         endif
 
-        if (trim(run%label) /= '') then
-            if (run%restart) &
-                call stop_all('get_config', 'CONFIGURATION ERROR: Restart requires setting output_bin')
-            run%bin_file = 'tvec_'//trim(run%label)//'.bin'
+
+        if (run%restart) then
+            inquire(file=trim(run%bin_file), exist=t_exists)
+            if (.not. t_exists) call stop_all('get_config', 'CONFIGURATION ERROR: Restart file not found')
+        endif
+
+
+        ! Check for the ewalkers file
+        if (trim(run%calc_type) == 'CADFCIQMC' .or. trim(run%calc_type) == 'DCSD-MC') then
+            inquire(file=trim(run%ext_cor_file), exist=t_exists)
+            if (.not. t_exists) call stop_all('get_config', 'CONFIGURATION ERROR: Walkers file not found')
         endif
 
         inquire(file=trim(run%bin_file), exist=t_exists)
@@ -292,19 +252,76 @@ contains
         endif
 
 
-    end subroutine get_config
+    end subroutine validate_config
 
-    subroutine get_calc_macros(sys, run, cc)
+
+    subroutine get_fcidump(sys, fcidump)
+
+        ! Load parameters from a FCIDUMP file
+
+        ! In:
+        !   fcidump: path to the FCIDUMP file
+
+        ! In/Out:
+        !   sys: molecular system data
+
+
+        use const, only: p, tmp_unit, line_len
+        use system, only: sys_t
+
+        use utils, only: parse_key_val
+
+        type(sys_t), intent(in out) :: sys
+        character(len=*), intent(in) :: fcidump
+
+        integer :: ios
+        integer :: idx, id_comma, id_equal
+        character(len=line_len) :: cur_line, val
+
+        integer :: norb, nelec
+
+        norb = -1
+        nelec = -1
+
+
+        open(tmp_unit, file=trim(fcidump), status="old")
+
+        do
+
+            read(tmp_unit, '(a)', iostat=ios) cur_line
+            idx = index(cur_line, "END")
+            if (idx /= 0) exit
+
+            call parse_key_val(cur_line, "NORB", val)
+            if (trim(val) /= '') read(val, *) norb
+
+            call parse_key_val(cur_line, "NELEC", val)
+            if (trim(val) /= '') read(val, *) nelec
+
+
+        enddo
+
+        close(tmp_unit)
+
+        sys%froz = 0
+        sys%nel = nelec
+        sys%nvirt = 2*norb - nelec
+
+
+    end subroutine get_fcidump
+
+
+    subroutine get_calc_macros(sys, run, cc, calc_type)
 
         ! Get calculation type from input file and set default
         ! configurations and parameters
 
-        ! In/Out:
-        !     run: runtime information. Specifically the config file
+        ! In:
+        !     calc_type: calculation type
 
-        ! Out:
-        !     sys: system information
-        !     run: runtime information
+        ! In/Out:
+        !     sys: molecualr system
+        !     run: runtime information. Specifically the config file
         !     cc: CC information
 
         use const, only: sp, dp, line_len
@@ -314,121 +331,165 @@ contains
         type(sys_t), intent(inout) :: sys
         type(run_t), intent(inout) :: run
         type(cc_t), intent(inout) :: cc
-
-        character(len=line_len) :: line
-        character(len=line_len) :: option
-        character(len=line_len) :: val
-
-        integer :: indx, l_indx
+        character(len=*), intent(in) :: calc_type
 
         ! Loop over the config file lines searchinf for calc_type
-        do l_indx=1, run%config%file_size
-            line = run%config%lines(l_indx)
+        select case (trim(calc_type))
 
-            ! Skip comments
-            indx = scan(line, '#') + scan(line, '!')
-            if (indx /= 0) cycle
-            ! Skip empty lines
-            if (trim(line) == '') cycle
-            ! Skip lines without equal sign
-            indx = scan(line, '=')
-            if (indx == 0 ) cycle
+        case ('CADFCIQMC')
+            run%calc_type = 'CADFCIQMC'
+            run%act_ind_t = 0
+            run%act_ind_q = 0
 
-            option = trim(adjustl(line(1:indx-1)))
-            val = trim(adjustl(line(indx+1:)))
+            run%ext_cor = .true.
+            run%lvl_t = .true.
+            run%lvl_q = .false.
 
-            select case (option)
+        case ('DCSD-MC')
+            run%calc_type = 'DCSD-MC'
+            run%act_ind_t = 0
+            run%act_ind_q = 0
 
-            case ('calc_type')
+            cc%acc%t2t2_t2 = (/1.0_sp, 0.0_sp, 0.5_sp, 0.5_sp, 0.0_sp/)
+            run%ext_cor = .true.
+            run%lvl_t = .true.
+            run%lvl_q = .false.
 
-                select case (val)
+        case ('CCSD')
+            run%calc_type = 'CCSD'
+            run%act_ind_t = 0
+            run%act_ind_q = 0
 
-                case ('dev')
-                    run%calc_type = 'dev'
+            run%lvl_t = .false.
+            run%lvl_q = .false.
 
-                case ('CADFCIQMC')
-                    run%calc_type = 'CADFCIQMC'
-                    run%act_ind_t = 0
-                    run%act_ind_q = 0
+        case ('CCSDt')
+            run%calc_type = 'CCSDt'
+            run%sorted_ints = .true.
+            sys%act_occ = -1
+            sys%act_unocc= -1
+            run%act_ind_t = 1
+            run%act_ind_q = 0
 
-                    run%ext_cor = .true.
-                    run%lvl_t = .true.
-                    run%lvl_q = .false.
+            run%lvl_t = .true.
+            run%lvl_q = .false.
 
-                case ('DCSD-MC')
-                    run%calc_type = 'DCSD-MC'
-                    run%act_ind_t = 0
-                    run%act_ind_q = 0
+        case ('stoch-CC')
+            run%calc_type = 'stoch-CC'
+            run%act_ind_t = 0
+            run%act_ind_q = 0
 
-                    cc%acc%t2t2_t2 = (/1.0_sp, 0.0_sp, 0.5_sp, 0.5_sp, 0.0_sp/)
-                    run%ext_cor = .true.
-                    run%lvl_t = .true.
-                    run%lvl_q = .false.
+            run%lvl_t = .true.
+            run%lvl_q = .false.
+            run%stoch = .true.
 
-                case ('CCSD')
-                    run%calc_type = 'CCSD'
-                    run%act_ind_t = 0
-                    run%act_ind_q = 0
+        case ('CCT3', 'CCt3', 'CC(t;3)')
+            run%calc_type = 'CC(t;3)'
+            run%sorted_ints = .true.
+            run%hbar = .true.
+            run%lcc = .true.
+            run%mm_23 = .true.
+            sys%act_occ = -1
+            sys%act_unocc= -1
+            run%act_ind_t = 1
+            run%act_ind_q = 0
 
-                    run%lvl_t = .false.
-                    run%lvl_q = .false.
+            run%lvl_t = .true.
+            run%lvl_q = .false.
 
-                case ('CCSDt')
-                    run%calc_type = 'CCSDt'
-                    run%sorted_ints = .true.
-                    sys%act_occ = -1
-                    sys%act_unocc= -1
-                    run%act_ind_t = 1
-                    run%act_ind_q = 0
+        case ('CCSDT')
+            run%calc_type = 'CCSDT'
+            run%act_ind_t = 0
+            run%act_ind_q = 0
 
-                    run%lvl_t = .true.
-                    run%lvl_q = .false.
+            run%lvl_t = .true.
+            run%lvl_q = .false.
 
-                case ('stoch-CC')
-                    run%calc_type = 'stoch-CC'
-                    run%act_ind_t = 0
-                    run%act_ind_q = 0
+        case ('CCSDTQ')
+            run%calc_type = 'CCSDTQ'
+            run%act_ind_t = 0
+            run%act_ind_q = 0
 
-                    run%lvl_t = .true.
-                    run%lvl_q = .false.
-                    run%stoch = .true.
+            run%lvl_t = .true.
+            run%lvl_q = .true.
 
-                case ('CCT3', 'CCt3', 'CC(t;3)')
-                    run%calc_type = 'CC(t;3)'
-                    run%sorted_ints = .true.
-                    run%hbar = .true.
-                    run%lcc = .true.
-                    run%mm_23 = .true.
-                    sys%act_occ = -1
-                    sys%act_unocc= -1
-                    run%act_ind_t = 1
-                    run%act_ind_q = 0
-
-                    run%lvl_t = .true.
-                    run%lvl_q = .false.
-
-                case ('CCSDT')
-                    run%calc_type = 'CCSDT'
-                    run%act_ind_t = 0
-                    run%act_ind_q = 0
-
-                    run%lvl_t = .true.
-                    run%lvl_q = .false.
-
-                case ('CCSDTQ')
-                    run%calc_type = 'CCSDTQ'
-                    run%act_ind_t = 0
-                    run%act_ind_q = 0
-
-                    run%lvl_t = .true.
-                    run%lvl_q = .true.
-
-                end select
-            end select
-
-        enddo
+        end select
 
     end subroutine get_calc_macros
+
+    subroutine get_sys_data(sys, option, val)
+
+        ! Get the molecular parameters
+
+        ! In:
+        !     option: option keyword from the config file
+        !     val: option's value
+
+        ! Out:
+        !     sys: molecular system information
+
+        use const, only: sp, dp
+        use system, only: sys_t
+
+        type(sys_t), intent(inout) :: sys
+        character(len=*), intent(in) :: option
+        character(len=*), intent(in) :: val
+
+        ! Molecular system parameters.
+        ! All values are loaded locally in order to be able to check
+        ! for errors. [TODO] improve
+        select case (option)
+        case ('core', 'nfroz', 'frozen', 'froz')
+            read(val, *) sys%froz_spin
+
+        case ('nel', 'electrons')
+            ! WARNING: this variable contains the number of correlated electrons
+            ! [TODO] change this to all electrons? Maybe use FCIDUMP approach
+            read(val, *) sys%nel
+
+        case ('nvir', 'nvirt', 'virtuals')
+            read(val, *) sys%nvirt
+
+        case ('multiplicity', 'mult')
+            read(val, *) sys%mult
+
+        end select
+
+
+    end subroutine get_sys_data
+
+
+    subroutine process_sys_data(sys)
+
+        ! Update all system parameters based on the required ones
+
+        ! In:
+        !   sys: molecular system data
+
+        use system, only: sys_t
+
+        type(sys_t), intent(in out) :: sys
+
+        ! Update final numbers
+        ! Convert spin orbital number to spatial
+        ! [TODO] move this to a better place
+        sys%froz = sys%froz_spin / 2
+        sys%occ_a = (sys%froz_spin + sys%nel) / 2
+        sys%occ_b = sys%occ_a - (sys%mult - 1) / 2
+        sys%orbs = (sys%froz_spin + sys%nel + sys%nvirt) / 2
+
+        ! Set active space
+        sys%act_occ_b = max(sys%occ_b - sys%act_occ, sys%froz)
+        sys%act_occ_a = sys%act_occ_b + sys%occ_a - sys%occ_b
+        sys%act_unocc_a = min(sys%occ_a + sys%act_unocc, sys%orbs)
+        sys%act_unocc_b = sys%act_unocc_a + sys%occ_a - sys%occ_b
+
+        ! Update nel with frozen orbitals
+        sys%nel = sys%nel + sys%froz_spin
+        sys%basis%nbasis = 2 * sys%orbs
+
+    end subroutine process_sys_data
+
 
     subroutine get_acc_opts(sys, run, cc, option, val)
 
@@ -623,6 +684,17 @@ contains
                 run%tol = 10.0_p ** itol
             endif
 
+        case ('fcidump')
+            run%fcidump = val
+
+        case ('calc_type')
+            run%calc_type = val
+
+        case ('restart', 'rest')
+            run%restart = .true.
+
+        case ('print_config', 'echo')
+            run%config%echo = .true.
 
         case ('label')
             run%label = val
@@ -717,6 +789,10 @@ contains
         type(cc_t), intent(inout) :: cc
 
         ! System
+        sys%froz_spin = 0
+        sys%froz = 0
+        sys%nel = -1
+        sys%nvirt = -1
         sys%mult = 0
         sys%act_occ_b = 0
         sys%act_unocc_a = 0
@@ -743,7 +819,8 @@ contains
         run%onebody_file = 'onebody.inp'
         run%twobody_file = 'twobody.inp'
         run%bin_file = 'tvec_'//trim(run%uuid)//'.bin'
-        !run%calc_type = 'CCSD'
+        run%fcidump = ''
+
         ! Externally corrected
         run%ext_cor = .false.
         run%ext_cor_sd = .true.
