@@ -1,15 +1,23 @@
 module external_correction
 
+    ! Module that deals with externally corrected coupled-cluster
+    ! methods. It is based on reading a FCI wave function, computed
+    ! with an external method, and producing T3 and T4 to be
+    ! subsequently introduced in CCSD-like equations.
+
     implicit none
 
 contains
 
     subroutine alloc_vec3_t(sys, vec3)
 
+        ! [TODO] move this to ext_cor types?
+
         ! Initialize a vector with up to three-body components
 
         ! In:
         !    sys: system information
+
         ! In/Out:
         !    vec3: vector with up to three-body components
 
@@ -85,22 +93,26 @@ contains
         ! In:
         !   sys: system information including molecular data, integrals, etc.
         !   run: runtime options
+
         ! In/Out:
         !   cc: coupled-cluster information. On exit, cc contains and updated t vector (cc%t_vec)
         !       and all cc%ext_cor variables populated
 
         use const, only: p, i0
-        use determinants, only: gen_f_ref
-        use energy, only: calculate_unsorted_energy
-        use ext_cor_types, only: vec3_t
-        use process_t4, only: update_t2_cluster
-        use printing, only: io, print_date
         use system, only: sys_t, run_t
         use cc_types, only: cc_t
+        use printing, only: io, print_date
+
+        use determinants, only: gen_f_ref
+        use energy, only: calculate_unsorted_energy
         use symmetry, only: read_sym
-        use cc_utils, only: antisymmetrize
+
+        use contract_t3, only: drive_t3_contraction
+        use ext_cor_types, only: vec3_t
+        use process_t4, only: update_t2_cluster
         use cluster_analysis, only: analyze_t3
 
+        use cc_utils, only: antisymmetrize
         use hdf5_io, only: write_ext_cor_vecs
 
         type(sys_t), intent(in) :: sys
@@ -151,8 +163,17 @@ contains
         ! Save T2 MC for DCMC calculations
         cc%acc%t2_mc = cc%t_vec(cc%pos(3):cc%pos(6)-1)
 
+
+        ! Initialize output contacted arrays
+        call init_output_arrays(sys, cc)
+
+        ! Contract T3 with H and generate intermediates for
+        ! the <ijab| (HT1T3)C |phi> terms
+        write(io, '(2x,a/)') '=> Generating <ia|[H_N,T3]|phi> and <ijab|[H_N,T3]|phi> intermediates'
+        call drive_t3_contraction(sys, cc)
+
         ! Generate T4 and contract with V on the fly
-        write(io, '(2x,a)') '=> Generating <ijab|[V_N,T4]|0> intermediate'
+        write(io, '(2x,a)') '=> Generating <ijab|[V_N,T4]|phi> intermediate'
         call ext_cor_4(sys, cc, f_ref, run%ext_cor_file, coef_norm, c_vec)
         call dealloc_vec3_t(c_vec)
 
@@ -176,15 +197,58 @@ contains
 
     end subroutine ext_cor_driver
 
+    ! [TODO] re arrange routines a.k.a. move this somewhere else
+    subroutine init_output_arrays(sys, cc)
+
+        use const, only: p
+        use system, only: sys_t
+        use cc_types, only: cc_t
+
+        type(sys_t), intent(in) :: sys
+        type(cc_t), target, intent(in out) :: cc
+
+        ! [TODO] move this to an initialization routine
+        if (.not. allocated(cc%ext_cor%t1a)) then
+            allocate(cc%ext_cor%t1a(sys%occ_a+1:sys%orbs, sys%froz+1:sys%occ_a))
+            cc%ext_cor%t1a = 0.0_p
+        endif
+
+        if (.not. allocated(cc%ext_cor%t1b)) then
+            allocate(cc%ext_cor%t1b(sys%occ_b+1:sys%orbs, sys%froz+1:sys%occ_b))
+            cc%ext_cor%t1b = 0.0_p
+        endif
+
+        ! [TODO] move this to an initialization routine
+        if (.not. allocated(cc%ext_cor%t2a)) then
+            allocate(cc%ext_cor%t2a(sys%occ_a+1:sys%orbs, sys%occ_a+1:sys%orbs, &
+                 sys%froz+1:sys%occ_a, sys%froz+1:sys%occ_a))
+            cc%ext_cor%t2a = 0.0_p
+        endif
+
+        if (.not. allocated(cc%ext_cor%t2b)) then
+            allocate(cc%ext_cor%t2b(sys%occ_b+1:sys%orbs, sys%occ_a+1:sys%orbs, &
+                 sys%froz+1:sys%occ_b, sys%froz+1:sys%occ_a))
+            cc%ext_cor%t2b = 0.0_p
+        endif
+
+        if (.not. allocated(cc%ext_cor%t2c)) then
+            allocate(cc%ext_cor%t2c(sys%occ_b+1:sys%orbs, sys%occ_b+1:sys%orbs, &
+                 sys%froz+1:sys%occ_b, sys%froz+1:sys%occ_b))
+            cc%ext_cor%t2c = 0.0_p
+        endif
+
+    end subroutine init_output_arrays
+
     subroutine parse_fciqmc_c3(sys, f_ref, filename, c_vec, coef_norm)
 
         ! Translate configurations and walker populations to excitations and
         ! intermediately-renormalized CI coefficients
-        !
+
         ! In:
         !   sys: system information
         !   f_ref: refernce determinant in bitform (see HANDE)
         !   filename: file containing FCIQMC walkers per determinant
+
         ! In/Out:
         !   c_vec: arrays containing spin-integrated CI coefficients obtained from FCIQMC
         !   coef_norm: normalization coefficient (is equal to the amount of walkers on the
@@ -328,7 +392,7 @@ contains
     subroutine substract_disc(sys, cc)
 
         use const, only: i0, p
-        use contract_doubles_ext_cor, only: drive_doubles_contraction
+        use contract_t4, only: drive_t4_contraction
         use system, only: sys_t
         use cc_types, only: cc_t
         use cc_utils, only: antisymmetrize_t2
@@ -339,7 +403,6 @@ contains
         type(cc_t), intent(inout) :: cc
 
         integer :: i, j, a, b
-        integer :: ii, jj, aa, bb
 
         real(p) :: start_time, end_time
 
@@ -350,7 +413,7 @@ contains
 
         write(io, '(4x,a)') '=> Contracting non-linear terms'
         start_time = get_wall_time()
-        call drive_doubles_contraction(sys, cc, v2a, v2b, v2c)
+        call drive_t4_contraction(sys, cc, v2a, v2b, v2c)
         end_time = get_wall_time()
         write(io, '(4x,a,f10.2,a)') '=> Contraction took', end_time - start_time, ' seconds'
 
@@ -362,12 +425,8 @@ contains
                 do a=sys%occ_a+1, sys%orbs
                     do b=sys%occ_a+1, sys%orbs
 
-                        ii = i - sys%froz
-                        jj = j - sys%froz
-                        aa = a - sys%occ_a
-                        bb = b - sys%occ_a
 
-                        cc%ext_cor%t2a(bb,aa,jj,ii) = cc%ext_cor%t2a(bb,aa,jj,ii) - v2a(b,a,j,i)
+                        cc%ext_cor%t2a(b,a,j,i) = cc%ext_cor%t2a(b,a,j,i) - v2a(b,a,j,i)
 
                     enddo
                 enddo
@@ -379,12 +438,7 @@ contains
                 do a=sys%occ_a+1, sys%orbs
                     do b=sys%occ_b+1, sys%orbs
 
-                        ii = i - sys%froz
-                        jj = j - sys%froz
-                        aa = a - sys%occ_a
-                        bb = b - sys%occ_b
-
-                        cc%ext_cor%t2b(bb,aa,jj,ii) = cc%ext_cor%t2b(bb,aa,jj,ii) - v2b(b,a,j,i)
+                        cc%ext_cor%t2b(b,a,j,i) = cc%ext_cor%t2b(b,a,j,i) - v2b(b,a,j,i)
 
                     enddo
                 enddo
@@ -396,12 +450,7 @@ contains
                 do a=sys%occ_b+1, sys%orbs
                     do b=sys%occ_b+1, sys%orbs
 
-                        ii = i - sys%froz
-                        jj = j - sys%froz
-                        aa = a - sys%occ_b
-                        bb = b - sys%occ_b
-
-                        cc%ext_cor%t2c(bb,aa,jj,ii) = cc%ext_cor%t2c(bb,aa,jj,ii) - v2c(b,a,j,i)
+                        cc%ext_cor%t2c(b,a,j,i) = cc%ext_cor%t2c(b,a,j,i) - v2c(b,a,j,i)
 
                     enddo
                 enddo
@@ -508,14 +557,16 @@ contains
 
     end subroutine ext_cor_4
 
+
     subroutine write_t3(sys, cc, t_vec, print_doubles)
 
         ! Write the CC files required for externally corrected CC calculations.
-        !
+
         ! In:
         !   sys: system information
         !   t_vec: cluster analyzed amplitudes up to triples
         !   print_doubles: if true writes down single and double amplitudes as well
+
         ! In/Out:
         !   cc: coupled-cluster information with updated T vector (cc%t_vec) amplitudes
 

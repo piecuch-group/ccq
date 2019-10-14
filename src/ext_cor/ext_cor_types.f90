@@ -7,9 +7,32 @@ module ext_cor_types
         integer(i0), allocatable :: doubles_conf(:,:)
         real(p), allocatable :: doubles_proj(:)
 
+        ! [TODO] refactor this such that vec3_t is being used instead
+        real(p), allocatable :: t1a(:,:)
+        real(p), allocatable :: t1b(:,:)
+
         real(p), allocatable :: t2a(:,:,:,:)
         real(p), allocatable :: t2b(:,:,:,:)
         real(p), allocatable :: t2c(:,:,:,:)
+
+        ! [TODO] this should be an Hbar eventually
+        ! contains the intermediates required to update T3T1 terms
+        ! in the externally corrected methods
+        real(p), allocatable :: x1(:,:,:,:)
+        real(p), allocatable :: x2(:,:,:,:)
+        real(p), allocatable :: x3(:,:,:,:,:,:)
+        real(p), allocatable :: x4(:,:,:,:,:,:)
+        real(p), allocatable :: x5(:,:,:,:,:,:)
+        real(p), allocatable :: x6(:,:,:,:)
+        real(p), allocatable :: x7(:,:,:,:)
+        real(p), allocatable :: x8(:,:,:,:,:,:)
+        real(p), allocatable :: x9(:,:,:,:)
+        real(p), allocatable :: x10(:,:,:,:)
+        real(p), allocatable :: x11(:,:,:,:,:,:)
+        real(p), allocatable :: x12(:,:,:,:)
+        real(p), allocatable :: x13(:,:,:,:)
+        real(p), allocatable :: x14(:,:,:,:,:,:)
+
     end type ext_cor_t
 
     type vec3_t

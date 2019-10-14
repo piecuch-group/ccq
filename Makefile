@@ -84,7 +84,6 @@ lib: $(BIN_DIR)/$(SHARED_LIBRARY) $(BIN_DIR)/$(STATIC_LIBRARY)
 
 # Fortran
 # -------
-#
 $(BUILD_DIR)/printing.o: src/printing.F90
 	$(FC) -c $(FFLAGS) -DCOMP_HOST="'$(COMP_HOST)'" -DCOMP_TIME="'$(COMP_TIME)'" -DVERSION="'$(GIT_SHA1)'" -DFLAGS="'$(FFLAGS)'" -o $@ $< $(F90_MOD_FLAG) $(BUILD_DIR)
 
@@ -110,7 +109,6 @@ $(BUILD_DIR)/%.o: %.c
 
 # Goals
 # -------
-#
 
 # Compile binary
 $(BIN_DIR)/$(PROGRAM): $(OBJS) | $(BIN_DIR)

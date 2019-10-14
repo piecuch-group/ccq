@@ -26,6 +26,8 @@ contains
         use stoch_cc, only: update_stoch_t3
         use cc_utils, only: antisym_t
 
+        use contract_t3, only: hbar_on_t2a, hbar_on_t2b, hbar_on_t2c
+
         implicit none
 
         type(sys_t), intent(in) :: sys
@@ -100,10 +102,14 @@ contains
                 intr=>sys%ints%v_aa, intb=>sys%ints%v_bb, intm=>sys%ints%v_ab)
 
             allocate(v2(n1+1:n3,n1+1:n3,n0+1:n1,n0+1:n1))
-            v2=0.0d0
+            v2=0.0_p
+
+            ! Externally corrected pre-load
             if (run%ext_cor) then
                 v2(:,:,:,:) = cc%ext_cor%t2a(:,:,:,:)
+                call hbar_on_t2a(sys, cc, v2)
             endif
+
             call sumx2143(n0,n3,n1,n3,n1,n3,n0,n1,n0,n1,v2,intr,1.000)
 
             call t2a_update(n0,n1,n2,n3,k1,k2,k3,k4,run%lvl_t,run%lvl_q,run%shift,v2, &
@@ -120,10 +126,13 @@ contains
                 enddo
             else
                 allocate(v2(n2+1:n3,n2+1:n3,n0+1:n2,n0+1:n2))
-                v2=0.0d0
+                v2=0.0_p
+
                 if (run%ext_cor) then
                     v2(:,:,:,:) = cc%ext_cor%t2c(:,:,:,:)
+                    call hbar_on_t2c(sys, cc, v2)
                 endif
+
                 call sumx2143(n0,n3,n2,n3,n2,n3,n0,n2,n0,n2,v2,intb,1.000)
 
                 call t2c_update(n0,n1,n2,n3,k1,k2,k3,k4,run%lvl_t,run%lvl_q,run%shift,v2, &
@@ -136,10 +145,13 @@ contains
             endif
 
             allocate(v2(n2+1:n3,n1+1:n3,n0+1:n2,n0+1:n1))
-            v2=0.0d0
+            v2=0.0_p
+
             if (run%ext_cor) then
                 v2(:,:,:,:) = cc%ext_cor%t2b(:,:,:,:)
+                call hbar_on_t2b(sys, cc, v2)
             endif
+
             call sumx2143(n0,n3,n2,n3,n1,n3,n0,n2,n0,n1,v2,intm,1.000)
 
             call t2b_update(n0,n1,n2,n3,k1,k2,k3,k4,run%lvl_t,run%lvl_q,run%shift,v2, &
@@ -151,8 +163,13 @@ contains
             deallocate(v2)
 
             allocate(v1(n1+1:n3,n0+1:n1))
-            v1=0.0d0
+            v1=0.0_p
+
             call sumx12(0,n3,n1,n3,n0,n1,v1,fockr, 1.000)   !!!!!not sure if the 0 should be n0
+
+            if (run%ext_cor) then
+                v1(:,:) = cc%ext_cor%t1a(:,:)
+            endif
 
             call t1a_update(n0,n1,n2,n3,k1,k2,k3,k4,run%lvl_t,run%shift,v1, &
                 fockr,fockb,intr,intb,intm,t(k1a),t(k1b),t(k2a),t(k2b),t(k2c), &
@@ -166,8 +183,13 @@ contains
                 enddo
             else
                 allocate(v1(n2+1:n3,n0+1:n2))
-                v1=0.0d0
+                v1=0.0_p
+
                 call sumx12(0,n3,n2,n3,n0,n2,v1,fockb, 1.000)
+
+                if (run%ext_cor) then
+                    v1(:,:) = cc%ext_cor%t1b(:,:)
+                endif
 
                 call t1b_update(n0,n1,n2,n3,k1,k2,k3,k4,run%lvl_t,run%shift,v1, &
                     fockr,fockb,intr,intb,intm,t(k1a),t(k1b),t(k2a),t(k2b),t(k2c), &

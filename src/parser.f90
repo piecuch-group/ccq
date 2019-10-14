@@ -342,7 +342,7 @@ contains
             run%act_ind_q = 0
 
             run%ext_cor = .true.
-            run%lvl_t = .true.
+            run%lvl_t = .false.
             run%lvl_q = .false.
 
         case ('DCSD-MC')
@@ -352,7 +352,7 @@ contains
 
             cc%acc%t2t2_t2 = (/1.0_sp, 0.0_sp, 0.5_sp, 0.5_sp, 0.0_sp/)
             run%ext_cor = .true.
-            run%lvl_t = .true.
+            run%lvl_t = .false.
             run%lvl_q = .false.
 
         case ('CCSD')

@@ -26,12 +26,12 @@ program main
     ! Initialize printing system
     call init_print(run%output_file)
 
-    ! Print settings, configurations, host and compilationn
-    ! formation to the output file
+    ! Print settings, configurations, host, and compilation
+    ! information to the output stream
     call print_header(run)
     if (run%config%echo) call print_config(run%config)
 
-    ! Run CC calculations
+    ! Run calculations
     call run_calcs(sys, run, cc)
 
     ! Close output file

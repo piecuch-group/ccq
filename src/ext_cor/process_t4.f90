@@ -186,29 +186,23 @@ contains
         use ext_cor_types, only: ext_cor_t
         use system, only: sys_t
 
+        use errors, only: stop_all
+
         type(sys_t), intent(in) :: sys
         type(ext_cor_t), intent(inout) :: ext_cor
         integer(i0), intent(in) :: f_ref(sys%basis%string_len)
         type(excit_t) :: excit
-        integer :: nocc_a, nocc_b, nunocc_a, nunocc_b
         integer :: e_sign
 
         integer :: i
 
-        nocc_a = sys%occ_a - sys%froz
-        nocc_b = sys%occ_b - sys%froz
-        nunocc_a = sys%orbs - sys%occ_a
-        nunocc_b = sys%orbs - sys%occ_b
-
+        ! Assertion for sanity
         if (.not. allocated(ext_cor%t2a)) &
-            allocate(ext_cor%t2a(nunocc_a, nunocc_a, nocc_a, nocc_a))
-        ext_cor%t2a = 0.0_p
+             call stop_all('update_t2_cluster', 'RUNTIME ERROR: ext_cor%t2a not allocated')
         if (.not. allocated(ext_cor%t2b)) &
-            allocate(ext_cor%t2b(nunocc_b, nunocc_a, nocc_b, nocc_a))
-        ext_cor%t2b = 0.0_p
+             call stop_all('update_t2_cluster', 'RUNTIME ERROR: ext_cor%t2b not allocated')
         if (.not. allocated(ext_cor%t2c)) &
-            allocate(ext_cor%t2c(nunocc_b, nunocc_b, nocc_b, nocc_b))
-        ext_cor%t2c = 0.0_p
+             call stop_all('update_t2_cluster', 'RUNTIME ERROR: ext_cor%t2c not allocated')
 
         associate(from_a=>excit%from_a, from_b=>excit%from_b, &
                 to_a=>excit%to_a, to_b=>excit%to_b)
@@ -222,26 +216,27 @@ contains
                 if (excit%perm) e_sign = -1
 
                 ! Shift numbers to match the system's array
-
-
-                from_a = from_a - sys%froz
-                from_b = from_b - sys%froz
-                to_a = to_a - sys%occ_a
-                to_b = to_b - sys%occ_b
+                !from_a = from_a - sys%froz
+                !from_b = from_b - sys%froz
+                !to_a = to_a - sys%occ_a
+                !to_b = to_b - sys%occ_b
 
                 select case (excit%nexcit_alpha)
 
                 case(2)
                     ext_cor%t2a(to_a(2), to_a(1), from_a(2), from_a(1)) = &
-                        ext_cor%doubles_proj(i) * e_sign
+                         ext_cor%t2a(to_a(2), to_a(1), from_a(2), from_a(1)) + &
+                         ext_cor%doubles_proj(i) * e_sign
 
                 case(1)
                     ext_cor%t2b(to_b(1), to_a(1), from_b(1), from_a(1)) = &
-                        ext_cor%doubles_proj(i) * e_sign
+                         ext_cor%t2b(to_b(1), to_a(1), from_b(1), from_a(1)) + &
+                         ext_cor%doubles_proj(i) * e_sign
 
                 case(0)
                     ext_cor%t2c(to_b(2), to_b(1), from_b(2), from_b(1)) = &
-                        ext_cor%doubles_proj(i) * e_sign
+                         ext_cor%t2c(to_b(2), to_b(1), from_b(2), from_b(1)) + &
+                         ext_cor%doubles_proj(i) * e_sign
 
                 end select
 
