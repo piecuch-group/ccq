@@ -67,7 +67,7 @@ contains
         ! Calculate the energy of a Lambda CC state
 
         ! In:
-        !   sys: molecular system information
+        !   sys: molecular system data
         !   cc: CC vectors
 
         ! Out:
@@ -84,6 +84,10 @@ contains
         integer :: i
 
         energy = 0.0_p
+
+        ! [TODO] find a better way to deal with the unused
+        ! var warning
+        i = sys%froz
 
         do i=1, cc%l_size
             energy = energy + cc%lh_vec(i) * cc%lh_vec(i)

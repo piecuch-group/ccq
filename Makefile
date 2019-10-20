@@ -61,6 +61,9 @@ LIB_OBJS := $(filter-out $(ENTRY_OBJ),$(OBJS))
 AR := ar
 ARFLAGS := -rcs
 
+# Force good coding
+WARNINGS := -Wall -std=f2018 -fall-intrinsics
+
 
 # Enviroment data logging
 # -----------------------
@@ -91,13 +94,13 @@ $(BUILD_DIR)/%.o: %.F
 	$(FC) $(CPPFLAGS) -c $(FFLAGS) $< -o $@ $(F90_MOD_FLAG) $(BUILD_DIR)
 
 $(BUILD_DIR)/%.o: %.F90
-	$(FC) $(CPPFLAGS) -c $(FFLAGS) $< -o $@ $(F90_MOD_FLAG) $(BUILD_DIR)
+	$(FC) $(CPPFLAGS) -c $(WARNINGS) $(FFLAGS) $< -o $@ $(F90_MOD_FLAG) $(BUILD_DIR)
 
 $(BUILD_DIR)/%.o: %.f
 	$(FC) -c $(FFLAGS) $< -o $@ $(F90_MOD_FLAG) $(BUILD_DIR)
 
 $(BUILD_DIR)/%.o: %.f90
-	$(FC) -c $(FFLAGS) $< -o $@ $(F90_MOD_FLAG) $(BUILD_DIR)
+	$(FC) -c $(WARNINGS) $(FFLAGS) $< -o $@ $(F90_MOD_FLAG) $(BUILD_DIR)
 
 %.mod: ;
 

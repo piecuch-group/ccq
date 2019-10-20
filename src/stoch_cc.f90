@@ -22,7 +22,6 @@ contains
         use checking, only: check_allocate, check_deallocate
         use system, only: sys_t, run_t
         use cc_types, only: cc_t, init_hbar, dealloc_hbar, hbar_t
-        use cc_utils, only: antisym_t
 
         type(sys_t), intent(in) :: sys
         type(run_t), intent(in) :: run
@@ -235,13 +234,13 @@ contains
 
                 elseif (nexcit == 2) then
                     ! Call 2 difference Slater rules
-                    h_element = slater2_simham(sys, cc%hbar, occ_list, unocc_list, &
+                    h_element = slater2_simham(sys, cc%hbar, occ_list, &
                         excit%from_orb(1), excit%from_orb(2), &
                         excit%to_orb(1), excit%to_orb(2), excit%perm)
 
                 elseif (nexcit == 3) then
                     ! Call 3 difference Slater rules
-                    h_element = slater3_simham(sys, cc%hbar, &
+                    h_element = slater3_simham(cc%hbar, &
                         excit%from_orb(1), excit%from_orb(2), excit%from_orb(3), &
                         excit%to_orb(1), excit%to_orb(2), excit%to_orb(3), excit%perm)
 

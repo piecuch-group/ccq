@@ -365,7 +365,7 @@ contains
     end function slater1_simham
 
 
-    function slater2_simham(sys, hbar, occ_list, unocc_list, i, j, a, b, perm) result(h_element)
+    function slater2_simham(sys, hbar, occ_list, i, j, a, b, perm) result(h_element)
 
         ! Calculate elements of the similarity transformed Hamiltonian with two
         ! difference.
@@ -387,7 +387,7 @@ contains
         real(p) :: h_element
         type(sys_t), intent(in) :: sys
         type(hbar_t), intent(in) :: hbar
-        integer, intent(in) :: occ_list(:), unocc_list(:)
+        integer, intent(in) :: occ_list(:)
         integer, intent(in) :: i, j, a, b
         logical, intent(in) :: perm
 
@@ -399,8 +399,8 @@ contains
         do kel=1, sys%nvirt
             ! <ijk|g|abk>
             h_element = h_element + get_g(hbar%aaa, hbar%aab, hbar%abb, hbar%bbb, &
-                i, j, unocc_list(kel), &
-                a, b, unocc_list(kel))
+                i, j, occ_list(kel), &
+                a, b, occ_list(kel))
         enddo
 
         if (perm) h_element = -h_element
@@ -408,14 +408,13 @@ contains
     end function slater2_simham
 
 
-    function slater3_simham(sys, hbar, i, j, k, a, b, c, perm) result(h_element)
+    function slater3_simham(hbar, i, j, k, a, b, c, perm) result(h_element)
 
         ! Calculate elements of the similarity transformed Hamiltonian with three
         ! difference.
         ! <D_I | simH_N | D_J> = <D_I | simH_N * E_a^i E_b^j E_c^k | D_I>
 
         ! In:
-        !    sys: system's information
         !    occ_list: occupied orbitals
         !    i, a: from (i) and to (a) orbitals of the single excitation
         !    perm: permutation parity
@@ -424,16 +423,12 @@ contains
         !    h_element: Hamiltonian element
 
         use const, only: p
-        use system, only: sys_t
         use cc_types, only: hbar_t
 
         real(p) :: h_element
-        type(sys_t), intent(in) :: sys
         type(hbar_t), intent(in) :: hbar
         integer, intent(in) :: i, j, k, a, b, c
         logical, intent(in) :: perm
-
-        integer :: iel, jel
 
         ! <ijk|g|abc>
         h_element = get_g(hbar%aaa, hbar%aab, hbar%abb, hbar%bbb, &
@@ -457,7 +452,7 @@ contains
 
         logical :: perm
         integer :: indx, cnt
-        integer :: diff, tmp
+        integer :: diff
         integer :: ex_1, ex_2
         integer :: inds_tmp(6)
 

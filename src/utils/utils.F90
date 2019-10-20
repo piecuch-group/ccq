@@ -351,7 +351,7 @@ contains
 
     end subroutine append_ext
 
-    subroutine get_unique_filename(stem, suffix, tnext, istart, filename, id, reduce)
+    subroutine get_unique_filename(stem, suffix, tnext, istart, filename, id)
 
         ! Find a filename which is either the "newest" or the next to be used.
         ! The filename is assumed to be stem.xsuffix, where x is an integer.
@@ -376,7 +376,6 @@ contains
         integer, intent(in) :: istart
         character(*), intent(out) :: filename
         integer, optional, intent(out) :: id
-        logical, optional, intent(in) :: reduce
 
         integer :: i
         logical :: exists
@@ -674,15 +673,15 @@ contains
 
     function get_wall_time() result(t)
 
-        use const, only: int_64, p
+        use const, only: int_64, dp
 
-        real(p) :: t
+        real(dp) :: t
 
         integer(int_64) :: t_int, count_rate, count_max
 
         call system_clock(t_int, count_rate, count_max)
 
-        t = real(t_int, p) / real(count_rate, p)
+        t = real(t_int, dp) / real(count_rate, dp)
 
     end function get_wall_time
 

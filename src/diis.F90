@@ -38,19 +38,14 @@ contains
         ! Local vars
         integer, allocatable :: ipiv(:)
         integer :: info
-        integer :: idx, idy
-        integer :: max_t_size
 
         real(p), allocatable :: B(:,:), C(:)
 
 #ifndef ENABLE_HDF5
         real(p), allocatable :: vec_aux(:)
+        integer :: idx
 #endif
 
-        real(p) :: accum
-        ! Define external functions
-        ! [TODO] should use module
-        real(p) :: ddot, axpy
 
 
         allocate(B(run%diis_space+1,run%diis_space+1))
@@ -114,15 +109,9 @@ contains
         integer, intent(in) :: diis_space
 
         real(p) :: residuum
-        integer :: indx1, indx2
-
-#ifndef ENABLE_HDF5
-        real(p), allocatable :: v1(:), v2(:)
-        real(p) :: ddot
-#endif
-
 
 #ifdef ENABLE_HDF5
+        integer :: indx1, indx2
 
         indx1 = mod(iter - 1, diis_space + 1)
         if (indx1 == 0) indx1 = diis_space + 1
@@ -133,7 +122,10 @@ contains
 
         residuum = get_chunk_residuum(conv%filename, conv%iter_dset_name, &
              indx1, indx2)
+
 #else
+        real(p), allocatable :: v1(:), v2(:)
+        real(p) :: ddot, dsqrt
 
         ! Allocate auxiliary vectors
         allocate(v1(conv%vec_size))
@@ -316,8 +308,10 @@ contains
         integer, intent(in) :: iter
         integer, intent(in) :: diis_space
 
+#ifndef ENABLE_HDF5
         character(len=c_len) :: filename
-        integer :: indx_rec, i_chunk, i
+#endif
+        integer :: indx_rec
 
 
 #ifdef ENABLE_HDF5
@@ -371,6 +365,9 @@ contains
         use solver_types, only: conv_t
 #ifdef ENABLE_HDF5
         use hdf5_io, only: init_dset
+#else
+        character(len=200) :: dummy_filename
+        integer :: dummy_diis_space
 #endif
 
         type(conv_t), intent(in) :: conv
@@ -378,6 +375,9 @@ contains
 
 #ifdef ENABLE_HDF5
         call init_dset(conv%filename, conv%iter_dset_name, [conv%vec_size, diis_space + 1])
+#else
+        dummy_filename = conv%filename(1:200)
+        dummy_diis_space = diis_space
 #endif
 
     end subroutine init_vecs
@@ -386,7 +386,6 @@ contains
 
         ! Remove DIIS generated files after
         ! convergence is reached.
-
 
         ! In:
         !   conv: CC vector and converfence data
@@ -402,18 +401,20 @@ contains
 
         integer :: idx
         character(len=c_len) :: filename
+        logical :: exists
 
-#ifndef ENABLE_HDF5
 
         do idx=1, diis_space
             write(filename, '(a,i0,a)') trim(conv%iter_dset_name)//"-", &
                 idx, ".bin"
 
-            open(tmp_unit, file=trim(filename), status='unknown')
-            close(tmp_unit, status='delete')
-        enddo
+            inquire(file=filename, exist=exists)
 
-#endif
+            if (exists) then
+                open(tmp_unit, file=trim(filename), status='unknown')
+                close(tmp_unit, status='delete')
+            endif
+        enddo
 
     end subroutine clean_up_files
 

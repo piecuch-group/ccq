@@ -98,7 +98,7 @@ contains
 
 
         ! Static updates. These will not be changed during the
-        ! iterative procedure.
+        ! iterative procedure (these are the linear terms).
         call t3_on_t1a(sys, t3a, t3b, t3c, cc%ext_cor%t1a)
         call t3_on_t1b(sys, t3b, t3c, t3d, cc%ext_cor%t1b)
 
@@ -142,12 +142,7 @@ contains
         real(p), pointer :: t3c(:,:,:,:,:,:) => null()
         real(p), pointer :: t3d(:,:,:,:,:,:) => null()
 
-        real(p), allocatable::b1(:,:)
-        real(p), allocatable::b2(:,:)
-        real(p), allocatable::c1(:,:,:)
-        real(p), allocatable::c2(:,:,:)
         real(p), allocatable::d1(:,:,:,:)
-        real(p), allocatable::d2(:,:,:,:)
         real(p), allocatable::f2(:,:,:,:,:,:)
 
         real(p), allocatable::s1(:,:,:,:)
@@ -749,7 +744,7 @@ contains
         real(p), allocatable :: z13(:,:)
 
         integer :: k1, k2, k3, k4
-        integer :: i1, i2, i3
+        integer :: i2, i3
 
         associate(n0=>sys%froz, n1=>sys%occ_a, n2=>sys%occ_b, n3=>sys%orbs, &
              fockr=>sys%ints%f_a, fockb=>sys%ints%f_b, &
@@ -835,7 +830,7 @@ contains
         real(p), allocatable :: z13(:,:)
 
         integer :: k1, k2, k3, k4
-        integer :: i1, i2, i3
+        integer :: i2, i3
 
         associate(n0=>sys%froz, n1=>sys%occ_a, n2=>sys%occ_b, n3=>sys%orbs, &
              fockr=>sys%ints%f_a, fockb=>sys%ints%f_b, &
@@ -1502,13 +1497,7 @@ contains
         !real(p), pointer :: v2A(:,:,:,:) => null()
         real(p), intent(in out) :: v2A(:,:,:,:)
 
-        real(p),allocatable::B1(:,:)
         real(p),allocatable::B2(:,:)
-        real(p),allocatable::C1(:,:,:)
-        real(p),allocatable::C2(:,:,:)
-        real(p),allocatable::D1(:,:,:,:)
-        real(p),allocatable::D2(:,:,:,:)
-        real(p),allocatable::F2(:,:,:,:,:,:)
 
         real(p),allocatable::Z2(:,:,:,:)
         real(p),allocatable::Z4(:,:,:,:)
@@ -1618,13 +1607,7 @@ contains
         !real(p), pointer :: v2C(:,:,:,:) => null()
         real(p), intent(in out) :: v2C(:,:,:,:)
 
-        real(p), allocatable::B1(:,:)
         real(p), allocatable::B2(:,:)
-        real(p), allocatable::C1(:,:,:)
-        real(p), allocatable::C2(:,:,:)
-        real(p), allocatable::D1(:,:,:,:)
-        real(p), allocatable::D2(:,:,:,:)
-        real(p), allocatable::F2(:,:,:,:,:,:)
 
         real(p), allocatable::Z1(:,:,:,:)
         real(p), allocatable::Z4(:,:,:,:)
@@ -1737,13 +1720,7 @@ contains
         !real(p), pointer :: v2B(:,:,:,:) => null()
         real(p), intent(in out) :: v2B(:,:,:,:)
 
-        real(p), allocatable :: B1(:,:)
         real(p), allocatable :: B2(:,:)
-        real(p), allocatable :: C1(:,:,:)
-        real(p), allocatable :: C2(:,:,:)
-        real(p), allocatable :: D1(:,:,:,:)
-        real(p), allocatable :: D2(:,:,:,:)
-        real(p), allocatable :: F2(:,:,:,:,:,:)
 
         real(p), allocatable :: Z2(:,:,:,:)
         real(p), allocatable :: Z4(:,:,:,:)

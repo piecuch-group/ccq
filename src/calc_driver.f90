@@ -26,7 +26,7 @@ contains
         use const, only: p
         use printing, only: print_calc_params, print_date, print_summary
 
-        use external_correction, only: ext_cor_driver
+        use external_correction, only: external_correction_driver
         use solver, only: solve_cc, solve_lcc
         use hbar_gen, only: hbar2
         use mm_correct, only: crcc23
@@ -48,7 +48,7 @@ contains
         ! Externally corrected CC methods
         ! -------------------------------
         if (run%ext_cor) then
-            call ext_cor_driver(sys, run, cc)
+            call external_correction_driver(sys, run, cc)
         endif
 
         ! Solve coupled cluster
@@ -59,7 +59,7 @@ contains
         ! ---------------
         ! [TODO] improve naming of hbar2
         if (run%hbar) then
-            call hbar2(sys, run, cc)
+            call hbar2(sys, cc)
         endif
 
         ! Solve left coupled cluster
@@ -69,7 +69,7 @@ contains
 
         ! Calculate MM correction
         if (run%mm_23) then
-            call crcc23(sys, run, cc)
+            call crcc23(sys, cc)
         endif
 
         ! Wrap up
@@ -110,7 +110,7 @@ contains
         ! Load integrals
         call load_ints(sys, run)
         ! [TODO] everything should be sorted in the future
-        call load_sorted_ints(sys, run)
+        call load_sorted_ints(sys)
 
         ! Initialize determinant and excitation systems
         call init_basis_strings(sys%basis)
@@ -148,12 +148,10 @@ contains
         type(cc_t), intent(inout) :: cc
         logical, intent(in) :: cc_failed
 
-        integer :: idx
-
         ! Close T vec file
         ! [TODO] cleanup: write bin files and deal with failure to converge
 
-        if (run%lvl_q) call close_t4_files(sys, run%keep_bin, cc_failed)
+        if (run%lvl_q) call close_t4_files(run%keep_bin, cc_failed)
 
         ! [TODO] clean deallocations and allocations. Prolly better to have a module handling this
         ! Deallocate T
@@ -166,9 +164,7 @@ contains
         call dealloc_basis_t(sys%basis)
         call end_excitations(sys%basis%excit_mask)
         call unload_ints(sys)
-        if (run%sorted_ints) then
-            call unload_sorted_ints(sys)
-        endif
+        call unload_sorted_ints(sys)
 
     end subroutine clean_system
 
@@ -182,8 +178,6 @@ contains
 
         type(run_t), intent(in) :: run
         type(cc_t), intent(inout) :: cc
-
-        logical :: t_exists
 
         ! Initialize T vector
         if (.not. allocated(cc%t_vec)) then

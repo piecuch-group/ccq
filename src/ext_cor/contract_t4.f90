@@ -1,7 +1,7 @@
 module contract_t4
 
     ! Contract T4 and project onto doubles, using C4 and the
-    ! disconnected parts of the powers of T1, T2 and T3
+    ! disconnected parts of the powers of T1, T2 and T3.
 
     use const, only: p
 
@@ -9,7 +9,132 @@ module contract_t4
 
 contains
 
-    subroutine drive_t4_contraction(sys, cc, v2a, v2b, v2c)
+    subroutine process_fciqmc_c4(sys, cc, f_ref, filename, coef_norm)
+
+        ! Parse and process quadruply excited determinants from
+        ! a FCI/FCIQMC wave function. The parsed C4 coefficients
+        ! are contracted with the Hamiltonian and projected on
+        ! doubles on the fly.
+
+        ! In:
+        !   sys: molecular system information
+        !   f_ref: reference determinant. Usually Hartree--Fock
+        !   filename: filename containing the CI wave function (list of determinants)
+        !   coef_norm: coefficient of the reference determinant. Required for
+        !              the intermediate renormalization of the wave function
+
+        ! In/Out:
+        !   cc: coupled-cluster information
+
+
+        use const, only: i0, walk_unit
+        use system, only: sys_t
+        use cc_types, only: cc_t
+
+        use determinants, only: encode_det
+        use excitations, only: excit_t, get_excitation_level, shift_occ_list
+        use det_hash
+
+        use checking, only: check_allocate, check_deallocate
+        use printing, only: io
+
+        use utils, only: get_wall_time
+
+        type(sys_t), intent(in) :: sys
+        type(cc_t), intent(in out) :: cc
+
+        integer(i0), intent(in) :: f_ref(sys%basis%string_len)
+        character(len=*), intent(in) :: filename
+        real(p), intent(in) :: coef_norm
+
+        type(dictionary_t) :: doubles_conf_hash
+
+        real(p) :: c4_amp
+
+        real(p) :: prev_time
+
+        real(p) :: read_coef
+        integer :: idx
+        integer :: occ_list(sys%nel)
+        integer(i0) :: f_t4(sys%basis%string_len)
+        integer(i0) :: f_doub(sys%basis%string_len)
+        integer :: doubles_nconf
+        integer :: cnt_c4 = 0
+        integer :: c_id
+        integer :: ios
+        integer :: ierr
+        integer :: excit_rank
+
+
+        ! Generate doubly excited determinants required to calculate the
+        ! matrix elements of <ijab | [V_N, T_4] |phi>
+        ! [TODO] we might be able to move this?
+        write(io, '(4x,a)') '=> Creating twobody configurations'
+        call gen_doubles_conf(sys, cc%ext_cor%doubles_conf, f_ref)
+        doubles_nconf = size(cc%ext_cor%doubles_conf, 2)
+        write(io, '(8x,a,i8,a)') '=> ', doubles_nconf,' double excitations'
+        cc%ext_cor%doubles_nconf = doubles_nconf
+
+        ! Create a hash table for finding indices by mapping determinants
+        ! to indices
+        call doubles_conf_hash%init(doubles_nconf)
+        do idx=1, doubles_nconf
+            f_doub = cc%ext_cor%doubles_conf(:,idx)
+            call doubles_conf_hash%set(f_doub, idx)
+        enddo
+
+        ! Allocate the array that holds the  <ijab | [V_N, T_4] |phi>
+        ! projection.
+        allocate(cc%ext_cor%doubles_proj(doubles_nconf), stat=ierr)
+        cc%ext_cor%doubles_proj = 0.0_p
+
+        ! Load all quadruply excited determinants in CIQMC
+        open(walk_unit, file=trim(filename), status='old')
+
+        write(io, '(4x,a)') '=> Starting loop over stochastic quadruply excited determinants'
+        prev_time = get_wall_time()
+        do
+
+            ! Read Slater determinant
+            read(walk_unit, *, iostat=ios) c_id, read_coef, occ_list(1:sys%nel-sys%froz*2)
+            if (ios /= 0) exit
+
+            ! Shift occupation list due to frozen orbitals that
+            ! need to be taken into account for the CC code
+            call shift_occ_list(sys%froz*2, sys%nel, occ_list)
+            call encode_det(sys%basis, occ_list, f_t4)
+            excit_rank = get_excitation_level(f_ref, f_t4)
+
+            ! Skip non quadruply excited determinants
+            if (excit_rank /= 4) cycle
+
+            ! Update the array holding the projections <ijab | [V_N, C_4] |phi>
+            c4_amp = read_coef / coef_norm
+            if (c4_amp /= 0.0_p) then
+                cnt_c4 = cnt_c4 + 1
+                call update_doubles_projection(sys, f_t4, c4_amp, &
+                     cc%ext_cor%doubles_proj, doubles_conf_hash, f_ref)
+            endif
+
+        enddo
+        close(walk_unit)
+
+        write(io, '(8x,a,i8,a,f8.2,a)') '=>', cnt_c4, ' amplitudes proccesed in ', &
+            get_wall_time()-prev_time, ' seconds'
+
+    end subroutine process_fciqmc_c4
+
+    subroutine drive_t4_contraction(sys, cc)
+
+        ! Project T4 onto doubles by using C4 coefficients and the
+        ! partially disconnected parts of the T1, T2, and T3
+        ! cluster components
+
+        ! In:
+        !   sys: molecular system information
+
+        ! In/Out:
+        !   cc: coupled-cluster data.
 
         use const, only: dp
         use cc_types, only: cc_t
@@ -18,15 +143,16 @@ contains
         use errors, only: stop_all
         use printing, only: io
 
+        use cc_utils, only: antisymmetrize_t2
         use utils, only: get_wall_time
 
 
         type(sys_t), intent(in) :: sys
-        type(cc_t), intent(in), target :: cc
+        type(cc_t), target, intent(in out) :: cc
 
-        real(p), allocatable, intent(out) :: v2a(:,:,:,:)
-        real(p), allocatable, intent(out) :: v2b(:,:,:,:)
-        real(p), allocatable, intent(out) :: v2c(:,:,:,:)
+        real(p), allocatable :: v2a(:,:,:,:)
+        real(p), allocatable :: v2b(:,:,:,:)
+        real(p), allocatable :: v2c(:,:,:,:)
 
         real(dp) :: start_time, end_time
 
@@ -42,19 +168,12 @@ contains
         real(p), pointer :: t3c(:,:,:,:,:,:) => null()
         real(p), pointer :: t3d(:,:,:,:,:,:) => null()
 
-        real(p) :: shift
-
         ! Compatibility vars
         ! [TODO] all this has to be removed
         integer :: n0, n1, n2 ,n3, m1, m2
         integer :: k1, k2, k3, k4
-        integer :: k5, k6 ,k7, k8, k9, k0
 
-        integer :: k1a, k1b, k2a, k2b, k2c, k3a, k3b, k3c, k3d
-
-        integer :: i, i0, i1
-
-        shift = 0.0_p
+        integer :: i, j, a, b
 
         ! Compatibility layer
         n0 = sys%froz
@@ -72,16 +191,6 @@ contains
         k2 = sys%occ_b - sys%froz
         ! K4 = # of unocc beta
         k4 = sys%orbs - sys%occ_b
-
-        k1a = cc%pos(1)
-        k1b = cc%pos(2)
-        k2a = cc%pos(3)
-        k2b = cc%pos(4)
-        k2c = cc%pos(5)
-        k3a = cc%pos(6)
-        k3b = cc%pos(7)
-        k3c = cc%pos(8)
-        k3d = cc%pos(9)
 
 
         write(io, '(12x,a)') '=> Allocating arrays'
@@ -141,29 +250,31 @@ contains
 
 
             allocate(V2A(N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1))
-            V2A=0.0d0
+            V2A = 0.0_p
             allocate(V2B(N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N1))
-            V2B=0.0d0
+            V2B = 0.0_p
             allocate(V2C(N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2))
-            V2C=0.0d0
+            V2C = 0.0_p
 
             write(io, '(12x,a)') '=> <ijab| [V_N, (T4 - C4)]D | phi> alpha spin'
             start_time = get_wall_time()
             call t2A_disconnected(n0,n1,n2,n3, &
-                 k1,k2,k3,k4,v2a,v2b,v2c, &
-                 fockr, fockb, intr,intb,intm, &
+                 k1,k2,k3,k4, &
+                 v2a,v2b,v2c, &
+                 intr, intb, intm, &
                  t1a, t1b, t2a, t2b, t2c, &
-                 t3a, t3b, t3c, t3d)
+                 t3a, t3b, t3c)
             end_time = get_wall_time()
             write(io, '(16x,a,f10.2,a)') '=> Took', end_time - start_time, ' seconds'
 
             write(io, '(12x,a)') '=> <ijab| [V_N, (T4 - C4)]D | phi> beta spin'
             start_time = get_wall_time()
             call t2B_disconnected(n0,n1,n2,n3, &
-                 k1,k2,k3,k4,v2b,v2c, &
-                 fockr, fockb, intr,intb,intm, &
-                 t1a, t1b, t2a, t2b, t2c, &
-                 t3a, t3b, t3c, t3d)
+                 k1, k2, k3, k4, &
+                 v2b, v2c, &
+                 intr, intb, intm, &
+                 t1a, t1b, t2b, t2c, &
+                 t3b, t3c, t3d)
             end_time = get_wall_time()
             write(io, '(16x,a,f10.2,a)') '=> Took', end_time - start_time, ' seconds'
 
@@ -171,13 +282,12 @@ contains
             start_time = get_wall_time()
             call t2A_update(N0,N1,N2,N3,V2A, &
                  K1,K2,K3,K4, &
-                 FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,&
-                 VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,&
-                 VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,&
-                 VBPHPH,VBHPPP,VBPHPP,&
-                 VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,&
-                 t1a, t1b, t2a, t2b, t2c, &
-                 t3a, t3b, t3c, t3d)
+                 VAHHPP, &
+                 VBHHPP, &
+                 VCHHPP, &
+                 t1a, t1b, &
+                 t2a, t2b, &
+                 t3a, t3b)
             end_time = get_wall_time()
             write(io, '(16x,a,f10.2,a)') '=> Took', end_time - start_time, ' seconds'
 
@@ -185,144 +295,469 @@ contains
             start_time = get_wall_time()
             call t2B_update(N0,N1,N2,N3,V2B, &
                  K1,K2,K3,K4, &
-                 FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,&
-                 VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,&
-                 VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,&
-                 VBPHPH,VBHPPP,VBPHPP,&
-                 VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,&
-                 t1a, t1b, t2a, t2b, t2c, &
-                 t3a, t3b, t3c, t3d)
+                 VAHHPP, &
+                 VBHHPP, &
+                 VCHHPP, &
+                 t1a, t1b, &
+                 t2a, t2b, t2c, &
+                 t3b, t3c)
             end_time = get_wall_time()
             write(io, '(16x,a,f10.2,a)') '=> Took', end_time - start_time, ' seconds'
 
             write(io, '(12x,a)') '=> <ijab| (V_N, (T4 - C4))C | phi> beta-beta spin'
             start_time = get_wall_time()
-            call t2C_update(N0,N1,N2,N3,V2C, &
-                 K1,K2,K3,K4, &
-                 FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,&
-                 VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,&
-                 VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,&
-                 VBPHPH,VBHPPP,VBPHPP,&
-                 VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,&
-                 t1a, t1b, t2a, t2b, t2c, &
-                 t3a, t3b, t3c, t3d)
+            call t2C_update(N0, N1, N2, N3, V2C, &
+                 K1, K2, K3, K4, &
+                 VAHHPP, &
+                 VBHHPP, &
+                 VCHHPP, &
+                 t1a, t1b, &
+                 t2b, t2c, &
+                 t3c, t3d)
             end_time = get_wall_time()
             write(io, '(16x,a,f10.2,a)') '=> Took', end_time - start_time, ' seconds'
 
         end associate
 
+        call antisymmetrize_t2(cc%ext_cor%t2a, cc%ext_cor%t2c)
+        call antisymmetrize_t2(v2a, v2c)
+
+        ! Subtract disconnected from T2A
+        do i=sys%froz+1, sys%occ_a
+            do j=sys%froz+1, sys%occ_a
+                do a=sys%occ_a+1, sys%orbs
+                    do b=sys%occ_a+1, sys%orbs
+
+
+                        cc%ext_cor%t2a(b,a,j,i) = cc%ext_cor%t2a(b,a,j,i) - v2a(b,a,j,i)
+
+                    enddo
+                enddo
+            enddo
+        enddo
+
+        ! Subtract disconnected from T2B
+        do i=sys%froz+1, sys%occ_a
+            do j=sys%froz+1, sys%occ_b
+                do a=sys%occ_a+1, sys%orbs
+                    do b=sys%occ_b+1, sys%orbs
+
+                        cc%ext_cor%t2b(b,a,j,i) = cc%ext_cor%t2b(b,a,j,i) - v2b(b,a,j,i)
+
+                    enddo
+                enddo
+            enddo
+        enddo
+
+        ! Subtract disconnected from T2C
+        do i=sys%froz+1, sys%occ_b
+            do j=sys%froz+1, sys%occ_b
+                do a=sys%occ_b+1, sys%orbs
+                    do b=sys%occ_b+1, sys%orbs
+
+                        cc%ext_cor%t2c(b,a,j,i) = cc%ext_cor%t2c(b,a,j,i) - v2c(b,a,j,i)
+
+                    enddo
+                enddo
+            enddo
+        enddo
+
     end subroutine drive_t4_contraction
 
+    subroutine gen_doubles_conf(sys, confs, f_ref)
+
+        use const, only: i0
+        use utils, only: combs, binom_i
+        use checking, only: check_allocate, check_deallocate
+        use determinants, only: encode_det
+        use excitations, only: excit_t, create_excited_det
+        use symmetry, only: is_sym
+        use system, only: sys_t
+
+        type(sys_t), intent(in) :: sys
+        integer(i0), allocatable, intent(out) :: confs(:,:)
+        integer(i0), intent(in) :: f_ref(sys%basis%string_len)
+
+        integer(i0), allocatable :: tmp_confs(:,:)
+
+        type(excit_t) :: excit
+        integer(i0) :: f_tmp(sys%basis%string_len)
+
+        integer :: ierr
+
+        integer :: ind_conf
+        integer :: a, b
+        integer :: i, j
+
+        integer :: ndoubles
+
+        ! Set connection excitation level
+        excit%nexcit = 2
+
+        ndoubles = binom_i(sys%nel-sys%froz*2, 2) * binom_i(sys%nvirt, 2)
+        allocate(tmp_confs(sys%basis%string_len, ndoubles), stat=ierr)
+        call check_allocate('tmp_confs', ndoubles, ierr)
+
+        ind_conf = 0
+        do a=sys%nel+1, sys%orbs*2
+            do b=a+1, sys%orbs*2
+
+                excit%to_orb(1:2) = [a, b]
+
+                do i=sys%froz*2+1, sys%nel
+                    do j=i+1, sys%nel
+
+                        excit%from_orb(1:2) = [i, j]
+
+                        if (check_spin(excit, 2) .and. check_sym(excit, 2)) then
+                            call create_excited_det(sys%basis, f_ref, excit, f_tmp)
+                            ind_conf = ind_conf + 1
+                            tmp_confs(:,ind_conf) = f_tmp
+                        endif
+
+                    enddo
+                enddo
+
+            enddo
+        enddo
+
+        ! Compact configurations array
+        allocate(confs(sys%basis%string_len, ind_conf), stat=ierr)
+        call check_allocate('confs', ind_conf, ierr)
+        confs(:,:) = tmp_confs(:,1:ind_conf)
+        deallocate(tmp_confs)
+        call check_deallocate('tmp_confs', ierr)
+
+
+    end subroutine gen_doubles_conf
+
+    subroutine update_doubles_projection(sys, t4_conf, t4_amp, &
+            doubles_projection, doubles_conf_hash, f_ref)
+
+        use const, only: i0
+        use det_hash
+        use excitations, only: excit_t, get_excitation_level, get_excitation, create_excited_det, find_excitation_permutation2
+        use hmat, only: get_v
+        use system, only: sys_t
+        use utils, only: next_comb
+
+        type(sys_t), intent(in) :: sys
+        integer(i0), intent(in) :: t4_conf(sys%basis%string_len)
+        real(p), intent(in) :: t4_amp
+        real(p), intent(in out) :: doubles_projection(:)
+        type(dictionary_t), intent(in) :: doubles_conf_hash
+        integer(i0), intent(in) :: f_ref(sys%basis%string_len)
+
+        integer(i0) :: f_doub(sys%basis%string_len)
+
+        !  Local variables
+        integer, parameter :: n = 4
+        integer, parameter :: r = 2
+
+        integer :: inds_from(r), inds_to(r)
+        integer :: iconf
+        integer :: idx
+        integer :: i, j, a, b
+        type(excit_t) :: excit, excit_t4
+        real(p) :: h_element
+
+        logical :: done
+
+
+        excit_t4 = get_excitation(sys%nel, sys%basis, f_ref, t4_conf)
+
+
+        associate(from=>excit_t4%from_orb, to=>excit_t4%to_orb)
+
+            do idx=1, r
+                inds_from(idx) = idx
+            enddo
+
+            from_loop: do
+
+                do idx=1, r
+                    inds_to(idx) = idx
+                    ! Inverting excitation
+                    excit%to_orb(idx) = from(inds_from(idx))
+                enddo
+
+
+                to_loop: do
+
+                    do idx=1, r
+                        ! Inverting excitation
+                        excit%from_orb(idx) = to(inds_to(idx))
+                    enddo
+
+                    ! Calculate matrix element. Note that only double excitations
+                    ! are allowed, thus only twobody integrals are needed (Slater rules).
+                    a = excit%from_orb(1)
+                    b = excit%from_orb(2)
+                    i = excit%to_orb(1)
+                    j = excit%to_orb(2)
+
+                    excit%nexcit = 2
+
+                    h_element = get_v(sys%ints%v_aa, sys%ints%v_ab, sys%ints%v_bb, i, j, a, b)
+
+                    if (h_element /= 0.0_p) then
+
+                        call create_excited_det(sys%basis, t4_conf, excit, f_doub)
+                        call find_excitation_permutation2(sys%basis%excit_mask, t4_conf, excit)
+
+                        ! Apply the appropriate permutation parity
+                        ! [TODO]
+                        if (excit%perm) h_element = -h_element
+
+                        iconf = get_val(f_doub, doubles_conf_hash%dict_size, doubles_conf_hash)
+
+                        ! Update projection on doubles
+                        doubles_projection(iconf) = doubles_projection(iconf) + (h_element * t4_amp)
+
+                    endif
+
+                    ! Get next combination of to orbitals
+                    call next_comb(n, inds_to, r, done)
+                    if (done) exit to_loop
+
+                enddo to_loop
+
+                ! Get next combination of to orbitals
+                call next_comb(n, inds_from, r, done)
+                if (done) exit from_loop
+
+            enddo from_loop
+
+        end associate
+
+    end subroutine update_doubles_projection
+
+    subroutine update_t2_cluster(sys, ext_cor, f_ref)
+
+        use const, only: i0
+        use excitations, only: excit_t, get_excitation_spin_integrate, get_excitation_level
+        use ext_cor_types, only: ext_cor_t
+        use system, only: sys_t
+
+        use errors, only: stop_all
+
+        type(sys_t), intent(in) :: sys
+        type(ext_cor_t), intent(inout) :: ext_cor
+        integer(i0), intent(in) :: f_ref(sys%basis%string_len)
+        type(excit_t) :: excit
+        integer :: e_sign
+
+        integer :: i
+
+        ! Assertion for sanity
+        if (.not. allocated(ext_cor%t2a)) &
+             call stop_all('update_t2_cluster', 'RUNTIME ERROR: ext_cor%t2a not allocated')
+        if (.not. allocated(ext_cor%t2b)) &
+             call stop_all('update_t2_cluster', 'RUNTIME ERROR: ext_cor%t2b not allocated')
+        if (.not. allocated(ext_cor%t2c)) &
+             call stop_all('update_t2_cluster', 'RUNTIME ERROR: ext_cor%t2c not allocated')
+
+        associate(from_a=>excit%from_a, from_b=>excit%from_b, &
+                to_a=>excit%to_a, to_b=>excit%to_b)
+
+
+            do i=1, ext_cor%doubles_nconf
+                ! Compute excitation
+                excit = get_excitation_spin_integrate(sys%nel, sys%basis, f_ref, ext_cor%doubles_conf(:,i))
+                ! Get excitation sign
+                e_sign = 1
+                if (excit%perm) e_sign = -1
+
+                ! Shift numbers to match the system's array
+                !from_a = from_a - sys%froz
+                !from_b = from_b - sys%froz
+                !to_a = to_a - sys%occ_a
+                !to_b = to_b - sys%occ_b
+
+                select case (excit%nexcit_alpha)
+
+                case(2)
+                    ext_cor%t2a(to_a(2), to_a(1), from_a(2), from_a(1)) = &
+                         ext_cor%t2a(to_a(2), to_a(1), from_a(2), from_a(1)) + &
+                         ext_cor%doubles_proj(i) * e_sign
+
+                case(1)
+                    ext_cor%t2b(to_b(1), to_a(1), from_b(1), from_a(1)) = &
+                         ext_cor%t2b(to_b(1), to_a(1), from_b(1), from_a(1)) + &
+                         ext_cor%doubles_proj(i) * e_sign
+
+                case(0)
+                    ext_cor%t2c(to_b(2), to_b(1), from_b(2), from_b(1)) = &
+                         ext_cor%t2c(to_b(2), to_b(1), from_b(2), from_b(1)) + &
+                         ext_cor%doubles_proj(i) * e_sign
+
+                end select
+
+            enddo
+
+        end associate
+
+    end subroutine update_t2_cluster
+
+    function check_exists(f_t4, c4_confs, cnt_c4) result(res)
+
+        use bit_utils, only: count_set_bits
+        use const, only: i0
+
+        logical :: res
+        integer(i0), intent(in) :: f_t4(:)
+        integer(i0), allocatable, intent(in) :: c4_confs(:,:)
+        integer, intent(in) :: cnt_c4
+
+        integer :: i
+        integer :: level
+
+        res = .false.
+        do i=1, cnt_c4
+
+            level = sum(count_set_bits(ieor(f_t4, c4_confs(:,i))))
+            if (level == 0) then
+                res = .true.
+                return
+            endif
+
+        enddo
+
+    end function check_exists
+
+    function check_spin(excit, r) result(res)
+
+        use excitations, only: excit_t
+
+        logical :: res
+        type(excit_t), intent(in) :: excit
+        integer, intent(in) :: r
+
+        integer :: spin_elecs, spin_virts
+        integer :: i
+
+        spin_elecs = 0
+        spin_virts = 0
+        do i=1, r
+            spin_elecs = spin_elecs + mod(excit%from_orb(i), 2)
+            spin_virts = spin_virts + mod(excit%to_orb(i), 2)
+        enddo
+
+        if (spin_elecs /= spin_virts) then
+            res = .false.
+        else
+            res = .true.
+        endif
+
+    end function check_spin
+
+    function check_sym(excit, r) result(res)
+
+        use excitations, only: excit_t
+        use symmetry, only: is_sym
+
+        logical :: res
+        type(excit_t), intent(in) :: excit
+        integer, intent(in) :: r
+
+        integer :: i
+        integer :: ex_orbs(8)
+
+
+        do i=1, r
+            ex_orbs(i) = int((excit%from_orb(i) + 1) / 2)
+        enddo
+        do i=r+1, 2*r
+            ex_orbs(i) = int((excit%to_orb(i-r) + 1) / 2)
+        enddo
+
+        res = is_sym(ex_orbs, 2*r)
+
+    end function check_sym
+
+    ! ----- Cluster update section -----
 
     subroutine t2A_update(N0,N1,N2,N3,V2A, &
          K1,K2,K3,K4,&
-         FAHH,FAHP,FAPP,FBHH,FBHP,FBPP, &
-         VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP, &
-         VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH, &
-         VBPHPH,VBHPPP,VBPHPP, &
-         VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP, &
-         t1A,t1B,t2A,t2B,t2C,t3A,t3B,t3C,t3D)
+         VAHHPP, &
+         VBHHPP, &
+         VCHHPP, &
+         t1A, t1B, &
+         t2A, t2B, &
+         t3A, t3B)
 
         use cc_utils, only: reorder_stripe, sum_stripe
 
         integer :: n0, n1, n2, n3
         integer :: k1, k2 ,k3, k4
         integer :: i1, i2, i3
-        real(kind=8) :: FAHH(N0+1:N1,N0+1:N1)
-        real(kind=8) :: FAHP(N1+1:N3,N0+1:N1)
-        real(kind=8) :: FAPP(N1+1:N3,N1+1:N3)
-        real(kind=8) :: FBHH(N0+1:N2,N0+1:N2)
-        real(kind=8) :: FBHP(N2+1:N3,N0+1:N2)
-        real(kind=8) :: FBPP(N2+1:N3,N2+1:N3)
-        real(kind=8) :: VAHHHH(N0+1:N1,N0+1:N1,N0+1:N1,N0+1:N1)
-        real(kind=8) :: VAHHHP(N1+1:N3,N0+1:N1,N0+1:N1,N0+1:N1)
-        real(kind=8) :: VAHHPP(N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1)
-        real(kind=8) :: VAHPHP(N1+1:N3,N0+1:N1,N1+1:N3,N0+1:N1)
-        real(kind=8) :: VAHPPP(N1+1:N3,N1+1:N3,N1+1:N3,N0+1:N1)
-        real(kind=8) :: VBHHHH(N0+1:N2,N0+1:N1,N0+1:N2,N0+1:N1)
-        real(kind=8) :: VBHHHP(N2+1:N3,N0+1:N1,N0+1:N2,N0+1:N1)
-        real(kind=8) :: VBHHPH(N0+1:N2,N1+1:N3,N0+1:N2,N0+1:N1)
-        real(kind=8) :: VBHHPP(N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N1)
-        real(kind=8) :: VBHPHP(N2+1:N3,N0+1:N1,N2+1:N3,N0+1:N1)
-        real(kind=8) :: VBHPPH(N0+1:N2,N1+1:N3,N2+1:N3,N0+1:N1)
-        real(kind=8) :: VBPHPH(N0+1:N2,N1+1:N3,N0+1:N2,N1+1:N3)
-        real(kind=8) :: VBHPPP(N2+1:N3,N1+1:N3,N2+1:N3,N0+1:N1)
-        real(kind=8) :: VBPHPP(N2+1:N3,N1+1:N3,N0+1:N2,N1+1:N3)
-        real(kind=8) :: VCHHHH(N0+1:N2,N0+1:N2,N0+1:N2,N0+1:N2)
-        real(kind=8) :: VCHHHP(N2+1:N3,N0+1:N2,N0+1:N2,N0+1:N2)
-        real(kind=8) :: VCHHPP(N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2)
-        real(kind=8) :: VCHPHP(N2+1:N3,N0+1:N2,N2+1:N3,N0+1:N2)
-        real(kind=8) :: VCHPPP(N2+1:N3,N2+1:N3,N2+1:N3,N0+1:N2)
 
-        real(kind=8) :: t1A(N1+1:N3,N0+1:N1)
-        real(kind=8) :: t1B(N2+1:N3,N0+1:N2)
-        real(kind=8) :: t2A(N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1)
-        real(kind=8) :: t2B(N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N1)
-        real(kind=8) :: t2C(N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2)
-        real(kind=8) :: t3A(N1+1:N3,N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1,N0+1:N1)
-        real(kind=8) :: t3B(N2+1:N3,N1+1:N3,N1+1:N3,N0+1:N2,N0+1:N1,N0+1:N1)
-        real(kind=8) :: t3C(N2+1:N3,N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N2,N0+1:N1)
-        real(kind=8) :: t3D(N2+1:N3,N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2,N0+1:N2)
+        real(p) :: VAHHPP(N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1)
+        real(p) :: VBHHPP(N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N1)
+        real(p) :: VCHHPP(N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2)
 
-        real(kind=8) :: V2A(N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1)
+        real(p) :: t1A(N1+1:N3,N0+1:N1)
+        real(p) :: t1B(N2+1:N3,N0+1:N2)
+        real(p) :: t2A(N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1)
+        real(p) :: t2B(N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N1)
+        real(p) :: t3A(N1+1:N3,N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1,N0+1:N1)
+        real(p) :: t3B(N2+1:N3,N1+1:N3,N1+1:N3,N0+1:N2,N0+1:N1,N0+1:N1)
 
-        real(kind=8),allocatable::B1(:,:)
-        real(kind=8),allocatable::B2(:,:)
-        real(kind=8),allocatable::C1(:,:,:)
-        real(kind=8),allocatable::C2(:,:,:)
-        real(kind=8),allocatable::D1(:,:,:,:)
-        real(kind=8),allocatable::D2(:,:,:,:)
-        real(kind=8),allocatable::F1(:,:,:,:,:,:)
-        real(kind=8),allocatable::F2(:,:,:,:,:,:)
+        real(p) :: V2A(N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1)
 
-        real(kind=8), allocatable :: S1(:,:,:,:)
-        real(kind=8), allocatable :: S25(:,:,:,:)
-        real(kind=8), allocatable :: S29(:,:,:,:)
-        real(kind=8), allocatable :: Q9(:,:)
-        real(kind=8), allocatable :: S27(:,:,:,:)
-        real(kind=8), allocatable :: S39(:,:,:,:)
-        real(kind=8), allocatable :: Q3(:,:)
-        real(kind=8), allocatable :: Q12(:,:)
-        real(kind=8), allocatable :: Q5(:,:)
-        real(kind=8), allocatable :: S14(:,:,:,:)
-        real(kind=8), allocatable :: S32(:,:,:,:)
-        real(kind=8), allocatable :: S17(:,:,:,:)
-        real(kind=8), allocatable :: Q7(:,:)
-        real(kind=8), allocatable :: Q8(:,:)
-        real(kind=8), allocatable :: S21(:,:,:,:)
-        real(kind=8), allocatable :: S23(:,:,:,:)
-        real(kind=8), allocatable :: S3(:,:,:,:)
-        real(kind=8), allocatable :: Q1(:,:)
-        real(kind=8), allocatable :: Q10(:,:)
-        real(kind=8), allocatable :: S8(:,:,:,:)
-        real(kind=8), allocatable :: Q6(:,:)
-        real(kind=8), allocatable :: S6(:,:,:,:)
-        real(kind=8), allocatable :: S35(:,:,:,:)
-        real(kind=8), allocatable :: Q11(:,:)
-        real(kind=8), allocatable :: Q4(:,:)
-        real(kind=8), allocatable :: Q2(:,:)
-        real(kind=8), allocatable :: Z2(:,:,:,:)
-        real(kind=8), allocatable :: X1(:,:,:,:)
-        real(kind=8), allocatable :: Z26(:,:,:,:)
-        real(kind=8), allocatable :: X2(:,:,:,:)
-        real(kind=8), allocatable :: Z40(:,:,:,:)
-        real(kind=8), allocatable :: Z30(:,:,:,:)
-        real(kind=8), allocatable :: X3(:,:)
-        real(kind=8), allocatable :: Z31(:,:,:,:)
-        real(kind=8), allocatable :: Z28(:,:,:,:)
-        real(kind=8), allocatable :: X4(:,:)
-        real(kind=8), allocatable :: Z11(:,:,:,:)
-        real(kind=8), allocatable :: X5(:,:)
-        real(kind=8), allocatable :: Z38(:,:,:,:)
-        real(kind=8), allocatable :: Z18(:,:,:,:)
-        real(kind=8), allocatable :: Z22(:,:,:,:)
-        real(kind=8), allocatable :: Z24(:,:,:,:)
-        real(kind=8), allocatable :: X6(:,:,:,:)
-        real(kind=8), allocatable :: Z4(:,:,:,:)
-        real(kind=8), allocatable :: Z7(:,:,:,:)
-        real(kind=8), allocatable :: Z36(:,:,:,:)
-        real(kind=8), allocatable :: X7(:,:)
-        real(kind=8), allocatable :: Z12(:,:,:,:)
+        real(p),allocatable::B2(:,:)
+        real(p),allocatable::D1(:,:,:,:)
+        real(p),allocatable::D2(:,:,:,:)
+        real(p),allocatable::F2(:,:,:,:,:,:)
+
+        real(p), allocatable :: S1(:,:,:,:)
+        real(p), allocatable :: S25(:,:,:,:)
+        real(p), allocatable :: S29(:,:,:,:)
+        real(p), allocatable :: Q9(:,:)
+        real(p), allocatable :: S27(:,:,:,:)
+        real(p), allocatable :: S39(:,:,:,:)
+        real(p), allocatable :: Q3(:,:)
+        real(p), allocatable :: Q12(:,:)
+        real(p), allocatable :: Q5(:,:)
+        real(p), allocatable :: S14(:,:,:,:)
+        real(p), allocatable :: S32(:,:,:,:)
+        real(p), allocatable :: S17(:,:,:,:)
+        real(p), allocatable :: Q7(:,:)
+        real(p), allocatable :: Q8(:,:)
+        real(p), allocatable :: S21(:,:,:,:)
+        real(p), allocatable :: S23(:,:,:,:)
+        real(p), allocatable :: S3(:,:,:,:)
+        real(p), allocatable :: Q1(:,:)
+        real(p), allocatable :: Q10(:,:)
+        real(p), allocatable :: S8(:,:,:,:)
+        real(p), allocatable :: Q6(:,:)
+        real(p), allocatable :: S6(:,:,:,:)
+        real(p), allocatable :: S35(:,:,:,:)
+        real(p), allocatable :: Q11(:,:)
+        real(p), allocatable :: Q4(:,:)
+        real(p), allocatable :: Q2(:,:)
+        real(p), allocatable :: Z2(:,:,:,:)
+        real(p), allocatable :: X1(:,:,:,:)
+        real(p), allocatable :: Z26(:,:,:,:)
+        real(p), allocatable :: X2(:,:,:,:)
+        real(p), allocatable :: Z40(:,:,:,:)
+        real(p), allocatable :: Z30(:,:,:,:)
+        real(p), allocatable :: X3(:,:)
+        real(p), allocatable :: Z31(:,:,:,:)
+        real(p), allocatable :: Z28(:,:,:,:)
+        real(p), allocatable :: X4(:,:)
+        real(p), allocatable :: Z11(:,:,:,:)
+        real(p), allocatable :: X5(:,:)
+        real(p), allocatable :: Z38(:,:,:,:)
+        real(p), allocatable :: Z18(:,:,:,:)
+        real(p), allocatable :: Z22(:,:,:,:)
+        real(p), allocatable :: Z24(:,:,:,:)
+        real(p), allocatable :: X6(:,:,:,:)
+        real(p), allocatable :: Z4(:,:,:,:)
+        real(p), allocatable :: Z7(:,:,:,:)
+        real(p), allocatable :: Z36(:,:,:,:)
+        real(p), allocatable :: X7(:,:)
+        real(p), allocatable :: Z12(:,:,:,:)
 
         allocate(D1(N1+1:N3,N0+1:N1,N0+1:N1,N1+1:N3))
         call reorder_stripe(4,shape(VAHHPP),size(VAHHPP),'1342',VAHHPP,D1)
@@ -904,135 +1339,109 @@ contains
 
     subroutine t2B_update(N0,N1,N2,N3,V2B, &
          K1,K2,K3,K4,&
-         FAHH,FAHP,FAPP,FBHH,FBHP,FBPP, &
-         VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP, &
-         VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH, &
-         VBPHPH,VBHPPP,VBPHPP, &
-         VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP, &
-         t1A,t1B,t2A,t2B,t2C,t3A,t3B,t3C,t3D)
+         VAHHPP, &
+         VBHHPP, &
+         VCHHPP, &
+         t1A, t1B, &
+         t2A, t2B, t2C, &
+         t3B, t3C)
 
         use cc_utils, only: reorder_stripe, sum_stripe
 
         integer :: n0, n1, n2, n3
         integer :: k1, k2 ,k3, k4
         integer :: i1, i2, i3
-        real(kind=8) :: FAHH(N0+1:N1,N0+1:N1)
-        real(kind=8) :: FAHP(N1+1:N3,N0+1:N1)
-        real(kind=8) :: FAPP(N1+1:N3,N1+1:N3)
-        real(kind=8) :: FBHH(N0+1:N2,N0+1:N2)
-        real(kind=8) :: FBHP(N2+1:N3,N0+1:N2)
-        real(kind=8) :: FBPP(N2+1:N3,N2+1:N3)
-        real(kind=8) :: VAHHHH(N0+1:N1,N0+1:N1,N0+1:N1,N0+1:N1)
-        real(kind=8) :: VAHHHP(N1+1:N3,N0+1:N1,N0+1:N1,N0+1:N1)
-        real(kind=8) :: VAHHPP(N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1)
-        real(kind=8) :: VAHPHP(N1+1:N3,N0+1:N1,N1+1:N3,N0+1:N1)
-        real(kind=8) :: VAHPPP(N1+1:N3,N1+1:N3,N1+1:N3,N0+1:N1)
-        real(kind=8) :: VBHHHH(N0+1:N2,N0+1:N1,N0+1:N2,N0+1:N1)
-        real(kind=8) :: VBHHHP(N2+1:N3,N0+1:N1,N0+1:N2,N0+1:N1)
-        real(kind=8) :: VBHHPH(N0+1:N2,N1+1:N3,N0+1:N2,N0+1:N1)
-        real(kind=8) :: VBHHPP(N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N1)
-        real(kind=8) :: VBHPHP(N2+1:N3,N0+1:N1,N2+1:N3,N0+1:N1)
-        real(kind=8) :: VBHPPH(N0+1:N2,N1+1:N3,N2+1:N3,N0+1:N1)
-        real(kind=8) :: VBPHPH(N0+1:N2,N1+1:N3,N0+1:N2,N1+1:N3)
-        real(kind=8) :: VBHPPP(N2+1:N3,N1+1:N3,N2+1:N3,N0+1:N1)
-        real(kind=8) :: VBPHPP(N2+1:N3,N1+1:N3,N0+1:N2,N1+1:N3)
-        real(kind=8) :: VCHHHH(N0+1:N2,N0+1:N2,N0+1:N2,N0+1:N2)
-        real(kind=8) :: VCHHHP(N2+1:N3,N0+1:N2,N0+1:N2,N0+1:N2)
-        real(kind=8) :: VCHHPP(N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2)
-        real(kind=8) :: VCHPHP(N2+1:N3,N0+1:N2,N2+1:N3,N0+1:N2)
-        real(kind=8) :: VCHPPP(N2+1:N3,N2+1:N3,N2+1:N3,N0+1:N2)
 
-        real(kind=8) :: t1A(N1+1:N3,N0+1:N1)
-        real(kind=8) :: t1B(N2+1:N3,N0+1:N2)
-        real(kind=8) :: t2A(N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1)
-        real(kind=8) :: t2B(N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N1)
-        real(kind=8) :: t2C(N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2)
-        real(kind=8) :: t3A(N1+1:N3,N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1,N0+1:N1)
-        real(kind=8) ::t3B(N2+1:N3,N1+1:N3,N1+1:N3,N0+1:N2,N0+1:N1,N0+1:N1)
-        real(kind=8) :: t3C(N2+1:N3,N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N2,N0+1:N1)
-        real(kind=8) :: t3D(N2+1:N3,N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2,N0+1:N2)
+        real(p) :: VAHHPP(N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1)
+        real(p) :: VBHHPP(N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N1)
+        real(p) :: VCHHPP(N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2)
 
-        real(kind=8) :: V2B(N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N1)
+        real(p) :: t1A(N1+1:N3,N0+1:N1)
+        real(p) :: t1B(N2+1:N3,N0+1:N2)
+        real(p) :: t2A(N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1)
+        real(p) :: t2B(N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N1)
+        real(p) :: t2C(N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2)
+        real(p) :: t3B(N2+1:N3,N1+1:N3,N1+1:N3,N0+1:N2,N0+1:N1,N0+1:N1)
+        real(p) :: t3C(N2+1:N3,N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N2,N0+1:N1)
 
-        real(kind=8),allocatable::B1(:,:)
-        real(kind=8),allocatable::B2(:,:)
-        real(kind=8),allocatable::C1(:,:,:)
-        real(kind=8),allocatable::C2(:,:,:)
-        real(kind=8),allocatable::D1(:,:,:,:)
-        real(kind=8),allocatable::D2(:,:,:,:)
-        real(kind=8),allocatable::F1(:,:,:,:,:,:)
-        real(kind=8),allocatable::F2(:,:,:,:,:,:)
+        real(p) :: V2B(N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N1)
 
-        real(kind=8), allocatable :: S1(:,:,:,:)
-        real(kind=8), allocatable :: S41(:,:,:,:)
-        real(kind=8), allocatable :: Q13(:,:)
-        real(kind=8), allocatable :: S6(:,:,:,:)
-        real(kind=8), allocatable :: S45(:,:,:,:)
-        real(kind=8), allocatable :: S47(:,:,:,:)
-        real(kind=8), allocatable :: Q15(:,:)
-        real(kind=8), allocatable :: S49(:,:,:,:)
-        real(kind=8), allocatable :: S65(:,:,:,:)
-        real(kind=8), allocatable :: S16(:,:,:,:)
-        real(kind=8), allocatable :: S61(:,:,:,:)
-        real(kind=8), allocatable :: Q19(:,:)
-        real(kind=8), allocatable :: S21(:,:,:,:)
-        real(kind=8), allocatable :: Q5(:,:)
-        real(kind=8), allocatable :: Q6(:,:)
-        real(kind=8), allocatable :: S25(:,:,:,:)
-        real(kind=8), allocatable :: Q7(:,:)
-        real(kind=8), allocatable :: Q8(:,:)
-        real(kind=8), allocatable :: S29(:,:,:,:)
-        real(kind=8), allocatable :: S55(:,:,:,:)
-        real(kind=8), allocatable :: S32(:,:,:,:)
-        real(kind=8), allocatable :: S34(:,:,:,:)
-        real(kind=8), allocatable :: Q10(:,:)
-        real(kind=8), allocatable :: Q11(:,:)
-        real(kind=8), allocatable :: Q12(:,:)
-        real(kind=8), allocatable :: S39(:,:,:,:)
-        real(kind=8), allocatable :: S3(:,:,:,:)
-        real(kind=8), allocatable :: Q1(:,:)
-        real(kind=8), allocatable :: Q14(:,:)
-        real(kind=8), allocatable :: S8(:,:,:,:)
-        real(kind=8), allocatable :: Q2(:,:)
-        real(kind=8), allocatable :: Q16(:,:)
-        real(kind=8), allocatable :: Q17(:,:)
-        real(kind=8), allocatable :: S11(:,:,:,:)
-        real(kind=8), allocatable :: S59(:,:,:,:)
-        real(kind=8), allocatable :: S52(:,:,:,:)
-        real(kind=8), allocatable :: S13(:,:,:,:)
-        real(kind=8), allocatable :: Q3(:,:)
-        real(kind=8), allocatable :: Q18(:,:)
-        real(kind=8), allocatable :: S18(:,:,:,:)
-        real(kind=8), allocatable :: Q4(:,:)
-        real(kind=8), allocatable :: Q20(:,:)
-        real(kind=8), allocatable :: Q9(:,:)
-        real(kind=8), allocatable :: Z2(:,:,:,:)
-        real(kind=8), allocatable :: X1(:,:,:,:)
-        real(kind=8), allocatable :: Z42(:,:,:,:)
-        real(kind=8), allocatable :: X2(:,:)
-        real(kind=8), allocatable :: Z43(:,:,:,:)
-        real(kind=8), allocatable :: Z7(:,:,:,:)
-        real(kind=8), allocatable :: X3(:,:,:,:)
-        real(kind=8), allocatable :: Z48(:,:,:,:)
-        real(kind=8), allocatable :: X4(:,:,:,:)
-        real(kind=8), allocatable :: Z66(:,:,:,:)
-        real(kind=8), allocatable :: Z17(:,:,:,:)
-        real(kind=8), allocatable :: X5(:,:)
-        real(kind=8), allocatable :: Z63(:,:,:,:)
-        real(kind=8), allocatable :: X6(:,:,:,:)
-        real(kind=8), allocatable :: Z22(:,:,:,:)
-        real(kind=8), allocatable :: X7(:,:)
-        real(kind=8), allocatable :: Z24(:,:,:,:)
-        real(kind=8), allocatable :: X8(:,:,:,:)
-        real(kind=8), allocatable :: Z26(:,:,:,:)
-        real(kind=8), allocatable :: X9(:,:)
-        real(kind=8), allocatable :: Z28(:,:,:,:)
-        real(kind=8), allocatable :: Z33(:,:,:,:)
-        real(kind=8), allocatable :: X10(:,:)
-        real(kind=8), allocatable :: Z5(:,:,:,:)
-        real(kind=8), allocatable :: X11(:,:)
-        real(kind=8), allocatable :: Z10(:,:,:,:)
-        real(kind=8), allocatable :: Z12(:,:,:,:)
+        real(p),allocatable::B1(:,:)
+        real(p),allocatable::B2(:,:)
+        real(p),allocatable::D1(:,:,:,:)
+        real(p),allocatable::D2(:,:,:,:)
+        real(p),allocatable::F2(:,:,:,:,:,:)
+
+        real(p), allocatable :: S1(:,:,:,:)
+        real(p), allocatable :: S41(:,:,:,:)
+        real(p), allocatable :: Q13(:,:)
+        real(p), allocatable :: S6(:,:,:,:)
+        real(p), allocatable :: S45(:,:,:,:)
+        real(p), allocatable :: S47(:,:,:,:)
+        real(p), allocatable :: Q15(:,:)
+        real(p), allocatable :: S49(:,:,:,:)
+        real(p), allocatable :: S65(:,:,:,:)
+        real(p), allocatable :: S16(:,:,:,:)
+        real(p), allocatable :: S61(:,:,:,:)
+        real(p), allocatable :: Q19(:,:)
+        real(p), allocatable :: S21(:,:,:,:)
+        real(p), allocatable :: Q5(:,:)
+        real(p), allocatable :: Q6(:,:)
+        real(p), allocatable :: S25(:,:,:,:)
+        real(p), allocatable :: Q7(:,:)
+        real(p), allocatable :: Q8(:,:)
+        real(p), allocatable :: S29(:,:,:,:)
+        real(p), allocatable :: S55(:,:,:,:)
+        real(p), allocatable :: S32(:,:,:,:)
+        real(p), allocatable :: S34(:,:,:,:)
+        real(p), allocatable :: Q10(:,:)
+        real(p), allocatable :: Q11(:,:)
+        real(p), allocatable :: Q12(:,:)
+        real(p), allocatable :: S39(:,:,:,:)
+        real(p), allocatable :: S3(:,:,:,:)
+        real(p), allocatable :: Q1(:,:)
+        real(p), allocatable :: Q14(:,:)
+        real(p), allocatable :: S8(:,:,:,:)
+        real(p), allocatable :: Q2(:,:)
+        real(p), allocatable :: Q16(:,:)
+        real(p), allocatable :: Q17(:,:)
+        real(p), allocatable :: S11(:,:,:,:)
+        real(p), allocatable :: S59(:,:,:,:)
+        real(p), allocatable :: S52(:,:,:,:)
+        real(p), allocatable :: S13(:,:,:,:)
+        real(p), allocatable :: Q3(:,:)
+        real(p), allocatable :: Q18(:,:)
+        real(p), allocatable :: S18(:,:,:,:)
+        real(p), allocatable :: Q4(:,:)
+        real(p), allocatable :: Q20(:,:)
+        real(p), allocatable :: Q9(:,:)
+        real(p), allocatable :: Z2(:,:,:,:)
+        real(p), allocatable :: X1(:,:,:,:)
+        real(p), allocatable :: Z42(:,:,:,:)
+        real(p), allocatable :: X2(:,:)
+        real(p), allocatable :: Z43(:,:,:,:)
+        real(p), allocatable :: Z7(:,:,:,:)
+        real(p), allocatable :: X3(:,:,:,:)
+        real(p), allocatable :: Z48(:,:,:,:)
+        real(p), allocatable :: X4(:,:,:,:)
+        real(p), allocatable :: Z66(:,:,:,:)
+        real(p), allocatable :: Z17(:,:,:,:)
+        real(p), allocatable :: X5(:,:)
+        real(p), allocatable :: Z63(:,:,:,:)
+        real(p), allocatable :: X6(:,:,:,:)
+        real(p), allocatable :: Z22(:,:,:,:)
+        real(p), allocatable :: X7(:,:)
+        real(p), allocatable :: Z24(:,:,:,:)
+        real(p), allocatable :: X8(:,:,:,:)
+        real(p), allocatable :: Z26(:,:,:,:)
+        real(p), allocatable :: X9(:,:)
+        real(p), allocatable :: Z28(:,:,:,:)
+        real(p), allocatable :: Z33(:,:,:,:)
+        real(p), allocatable :: X10(:,:)
+        real(p), allocatable :: Z5(:,:,:,:)
+        real(p), allocatable :: X11(:,:)
+        real(p), allocatable :: Z10(:,:,:,:)
+        real(p), allocatable :: Z12(:,:,:,:)
 
         allocate(D1(N1+1:N3,N0+1:N1,N0+1:N1,N1+1:N3))
         call reorder_stripe(4,shape(VAHHPP),size(VAHHPP),'1342',VAHHPP,D1)
@@ -1855,114 +2264,85 @@ contains
 
     subroutine t2C_update(N0,N1,N2,N3,V2C, &
          K1,K2,K3,K4,&
-         FAHH,FAHP,FAPP,FBHH,FBHP,FBPP, &
-         VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP, &
-         VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH, &
-         VBPHPH,VBHPPP,VBPHPP, &
-         VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP, &
-         t1A,t1B,t2A,t2B,t2C,t3A,t3B,t3C,t3D)
+         VAHHPP, &
+         VBHHPP, &
+         VCHHPP, &
+         t1A, t1B, &
+         t2B, t2C, &
+         t3C, t3D)
 
         use cc_utils, only: reorder_stripe, sum_stripe
 
         integer :: n0, n1, n2, n3
         integer :: k1, k2 ,k3, k4
         integer :: i1, i2, i3
-        real(kind=8) :: shift
-        real(kind=8) :: FAHH(N0+1:N1,N0+1:N1)
-        real(kind=8) :: FAHP(N1+1:N3,N0+1:N1)
-        real(kind=8) :: FAPP(N1+1:N3,N1+1:N3)
-        real(kind=8) :: FBHH(N0+1:N2,N0+1:N2)
-        real(kind=8) :: FBHP(N2+1:N3,N0+1:N2)
-        real(kind=8) :: FBPP(N2+1:N3,N2+1:N3)
-        real(kind=8) :: VAHHHH(N0+1:N1,N0+1:N1,N0+1:N1,N0+1:N1)
-        real(kind=8) :: VAHHHP(N1+1:N3,N0+1:N1,N0+1:N1,N0+1:N1)
-        real(kind=8) :: VAHHPP(N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1)
-        real(kind=8) :: VAHPHP(N1+1:N3,N0+1:N1,N1+1:N3,N0+1:N1)
-        real(kind=8) :: VAHPPP(N1+1:N3,N1+1:N3,N1+1:N3,N0+1:N1)
-        real(kind=8) :: VBHHHH(N0+1:N2,N0+1:N1,N0+1:N2,N0+1:N1)
-        real(kind=8) :: VBHHHP(N2+1:N3,N0+1:N1,N0+1:N2,N0+1:N1)
-        real(kind=8) :: VBHHPH(N0+1:N2,N1+1:N3,N0+1:N2,N0+1:N1)
-        real(kind=8) :: VBHHPP(N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N1)
-        real(kind=8) :: VBHPHP(N2+1:N3,N0+1:N1,N2+1:N3,N0+1:N1)
-        real(kind=8) :: VBHPPH(N0+1:N2,N1+1:N3,N2+1:N3,N0+1:N1)
-        real(kind=8) :: VBPHPH(N0+1:N2,N1+1:N3,N0+1:N2,N1+1:N3)
-        real(kind=8) :: VBHPPP(N2+1:N3,N1+1:N3,N2+1:N3,N0+1:N1)
-        real(kind=8) :: VBPHPP(N2+1:N3,N1+1:N3,N0+1:N2,N1+1:N3)
-        real(kind=8) :: VCHHHH(N0+1:N2,N0+1:N2,N0+1:N2,N0+1:N2)
-        real(kind=8) :: VCHHHP(N2+1:N3,N0+1:N2,N0+1:N2,N0+1:N2)
-        real(kind=8) :: VCHHPP(N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2)
-        real(kind=8) :: VCHPHP(N2+1:N3,N0+1:N2,N2+1:N3,N0+1:N2)
-        real(kind=8) :: VCHPPP(N2+1:N3,N2+1:N3,N2+1:N3,N0+1:N2)
+        real(p) :: VAHHPP(N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1)
+        real(p) :: VBHHPP(N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N1)
+        real(p) :: VCHHPP(N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2)
 
-        real(kind=8) :: t1A(N1+1:N3,N0+1:N1)
-        real(kind=8) :: t1B(N2+1:N3,N0+1:N2)
-        real(kind=8) :: t2A(N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1)
-        real(kind=8) :: t2B(N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N1)
-        real(kind=8) :: t2C(N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2)
-        real(kind=8) :: t3A(N1+1:N3,N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1,N0+1:N1)
-        real(kind=8) ::t3B(N2+1:N3,N1+1:N3,N1+1:N3,N0+1:N2,N0+1:N1,N0+1:N1)
-        real(kind=8) :: t3C(N2+1:N3,N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N2,N0+1:N1)
-        real(kind=8) :: t3D(N2+1:N3,N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2,N0+1:N2)
+        real(p) :: t1A(N1+1:N3,N0+1:N1)
+        real(p) :: t1B(N2+1:N3,N0+1:N2)
+        real(p) :: t2B(N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N1)
+        real(p) :: t2C(N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2)
+        real(p) :: t3C(N2+1:N3,N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N2,N0+1:N1)
+        real(p) :: t3D(N2+1:N3,N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2,N0+1:N2)
 
-        real(kind=8) :: V2C(N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2)
+        real(p) :: V2C(N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2)
 
-        real(kind=8),allocatable::B1(:,:)
-        real(kind=8),allocatable::B2(:,:)
-        real(kind=8),allocatable::C1(:,:,:)
-        real(kind=8),allocatable::C2(:,:,:)
-        real(kind=8),allocatable::D1(:,:,:,:)
-        real(kind=8),allocatable::D2(:,:,:,:)
-        real(kind=8),allocatable::F1(:,:,:,:,:,:)
-        real(kind=8),allocatable::F2(:,:,:,:,:,:)
+        real(p),allocatable::B1(:,:)
+        real(p),allocatable::B2(:,:)
+        real(p),allocatable::D1(:,:,:,:)
+        real(p),allocatable::D2(:,:,:,:)
+        real(p),allocatable::F2(:,:,:,:,:,:)
 
-        real(kind=8), allocatable :: Q1(:,:)
-        real(kind=8), allocatable :: Q2(:,:)
-        real(kind=8), allocatable :: Q9(:,:)
-        real(kind=8), allocatable :: Q10(:,:)
-        real(kind=8), allocatable :: Q3(:,:)
-        real(kind=8), allocatable :: S8(:,:,:,:)
-        real(kind=8), allocatable :: S29(:,:,:,:)
-        real(kind=8), allocatable :: S33(:,:,:,:)
-        real(kind=8), allocatable :: Q11(:,:)
-        real(kind=8), allocatable :: S31(:,:,:,:)
-        real(kind=8), allocatable :: S39(:,:,:,:)
-        real(kind=8), allocatable :: Q6(:,:)
-        real(kind=8), allocatable :: Q7(:,:)
-        real(kind=8), allocatable :: S20(:,:,:,:)
-        real(kind=8), allocatable :: S36(:,:,:,:)
-        real(kind=8), allocatable :: S23(:,:,:,:)
-        real(kind=8), allocatable :: S3(:,:,:,:)
-        real(kind=8), allocatable :: S27(:,:,:,:)
-        real(kind=8), allocatable :: S5(:,:,:,:)
-        real(kind=8), allocatable :: S10(:,:,:,:)
-        real(kind=8), allocatable :: Q4(:,:)
-        real(kind=8), allocatable :: Q12(:,:)
-        real(kind=8), allocatable :: S15(:,:,:,:)
-        real(kind=8), allocatable :: Q8(:,:)
-        real(kind=8), allocatable :: S13(:,:,:,:)
-        real(kind=8), allocatable :: Q5(:,:)
-        real(kind=8), allocatable :: X1(:,:)
-        real(kind=8), allocatable :: Z1(:,:,:,:)
-        real(kind=8), allocatable :: X2(:,:)
-        real(kind=8), allocatable :: Z2(:,:,:,:)
-        real(kind=8), allocatable :: X3(:,:)
-        real(kind=8), allocatable :: Z25(:,:,:,:)
-        real(kind=8), allocatable :: X4(:,:)
-        real(kind=8), allocatable :: Z26(:,:,:,:)
-        real(kind=8), allocatable :: Z9(:,:,:,:)
-        real(kind=8), allocatable :: X5(:,:,:,:)
-        real(kind=8), allocatable :: Z30(:,:,:,:)
-        real(kind=8), allocatable :: X6(:,:,:,:)
-        real(kind=8), allocatable :: Z40(:,:,:,:)
-        real(kind=8), allocatable :: Z34(:,:,:,:)
-        real(kind=8), allocatable :: Z32(:,:,:,:)
-        real(kind=8), allocatable :: Z24(:,:,:,:)
-        real(kind=8), allocatable :: Z4(:,:,:,:)
-        real(kind=8), allocatable :: Z28(:,:,:,:)
-        real(kind=8), allocatable :: X7(:,:,:,:)
-        real(kind=8), allocatable :: Z6(:,:,:,:)
-        real(kind=8), allocatable :: Z16(:,:,:,:)
-        real(kind=8), allocatable :: Z14(:,:,:,:)
+        real(p), allocatable :: Q1(:,:)
+        real(p), allocatable :: Q2(:,:)
+        real(p), allocatable :: Q9(:,:)
+        real(p), allocatable :: Q10(:,:)
+        real(p), allocatable :: Q3(:,:)
+        real(p), allocatable :: S8(:,:,:,:)
+        real(p), allocatable :: S29(:,:,:,:)
+        real(p), allocatable :: S33(:,:,:,:)
+        real(p), allocatable :: Q11(:,:)
+        real(p), allocatable :: S31(:,:,:,:)
+        real(p), allocatable :: S39(:,:,:,:)
+        real(p), allocatable :: Q6(:,:)
+        real(p), allocatable :: Q7(:,:)
+        real(p), allocatable :: S20(:,:,:,:)
+        real(p), allocatable :: S36(:,:,:,:)
+        real(p), allocatable :: S23(:,:,:,:)
+        real(p), allocatable :: S3(:,:,:,:)
+        real(p), allocatable :: S27(:,:,:,:)
+        real(p), allocatable :: S5(:,:,:,:)
+        real(p), allocatable :: S10(:,:,:,:)
+        real(p), allocatable :: Q4(:,:)
+        real(p), allocatable :: Q12(:,:)
+        real(p), allocatable :: S15(:,:,:,:)
+        real(p), allocatable :: Q8(:,:)
+        real(p), allocatable :: S13(:,:,:,:)
+        real(p), allocatable :: Q5(:,:)
+        real(p), allocatable :: X1(:,:)
+        real(p), allocatable :: Z1(:,:,:,:)
+        real(p), allocatable :: X2(:,:)
+        real(p), allocatable :: Z2(:,:,:,:)
+        real(p), allocatable :: X3(:,:)
+        real(p), allocatable :: Z25(:,:,:,:)
+        real(p), allocatable :: X4(:,:)
+        real(p), allocatable :: Z26(:,:,:,:)
+        real(p), allocatable :: Z9(:,:,:,:)
+        real(p), allocatable :: X5(:,:,:,:)
+        real(p), allocatable :: Z30(:,:,:,:)
+        real(p), allocatable :: X6(:,:,:,:)
+        real(p), allocatable :: Z40(:,:,:,:)
+        real(p), allocatable :: Z34(:,:,:,:)
+        real(p), allocatable :: Z32(:,:,:,:)
+        real(p), allocatable :: Z24(:,:,:,:)
+        real(p), allocatable :: Z4(:,:,:,:)
+        real(p), allocatable :: Z28(:,:,:,:)
+        real(p), allocatable :: X7(:,:,:,:)
+        real(p), allocatable :: Z6(:,:,:,:)
+        real(p), allocatable :: Z16(:,:,:,:)
+        real(p), allocatable :: Z14(:,:,:,:)
 
         allocate(D1(N0+1:N1,N1+1:N3,N0+1:N1,N1+1:N3))
         call reorder_stripe(4,shape(VAHHPP),size(VAHHPP),'4231',VAHHPP,D1)
@@ -2543,77 +2923,75 @@ contains
     end subroutine t2C_update
 
 
-    subroutine t2A_disconnected(N0,N1,N2,N3,K1,K2,K3,K4, &
+    subroutine t2A_disconnected(N0,N1,N2,N3, &
+         K1, K2, K3, K4, &
          V2A, V2B, V2C, &
-         FockR,FockB,IntR,IntB,IntM, &
-         t1A,t1B,t2A,t2B,t2C, &
-         t3A,t3B,t3C,t3D)
+         IntR, IntB, IntM, &
+         t1A, t1B, &
+         t2A, t2B, t2C, &
+         t3A, t3B, t3C)
 
         use cc_utils, only: reorder_stripe
 
         integer :: n0,n1,n2,n3
         integer :: k1,k2,k3,k4
         integer :: i,j,a,b
-        integer :: m, n, e,f
         integer :: i1, i2, i3
-        real(kind=8) :: shift,PP,Coeleft
-        real(kind=8) :: FockR(N3,N3)
-        real(kind=8) :: FockB(N3,N3)
-        real(kind=8) :: IntR(N0+1:N3,N0+1:N3,N0+1:N3,N0+1:N3)
-        real(kind=8) :: IntB(N0+1:N3,N0+1:N3,N0+1:N3,N0+1:N3)
-        real(kind=8) :: IntM(N0+1:N3,N0+1:N3,N0+1:N3,N0+1:N3)
-        real(kind=8) :: t1A(N1+1:N3,N0+1:N1)
-        real(kind=8) :: t1B(N2+1:N3,N0+1:N2)
-        real(kind=8) :: t2A(N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1)
-        real(kind=8) :: t2B(N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N1)
-        real(kind=8) :: t2C(N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2)
-        real(kind=8) :: t3A(N1+1:N3,N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1,N0+1:N1)
-        real(kind=8) :: t3B(N2+1:N3,N1+1:N3,N1+1:N3,N0+1:N2,N0+1:N1,N0+1:N1)
-        real(kind=8) :: t3C(N2+1:N3,N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N2,N0+1:N1)
-        real(kind=8) :: t3D(N2+1:N3,N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2,N0+1:N2)
-        real(kind=8) :: V2A(N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1)
-        real(kind=8) :: V2B(N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N1)
-        real(kind=8) :: V2C(N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2)
 
-        real(kind=8),allocatable::accum(:,:)
+        real(p) :: IntR(N0+1:N3,N0+1:N3,N0+1:N3,N0+1:N3)
+        real(p) :: IntB(N0+1:N3,N0+1:N3,N0+1:N3,N0+1:N3)
+        real(p) :: IntM(N0+1:N3,N0+1:N3,N0+1:N3,N0+1:N3)
 
-        real(kind=8) :: e2a, e2b, e2c
-        real(kind=8) :: e1a1a, e1a1b, e1b1b
-        real(kind=8) :: etot
+        real(p) :: t1A(N1+1:N3,N0+1:N1)
+        real(p) :: t1B(N2+1:N3,N0+1:N2)
+        real(p) :: t2A(N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1)
+        real(p) :: t2B(N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N1)
+        real(p) :: t2C(N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2)
+        real(p) :: t3A(N1+1:N3,N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1,N0+1:N1)
+        real(p) :: t3B(N2+1:N3,N1+1:N3,N1+1:N3,N0+1:N2,N0+1:N1,N0+1:N1)
+        real(p) :: t3C(N2+1:N3,N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N2,N0+1:N1)
+        real(p) :: V2A(N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1)
+        real(p) :: V2B(N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N1)
+        real(p) :: V2C(N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2)
 
-        real(kind=8),allocatable::B1(:,:)
-        real(kind=8),allocatable::B2(:,:)
-        real(kind=8),allocatable::D1(:,:,:,:)
-        real(kind=8),allocatable::D2(:,:,:,:)
-        real(kind=8),allocatable::F2(:,:,:,:,:,:)
-        real(kind=8),allocatable::H2(:,:,:,:,:,:,:,:)
+        real(p), allocatable :: accum(:,:)
 
-        real(kind=8),allocatable::Q1(:,:)
-        real(kind=8),allocatable::Q2(:,:)
-        real(kind=8),allocatable::Q3(:,:)
-        real(kind=8),allocatable::Q24(:,:)
-        real(kind=8),allocatable::Q25(:,:)
-        real(kind=8),allocatable::Q26(:,:)
-        real(kind=8),allocatable::Q27(:,:)
-        real(kind=8),allocatable::Q28(:,:)
-        real(kind=8),allocatable::Q29(:,:)
-        real(kind=8),allocatable::Q30(:,:)
-        real(kind=8),allocatable::Q31(:,:)
-        real(kind=8),allocatable::Q32(:,:)
-        real(kind=8),allocatable::Q33(:,:)
-        real(kind=8),allocatable::Q34(:,:)
-        real(kind=8),allocatable::Q35(:,:)
-        real(kind=8),allocatable::Q36(:,:)
-        real(kind=8),allocatable::Q37(:,:)
-        real(kind=8),allocatable::Q38(:,:)
-        real(kind=8),allocatable::Q39(:,:)
-        real(kind=8),allocatable::Q40(:,:)
-        real(kind=8),allocatable::Q41(:,:)
-        real(kind=8),allocatable::Q42(:,:)
-        real(kind=8),allocatable::Q43(:,:)
-        real(kind=8),allocatable::X1(:,:)
-        real(kind=8),allocatable::X2(:,:)
-        real(kind=8),allocatable::X3(:,:)
+        real(p) :: e2a, e2b, e2c
+        real(p) :: e1a1a, e1a1b, e1b1b
+        real(p) :: etot
+
+        real(p),allocatable::B1(:,:)
+        real(p),allocatable::B2(:,:)
+        real(p),allocatable::D1(:,:,:,:)
+        real(p),allocatable::D2(:,:,:,:)
+        real(p),allocatable::F2(:,:,:,:,:,:)
+
+        real(p),allocatable::Q1(:,:)
+        real(p),allocatable::Q2(:,:)
+        real(p),allocatable::Q3(:,:)
+        real(p),allocatable::Q24(:,:)
+        real(p),allocatable::Q25(:,:)
+        real(p),allocatable::Q26(:,:)
+        real(p),allocatable::Q27(:,:)
+        real(p),allocatable::Q28(:,:)
+        real(p),allocatable::Q29(:,:)
+        real(p),allocatable::Q30(:,:)
+        real(p),allocatable::Q31(:,:)
+        real(p),allocatable::Q32(:,:)
+        real(p),allocatable::Q33(:,:)
+        real(p),allocatable::Q34(:,:)
+        real(p),allocatable::Q35(:,:)
+        real(p),allocatable::Q36(:,:)
+        real(p),allocatable::Q37(:,:)
+        real(p),allocatable::Q38(:,:)
+        real(p),allocatable::Q39(:,:)
+        real(p),allocatable::Q40(:,:)
+        real(p),allocatable::Q41(:,:)
+        real(p),allocatable::Q42(:,:)
+        real(p),allocatable::Q43(:,:)
+        real(p),allocatable::X1(:,:)
+        real(p),allocatable::X2(:,:)
+        real(p),allocatable::X3(:,:)
 
         allocate(accum(N1+1:N3,N0+1:N1))
         accum = 0.0d0
@@ -2997,113 +3375,136 @@ contains
         v2c = v2c + etot * t2c
 
         ! All energy pieces times T_1A^2
-        forall(b=n1+1:n3, a=n1+1:n3, j=n0+1:n1, i=n0+1:n1)
-            v2a(b,a,j,i) = v2a(b,a,j,i) &
-                 + etot * (t1a(b,j) * t1a(a,i) - t1a(b,i) * t1a(a,j))
-        end forall
+        do i=n0+1, n1
+            do j=n0+1, n1
+                do a=n1+1, n3
+                    do b=n1+1, n3
+                        v2a(b,a,j,i) = v2a(b,a,j,i) &
+                             + etot * (t1a(b,j) * t1a(a,i) - t1a(b,i) * t1a(a,j))
+                    enddo
+                enddo
+            enddo
+        enddo
+
 
         ! All energy pieces times T_1A * T_1B
-        forall(b=n2+1:n3, a=n1+1:n3, j=n0+1:n2, i=n0+1:n1)
-            v2b(b,a,j,i) = v2b(b,a,j,i) &
-                 + etot * t1b(b,j) * t1a(a,i)
-        end forall
+        do i=n0+1, n1
+            do j=n0+1, n2
+                do a=n1+1, n3
+                    do b=n2+1, n3
+                        v2b(b,a,j,i) = v2b(b,a,j,i) &
+                             + etot * t1b(b,j) * t1a(a,i)
+                    enddo
+                enddo
+            enddo
+        enddo
 
         ! All energy pieces times T_1B * T_1B
-        forall(b=n2+1:n3, a=n2+1:n3, j=n0+1:n2, i=n0+1:n2)
-            v2c(b,a,j,i) = v2c(b,a,j,i) &
-                 + etot * (t1b(b,j) * t1b(a,i) - t1b(b,i) * t1b(a,j))
-        end forall
+        do i=n0+1, n2
+            do j=n0+1, n2
+                do a=n2+1, n3
+                    do b=n2+1, n3
+                        v2c(b,a,j,i) = v2c(b,a,j,i) &
+                             + etot * (t1b(b,j) * t1b(a,i) - t1b(b,i) * t1b(a,j))
+                    enddo
+                enddo
+            enddo
+        enddo
 
 
         ! Projection of singles A and outer product T_1A
-        forall(b=n1+1:n3, a=n1+1:n3, j=n0+1:n1, i=n0+1:n1)
-            v2a(b,a,j,i) = v2a(b,a,j,i) &
-                 + accum(b,j) * t1a(a,i) &
-                 - accum(a,j) * t1a(b,i) &
-                 - accum(b,i) * t1a(a,j) &
-                 + accum(a,i) * t1a(b,j)
-        end forall
+        do i=n0+1, n1
+            do j=n0+1, n1
+                do a=n1+1, n3
+                    do b=n1+1, n3
+                        v2a(b,a,j,i) = v2a(b,a,j,i) &
+                             + accum(b,j) * t1a(a,i) &
+                             - accum(a,j) * t1a(b,i) &
+                             - accum(b,i) * t1a(a,j) &
+                             + accum(a,i) * t1a(b,j)
+                    enddo
+                enddo
+            enddo
+        enddo
+
 
         ! Projection of singles A and outer product T_1B
-        forall(b=n1+1:n3, a=n1+1:n3, j=n0+1:n1, i=n0+1:n1)
-            v2b(b,a,j,i) = v2b(b,a,j,i) &
-                 + accum(a,i) * t1b(b,j)
-        end forall
+        do i=n0+1, n1
+            do j=n0+1, n2
+                do a=n1+1, n3
+                    do b=n2+1, n3
+                        v2b(b,a,j,i) = v2b(b,a,j,i) &
+                             + accum(a,i) * t1b(b,j)
+                    enddo
+                enddo
+            enddo
+        enddo
 
         deallocate(accum)
 
     end subroutine t2A_disconnected
 
-    subroutine t2B_disconnected(N0,N1,N2,N3,K1,K2,K3,K4, &
+    subroutine t2B_disconnected(N0,N1,N2,N3, &
+         K1,K2,K3,K4, &
          V2B, V2C, &
-         FockR,FockB,IntR,IntB,IntM, &
-         t1A,t1B,t2A,t2B,t2C, &
-         t3A,t3B,t3C,t3D)
+         IntR, IntB, IntM, &
+         t1A, t1B, t2B, t2C, &
+         t3B, t3C, t3D)
 
         use cc_utils, only: reorder_stripe
 
-        integer :: n0,n1,n2,n3
-        integer :: k1,k2,k3,k4
-        integer :: i,j,a,b
-        integer :: m, n, e,f
+        integer :: n0, n1, n2, n3
+        integer :: k1, k2, k3, k4
+        integer :: i, j, a, b
         integer :: i1, i2, i3
-        real(kind=8) :: shift,PP,Coeleft
-        real(kind=8) :: FockR(N3,N3)
-        real(kind=8) :: FockB(N3,N3)
-        real(kind=8) :: IntR(N0+1:N3,N0+1:N3,N0+1:N3,N0+1:N3)
-        real(kind=8) :: IntB(N0+1:N3,N0+1:N3,N0+1:N3,N0+1:N3)
-        real(kind=8) :: IntM(N0+1:N3,N0+1:N3,N0+1:N3,N0+1:N3)
-        real(kind=8) :: t1A(N1+1:N3,N0+1:N1)
-        real(kind=8) :: t1B(N2+1:N3,N0+1:N2)
-        real(kind=8) :: t2A(N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1)
-        real(kind=8) :: t2B(N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N1)
-        real(kind=8) :: t2C(N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2)
-        real(kind=8) :: t3A(N1+1:N3,N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1,N0+1:N1)
-        real(kind=8) :: t3B(N2+1:N3,N1+1:N3,N1+1:N3,N0+1:N2,N0+1:N1,N0+1:N1)
-        real(kind=8) :: t3C(N2+1:N3,N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N2,N0+1:N1)
-        real(kind=8) :: t3D(N2+1:N3,N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2,N0+1:N2)
-        real(kind=8) :: V2B(N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N1)
-        real(kind=8) :: V2C(N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2)
 
-        real(kind=8),allocatable::accum(:,:)
+        real(p) :: IntR(N0+1:N3,N0+1:N3,N0+1:N3,N0+1:N3)
+        real(p) :: IntB(N0+1:N3,N0+1:N3,N0+1:N3,N0+1:N3)
+        real(p) :: IntM(N0+1:N3,N0+1:N3,N0+1:N3,N0+1:N3)
+        real(p) :: t1A(N1+1:N3,N0+1:N1)
+        real(p) :: t1B(N2+1:N3,N0+1:N2)
+        real(p) :: t2B(N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N1)
+        real(p) :: t2C(N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2)
+        real(p) :: t3B(N2+1:N3,N1+1:N3,N1+1:N3,N0+1:N2,N0+1:N1,N0+1:N1)
+        real(p) :: t3C(N2+1:N3,N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N2,N0+1:N1)
+        real(p) :: t3D(N2+1:N3,N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2,N0+1:N2)
+        real(p) :: V2B(N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N1)
+        real(p) :: V2C(N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2)
 
-        real(kind=8) :: e2a, e2b, e2c
-        real(kind=8) :: e1a1a, e1a1b, e1b1b
-        real(kind=8) :: etot
+        real(p),allocatable::accum(:,:)
 
-        real(kind=8),allocatable::B1(:,:)
-        real(kind=8),allocatable::B2(:,:)
-        real(kind=8),allocatable::D1(:,:,:,:)
-        real(kind=8),allocatable::D2(:,:,:,:)
-        real(kind=8),allocatable::F2(:,:,:,:,:,:)
-        real(kind=8),allocatable::H2(:,:,:,:,:,:,:,:)
+        real(p),allocatable::B1(:,:)
+        real(p),allocatable::B2(:,:)
+        real(p),allocatable::D1(:,:,:,:)
+        real(p),allocatable::D2(:,:,:,:)
+        real(p),allocatable::F2(:,:,:,:,:,:)
 
-        real(kind=8),allocatable::Q1(:,:)
-        real(kind=8),allocatable::Q2(:,:)
-        real(kind=8),allocatable::Q3(:,:)
-        real(kind=8),allocatable::Q18(:,:)
-        real(kind=8),allocatable::Q19(:,:)
-        real(kind=8),allocatable::Q20(:,:)
-        real(kind=8),allocatable::Q21(:,:)
-        real(kind=8),allocatable::Q28(:,:)
-        real(kind=8),allocatable::Q29(:,:)
-        real(kind=8),allocatable::Q30(:,:)
-        real(kind=8),allocatable::Q31(:,:)
-        real(kind=8),allocatable::Q32(:,:)
-        real(kind=8),allocatable::Q33(:,:)
-        real(kind=8),allocatable::Q34(:,:)
-        real(kind=8),allocatable::Q35(:,:)
-        real(kind=8),allocatable::Q36(:,:)
-        real(kind=8),allocatable::Q37(:,:)
-        real(kind=8),allocatable::Q38(:,:)
-        real(kind=8),allocatable::Q39(:,:)
-        real(kind=8),allocatable::Q40(:,:)
-        real(kind=8),allocatable::Q41(:,:)
-        real(kind=8),allocatable::Q42(:,:)
-        real(kind=8),allocatable::Q43(:,:)
-        real(kind=8),allocatable::X1(:,:)
-        real(kind=8),allocatable::X2(:,:)
-        real(kind=8),allocatable::X3(:,:)
+        real(p),allocatable::Q1(:,:)
+        real(p),allocatable::Q2(:,:)
+        real(p),allocatable::Q3(:,:)
+        real(p),allocatable::Q18(:,:)
+        real(p),allocatable::Q19(:,:)
+        real(p),allocatable::Q20(:,:)
+        real(p),allocatable::Q21(:,:)
+        real(p),allocatable::Q28(:,:)
+        real(p),allocatable::Q29(:,:)
+        real(p),allocatable::Q30(:,:)
+        real(p),allocatable::Q31(:,:)
+        real(p),allocatable::Q32(:,:)
+        real(p),allocatable::Q33(:,:)
+        real(p),allocatable::Q34(:,:)
+        real(p),allocatable::Q35(:,:)
+        real(p),allocatable::Q36(:,:)
+        real(p),allocatable::Q37(:,:)
+        real(p),allocatable::Q38(:,:)
+        real(p),allocatable::Q39(:,:)
+        real(p),allocatable::Q40(:,:)
+        real(p),allocatable::Q41(:,:)
+        real(p),allocatable::Q42(:,:)
+        real(p),allocatable::Q43(:,:)
+        real(p),allocatable::X1(:,:)
+        real(p),allocatable::X2(:,:)
+        real(p),allocatable::X3(:,:)
 
 
         allocate(accum(N2+1:N3,N0+1:N2))
@@ -3469,19 +3870,31 @@ contains
         deallocate(X3)
 
         ! Projection of singles B and outer product T_1B
-        forall(b=n2+1:n3, a=n2+1:n3, j=n0+1:n2, i=n0+1:n2)
-            v2c(b,a,j,i) = v2c(b,a,j,i) &
-                 + accum(b,j) * t1b(a,i) &
-                 - accum(a,j) * t1b(b,i) &
-                 - accum(b,i) * t1b(a,j) &
-                 + accum(a,i) * t1b(b,j)
-        end forall
+        do i=n0+1, n2
+            do j=n0+1, n2
+                do a=n2+1, n3
+                    do b=n2+1, n3
+                        v2c(b,a,j,i) = v2c(b,a,j,i) &
+                             + accum(b,j) * t1b(a,i) &
+                             - accum(a,j) * t1b(b,i) &
+                             - accum(b,i) * t1b(a,j) &
+                             + accum(a,i) * t1b(b,j)
+                    enddo
+                enddo
+            enddo
+        enddo
 
         ! Projection of singles B and outer product T_1A
-        forall(b=n2+1:n3, a=n1+1:n3, j=n0+1:n2, i=n0+1:n1)
-            v2b(b,a,j,i) = v2b(b,a,j,i) &
-                 + accum(b,j) * t1a(a,i)
-        end forall
+        do i=n0+1, n1
+            do j=n0+1, n2
+                do a=n1+1, n3
+                    do b=n2+1, n3
+                        v2b(b,a,j,i) = v2b(b,a,j,i) &
+                             + accum(b,j) * t1a(a,i)
+                    enddo
+                enddo
+            enddo
+        enddo
 
 
         deallocate(accum)

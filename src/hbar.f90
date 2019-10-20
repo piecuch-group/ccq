@@ -7,16 +7,15 @@ module hbar_gen
 
 contains
 
-    subroutine hbar2(sys, run, cc)
+    subroutine hbar2(sys, cc)
 
         use const, only: p
         use printing, only: io, print_date
         use errors, only: stop_all
-        use system, only: sys_t, run_t
+        use system, only: sys_t
         use cc_types, only: cc_t, init_hbar
 
         type(sys_t), intent(in) :: sys
-        type(run_t), intent(in) :: run
         type(cc_t), intent(inout), target :: cc
 
         real(p), pointer :: t(:) => null()
@@ -27,37 +26,31 @@ contains
         integer :: i, j, k, l
         integer :: a, b, c, d
 
-        real(p), allocatable :: FockR(:,:)
-        real(p), allocatable :: FockB(:,:)
-        real(p), allocatable :: IntR(:,:,:,:)
-        real(p), allocatable :: IntB(:,:,:,:)
-        real(p), allocatable :: IntM(:,:,:,:)
-
-        real(p), allocatable::v0a2a(:,:)
-        real(p), allocatable::v0a2c(:,:)
-        real(p), allocatable::v0a4a(:,:,:,:)
-        real(p), allocatable::v0a4c(:,:,:,:)
-        real(p), allocatable::v0a4e(:,:,:,:)
-        real(p), allocatable::v1a1a(:,:)
-        real(p), allocatable::v1a3a(:,:,:,:)
-        real(p), allocatable::v1a3c(:,:,:,:)
-        real(p), allocatable::v1b1b(:,:)
-        real(p), allocatable::v1b3b(:,:,:,:)
-        real(p), allocatable::v1b3d(:,:,:,:)
-        real(p), allocatable::v2a0a(:,:)
-        real(p), allocatable::v2a2a(:,:,:,:)
-        real(p), allocatable::v2a2c(:,:,:,:)
-        real(p), allocatable::v2b2b(:,:,:,:)
-        real(p), allocatable::v2c0a(:,:)
-        real(p), allocatable::v2c2a(:,:,:,:)
-        real(p), allocatable::v2c2c(:,:,:,:)
-        real(p), allocatable::v3a1a(:,:,:,:)
-        real(p), allocatable::v3b1b(:,:,:,:)
-        real(p), allocatable::v3c1a(:,:,:,:)
-        real(p), allocatable::v3d1b(:,:,:,:)
-        real(p), allocatable::v4a0a(:,:,:,:)
-        real(p), allocatable::v4c0a(:,:,:,:)
-        real(p), allocatable::v4e0a(:,:,:,:)
+        real(p), allocatable :: v0a2a(:,:)
+        real(p), allocatable :: v0a2c(:,:)
+        real(p), allocatable :: v0a4a(:,:,:,:)
+        real(p), allocatable :: v0a4c(:,:,:,:)
+        real(p), allocatable :: v0a4e(:,:,:,:)
+        real(p), allocatable :: v1a1a(:,:)
+        real(p), allocatable :: v1a3a(:,:,:,:)
+        real(p), allocatable :: v1a3c(:,:,:,:)
+        real(p), allocatable :: v1b1b(:,:)
+        real(p), allocatable :: v1b3b(:,:,:,:)
+        real(p), allocatable :: v1b3d(:,:,:,:)
+        real(p), allocatable :: v2a0a(:,:)
+        real(p), allocatable :: v2a2a(:,:,:,:)
+        real(p), allocatable :: v2a2c(:,:,:,:)
+        real(p), allocatable :: v2b2b(:,:,:,:)
+        real(p), allocatable :: v2c0a(:,:)
+        real(p), allocatable :: v2c2a(:,:,:,:)
+        real(p), allocatable :: v2c2c(:,:,:,:)
+        real(p), allocatable :: v3a1a(:,:,:,:)
+        real(p), allocatable :: v3b1b(:,:,:,:)
+        real(p), allocatable :: v3c1a(:,:,:,:)
+        real(p), allocatable :: v3d1b(:,:,:,:)
+        real(p), allocatable :: v4a0a(:,:,:,:)
+        real(p), allocatable :: v4c0a(:,:,:,:)
+        real(p), allocatable :: v4e0a(:,:,:,:)
 
         ! Compatibility layer
         n0 = sys%froz

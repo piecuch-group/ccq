@@ -115,7 +115,6 @@ contains
         integer, intent(in) :: norbs
 
         integer :: tmp_sym(8)
-        integer :: test_ag = 1
         integer :: i, i_sym
         logical :: is_sym
 

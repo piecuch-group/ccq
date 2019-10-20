@@ -7,7 +7,7 @@ module cluster_analysis
 contains
 
 
-    subroutine analyze_t3(sys, c_vec, t_vec, rhf, rm_dscnctd)
+    subroutine cluster_analysis_up_t3(sys, c_vec, t_vec, rhf)
 
         ! Perform the cluster analysis of up to triply excited cluster components.
         !
@@ -21,7 +21,8 @@ contains
         use ext_cor_types, only: vec3_t
         use symmetry, only: is_sym
         use system, only: sys_t
-        use cc_utils, only: t3_aab_to_t3_abb
+
+        use cc_utils, only: t3_aab_to_t3_abb, antisymmetrize
 
         type(sys_t), intent(in) :: sys
         ! CI coefficients
@@ -30,17 +31,12 @@ contains
         type(vec3_t), intent(inout) :: t_vec
 
         logical, intent(in) :: rhf
-        logical, intent(in) :: rm_dscnctd
 
-
-        ! Place holders
-        real(p) :: c1c3, c12c2, c22, c13
         integer :: ex_orbs(8)
 
         ! Indices
-        integer :: i, j, k, l
-        integer :: a, b, c, d
-        integer :: indx
+        integer :: i, j, k
+        integer :: a, b, c
 
 
         ex_orbs = 0
@@ -51,7 +47,6 @@ contains
                 do j=i+1,occ_a
                     do a=occ_a+1,total
                         do b=a+1,total
-                            if (rm_dscnctd .and. c_vec%o2_aa(a,b,i,j) == 0.0) cycle
                             t_vec%o2_aa(a,b,i,j)=(c_vec%o2_aa(a,b,i,j) &
                                 -c_vec%o1_a(a,i)*c_vec%o1_a(b,j) &
                                 +c_vec%o1_a(a,j)*c_vec%o1_a(b,i))
@@ -65,7 +60,6 @@ contains
                 do j=froz+1,occ_b
                     do a=occ_a+1,total
                         do b=occ_b+1,total
-                            if (rm_dscnctd .and. c_vec%o2_ab(a,b,i,j) == 0.0) cycle
                             t_vec%o2_ab(a,b,i,j)=(c_vec%o2_ab(a,b,i,j) &
                                 -c_vec%o1_a(a,i)*c_vec%o1_b(b,j))
                         enddo
@@ -80,7 +74,6 @@ contains
                     do j=i+1,occ_b
                         do a=occ_b+1,total
                             do b=a+1,total
-                                if (rm_dscnctd .and. c_vec%o2_bb(a,b,i,j) == 0.0) cycle
                                 t_vec%o2_bb(a,b,i,j)=(c_vec%o2_bb(a,b,i,j) &
                                     -c_vec%o1_b(a,i)*c_vec%o1_b(b,j) &
                                     +c_vec%o1_b(a,j)*c_vec%o1_b(b,i))
@@ -109,7 +102,6 @@ contains
                                     ex_orbs(6) = k
 
                                     if (.not. is_sym(ex_orbs, 6)) cycle
-                                    if (rm_dscnctd .and. c_vec%o3_aaa(a,b,c,i,j,k) == 0.0) cycle
                                     t_vec%o3_aaa(a,b,c,i,j,k)=(c_vec%o3_aaa(a,b,c,i,j,k) &
                                         -c_vec%o1_a(a,i)*c_vec%o2_aa(b,c,j,k) &
                                         +c_vec%o1_a(a,j)*c_vec%o2_aa(b,c,i,k) &
@@ -152,7 +144,6 @@ contains
                                     ex_orbs(6) = k
 
                                     if (.not. is_sym(ex_orbs, 6)) cycle
-                                    if (rm_dscnctd .and. c_vec%o3_aab(a,b,c,i,j,k) == 0.0) cycle
                                     t_vec%o3_aab(a,b,c,i,j,k)=(c_vec%o3_aab(a,b,c,i,j,k) &
                                         -c_vec%o1_a(a,i)*c_vec%o2_ab(b,c,j,k) &
                                         +c_vec%o1_a(a,j)*c_vec%o2_ab(b,c,i,k) &
@@ -193,7 +184,6 @@ contains
                                         ex_orbs(6) = k
 
                                         if (.not. is_sym(ex_orbs, 6)) cycle
-                                        if (rm_dscnctd .and. c_vec%o3_abb(a,b,c,i,j,k) == 0.0) cycle
                                         t_vec%o3_abb(a,b,c,i,j,k)=(c_vec%o3_abb(a,b,c,i,j,k) &
                                             -c_vec%o1_a(a,i)*c_vec%o2_bb(b,c,j,k) &
                                             -c_vec%o1_b(c,k)*c_vec%o2_ab(a,b,i,j) &
@@ -228,7 +218,6 @@ contains
                                         ex_orbs(6) = k
 
                                         if (.not. is_sym(ex_orbs, 6)) cycle
-                                        if (rm_dscnctd .and. c_vec%o3_bbb(a,b,c,i,j,k) == 0.0) cycle
                                         t_vec%o3_bbb(a,b,c,i,j,k)=(c_vec%o3_bbb(a,b,c,i,j,k) &
                                             -c_vec%o1_b(a,i)*c_vec%o2_bb(b,c,j,k) &
                                             +c_vec%o1_b(a,j)*c_vec%o2_bb(b,c,i,k) &
@@ -263,7 +252,10 @@ contains
 
         end associate
 
-    end subroutine analyze_t3
+        ! Antisymmetrize before returning
+        call antisymmetrize(sys, t_vec)
+
+    end subroutine cluster_analysis_up_t3
 
     pure function analyze_t4_aaaa(c_vec, excit, c4) result(t4_amp)
 
@@ -291,9 +283,6 @@ contains
         ! Indices
         integer :: i, j, k, l
         integer :: a, b, c, d
-
-        ! Place holders
-        real(p) :: c1c3, c12c2, c22, c13
 
 
         i = excit%from_a(1)
@@ -474,9 +463,6 @@ contains
         ! Indices
         integer :: i, j, k, l
         integer :: a, b, c, d
-
-        ! Place holders
-        real(p) :: c1c3, c12c2, c22, c13
 
         i = excit%from_a(1)
         j = excit%from_a(2)
@@ -689,9 +675,6 @@ contains
         integer :: i, j, k, l
         integer :: a, b, c, d
 
-        ! Place holders
-        real(p) :: c1c3, c12c2, c22, c13
-
         i = excit%from_a(1)
         j = excit%from_b(1)
         k = excit%from_b(2)
@@ -791,9 +774,6 @@ contains
         ! Indices
         integer :: i, j, k, l
         integer :: a, b, c, d
-
-        ! Place holders
-        real(p) :: c1c3, c12c2, c22, c13
 
         i = excit%from_b(1)
         j = excit%from_b(2)

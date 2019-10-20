@@ -42,12 +42,11 @@ contains
 
     end subroutine load_e1int
 
-    subroutine load_e2int(orbs, filename, e2int, en_repul)
+    subroutine load_e2int(filename, e2int, en_repul)
 
         ! Load twobody molecular integrals
 
         ! In:
-        !    orbs: number of spatial orbitals
         !    filename: path to the file containing the integrals
 
         ! In/Out:
@@ -58,7 +57,6 @@ contains
 
         use const, only: p, tmp_unit
 
-        integer, intent(in) :: orbs
         character(len=*), intent(in) :: filename
         real(p), allocatable, intent(inout) :: e2int(:,:,:,:)
         real(p), intent(out) :: en_repul
@@ -142,9 +140,33 @@ contains
                 if (i /= 0 .and. a /= 0 .and. j /= 0 .and. b /= 0) then
                     ! Twobody integrals
                     e2int(i, j, a, b) = val
-                    e2int(i, b, a, j) = val
-                    e2int(a, j, i, b) = val
-                    e2int(a, b, i, j) = val
+                    if (i > a) then
+                        e2int(a, j, i, b) = val
+                        if (j > b) then
+                            e2int(i, b, a, j) = val
+                            e2int(a, b, i, j) = val
+                        endif
+                    else
+                        if (j > b) then
+                            e2int(i, b, a, j) = val
+                        endif
+                    endif
+
+                    if (i*(i-1)/2 + a > j*(j-1)/2 + b) then
+                        e2int(j, i, b, a) = val
+                        if (j > b) then
+                            e2int(b, i, j, a) = val
+                            if ( i > a ) then
+                                e2int(j, a, b, i) = val
+                                e2int(b, a, j, i) = val
+                            endif
+                        else
+                            if (i > a) then
+                                e2int(j, a, b, i) = val
+                            endif
+                        endif
+                    endif
+
 
                 else if (i /= 0 .and. a /= 0 .and. j + b == 0) then
                     ! Onebody integrals
@@ -162,7 +184,6 @@ contains
         enddo
 
         close(tmp_unit)
-
 
     end subroutine load_fcidump
 
@@ -189,8 +210,6 @@ contains
 
         real(p), allocatable :: e2int(:,:,:,:)
 
-        integer :: ios
-        integer :: indx
         integer :: i, j, a, b
         integer :: onebody_lines, orbs
 
@@ -213,11 +232,11 @@ contains
             call load_fcidump(run%fcidump, sys%ints%e1int, e2int, sys%en_repul)
         else
             onebody_lines = count_file_lines(run%onebody_file)
-            orbs = -(1 - sqrt(real(1 + 8*onebody_lines))) / 2
+            orbs = int(-(1 - sqrt(real(1 + 8*onebody_lines))) / 2)
             if (int(orbs) /= sys%orbs) call stop_all('load_ints', "Number of orbitals doesn't match the number of integrals")
             call load_e1int(sys%orbs, run%onebody_file, sys%ints%e1int)
 
-            call load_e2int(sys%orbs, run%twobody_file, e2int, sys%en_repul)
+            call load_e2int(run%twobody_file, e2int, sys%en_repul)
         endif
 
 
@@ -292,7 +311,7 @@ contains
             sys%ints%f_a = e1int
             sys%ints%f_b = e1int
 
-            ! By this point f cointains only z
+            ! At this point f cointains only z
             do i=1,orbs
                 do j=1,i
 
@@ -352,34 +371,27 @@ contains
 
     !---- Sorted integral section
 
-    subroutine load_sorted_ints(sys, run)
+    subroutine load_sorted_ints(sys)
 
         ! This routine sorts integrals into unique cases.
 
         ! In:
         !    sys: system information
-        !    run: runtime configurations
+
         ! Out:
         !    sorted integrals in sys%ints
 
         use const, only: p, tmp_unit, part_ints_a_unit, part_ints_b_unit, part_ints_c_unit
-        use system, only: sys_t, run_t
+        use system, only: sys_t
 
-        type(sys_t), intent(inout) :: sys
-        type(run_t), intent(in) :: run
-
-        real(p), allocatable :: e1int(:,:)
-        real(p), allocatable :: e2int(:,:,:,:)
-        real(p) :: hh
+        type(sys_t), intent(in out) :: sys
 
         ! Aux matrices used to generate all particle arrays
         real(p), allocatable :: vappp(:,:,:)
         real(p), allocatable :: vbppp(:,:,:)
         real(p), allocatable :: vcppp(:,:,:)
 
-        integer :: ios
-        integer :: indx
-        integer :: i, j, a, b, c, d, l
+        integer :: b, c, d, l
 
         integer :: unocc_a, unocc_b
 
@@ -596,6 +608,7 @@ contains
         if (allocated(sys%ints%fbhh)) deallocate(sys%ints%fbhh)
         if (allocated(sys%ints%fbhp)) deallocate(sys%ints%fbhp)
         if (allocated(sys%ints%fbpp)) deallocate(sys%ints%fbpp)
+
         if (allocated(sys%ints%vahhhh)) deallocate(sys%ints%vahhhh)
         if (allocated(sys%ints%vahhhp)) deallocate(sys%ints%vahhhp)
         if (allocated(sys%ints%vahhpp)) deallocate(sys%ints%vahhpp)

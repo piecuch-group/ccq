@@ -24,7 +24,6 @@ contains
         use system, only: sys_t, run_t
         use cc_types, only: cc_t
         use stoch_cc, only: update_stoch_t3
-        use cc_utils, only: antisym_t
 
         use contract_t3, only: hbar_on_t2a, hbar_on_t2b, hbar_on_t2c
 
@@ -358,6 +357,7 @@ contains
         type(run_t), intent(in) :: run
         type(cc_t), intent(inout), target :: cc
 
+#ifndef DISABLE_OPT_T3
         real(p), pointer :: t(:) => null()
 
         ! Adapt for Jun's old scheme
@@ -392,13 +392,8 @@ contains
 
         real(p), allocatable :: ht3d(:,:,:,:,:,:)
 
-#ifdef DISABLE_OPT_T3
-        call stop_all('update_clusters_t3_opt', 'ERROR: Feature not compiled.')
-#else
-
         ! Compatibility vars
         ! [TODO] all this has to be removed
-        integer :: n0, n1, n2 ,n3, m1, m2
         integer :: k1, k2, k3, k4
         integer :: k5, k6 ,k7, k8, k9, k0
 
@@ -408,6 +403,9 @@ contains
 
         integer :: i, i0, i1
         integer :: ipa, ipb, ipc
+#endif
+
+        integer :: n0, n1, n2 ,n3, m1, m2
 
         ! Compatibility layer
         n0 = sys%froz
@@ -417,6 +415,17 @@ contains
         m1 = sys%act_occ_b
         m2 = sys%act_unocc_a
 
+
+#ifdef DISABLE_OPT_T3
+        ! [TODO] come up with a better way of removing compiler warnings
+        ! when this is disabled
+        cc%t_size = 0
+        n0 = run%diis_space
+        call stop_all('update_clusters_t3_opt', 'ERROR: Feature not compiled.')
+#else
+
+        ! Compatibility vars
+        ! [TODO] all this has to be removed
         ipa = part_ints_a_unit
         ipb = part_ints_b_unit
         ipc = part_ints_c_unit

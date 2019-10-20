@@ -8,16 +8,15 @@ module mm_correct
 
 contains
 
-    subroutine crcc23(sys, run, cc)
+    subroutine crcc23(sys, cc)
 
         use const, only: p
-        use system, only: sys_t, run_t
+        use system, only: sys_t
         use cc_types, only: cc_t
         use printing, only: print_date, print_cct3
 
 
         type(sys_t), intent(in) :: sys
-        type(run_t), intent(in) :: run
         type(cc_t), intent(inout), target :: cc
 
         real(p), pointer :: t(:) => null()
@@ -26,14 +25,13 @@ contains
 
 
 
-        real(p) :: res,pp,shift,lhm,r0,ecc
-        real(p) :: da,db,dc,dd
+        real(p) :: pp, lhm, r0
+        real(p) :: da, db, dc, dd
 
         real(p) :: e23a
         real(p) :: e23b
         real(p) :: e23c
         real(p) :: e23d
-        real(p), allocatable :: r(:)
         real(p), allocatable :: lh3(:,:,:,:,:,:)
         real(p), allocatable :: mm3(:,:,:,:,:,:)
         real(p), allocatable :: d3a1(:,:,:)
@@ -46,11 +44,10 @@ contains
         real(p), allocatable :: d3d2(:,:,:)
 
         ! Compatibility vars
-        integer :: a,b,c,d,e,f
+        integer :: a, b, c
         integer :: i, j, k
-        integer :: nroot, iroot
-        integer :: k1a, k1b, k2a, k2b, k2c, k3a, k3b, k3c, k3d, kkk
-        integer :: l2b, l2c
+        integer :: iroot
+        integer :: k1a, k1b, k2a, k2b, k2c
         integer :: m1, m2
         integer :: k1, k2, k3, k4
 

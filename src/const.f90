@@ -10,7 +10,7 @@ module const
     integer, parameter :: int_64 = selected_int_kind(15)
 
     ! Integer select for determinants
-    integer, parameter :: i0 = int_32
+    integer, parameter :: i0 = int_64
     ! Number of bits in an integer of type i0.
     ! Note that pgi 10.3 has a bug and returns 32 if bit_size(int(0,i0)) is used.
     integer, parameter :: i0_length = bit_size(0_i0)

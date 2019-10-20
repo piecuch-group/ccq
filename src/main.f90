@@ -20,7 +20,7 @@ program main
     type(cc_t) :: cc
 
     ! Parse and load configurations
-    call get_opts(sys, run)
+    call get_opts(run)
     call get_config(sys, run, cc)
 
     ! Initialize printing system

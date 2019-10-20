@@ -7,7 +7,7 @@
   #include <stdint.h>
   #include <strings.h>
 
-  #define	FORCE_INLINE __attribute__((always_inline))
+  #define	FORCE_INLINE __attribute__((always_inline)) inline
 
   FORCE_INLINE uint32_t rotl32 ( uint32_t x, int8_t r ){ return (x << r) | (x >> (32 - r)); }
   FORCE_INLINE uint64_t rotl64 ( uint64_t x, int8_t r ){ return (x << r) | (x >> (64 - r)); }
@@ -22,7 +22,7 @@
   #define BIG_CONSTANT(x) (x##LLU)
   #define _stricmp strcasecmp
 
-#endif 
+#endif
 /* MURMUR_PLATFORM_H */
 
 #ifdef __cplusplus

@@ -15,7 +15,7 @@ module parser
 
 contains
 
-    subroutine get_opts(sys, run)
+    subroutine get_opts(run)
 
         ! Read command line options
 
@@ -23,15 +23,13 @@ contains
         !    command line arguments from system shell
 
         ! In/Out:
-        !    sys: system information
         !    run: runtime information
 
-        use system, only: sys_t, run_t
+        use system, only: run_t
         use printing, only: print_help
         use errors, only: stop_all
 
-        type(sys_t), intent(inout) :: sys
-        type(run_t), intent(inout) :: run
+        type(run_t), intent(in out) :: run
 
         integer :: arg_cnt
         integer :: i
@@ -110,18 +108,13 @@ contains
         use system, only: sys_t, run_t, config_t
         use cc_types, only: cc_t
 
-        use printing, only: io
-        use errors, only: stop_all
-
         type(sys_t), intent(inout) :: sys
         type(run_t), intent(inout) :: run
         type(cc_t), intent(inout) :: cc
 
-
         character(len=line_len) :: line
         character(len=line_len) :: option
         character(len=line_len) :: val
-
 
         integer :: indx, l_indx
 
@@ -160,8 +153,9 @@ contains
             ! Load key-value pair configurations
             call get_sys_data(sys, option, val)
             call get_run_opts(run, option, val)
-            call get_ext_cor_opts(sys, run, cc, option, val)
-            call get_act_opts(sys, run, cc, option, val)
+            call get_ext_cor_opts(run, option, val)
+            call get_act_opts(sys, run, option, val)
+            call get_acc_opts(cc, option, val)
 
         enddo
 
@@ -172,7 +166,7 @@ contains
         call process_sys_data(sys)
 
         ! Validate configuration. Handle errors or exit if necessary
-        call validate_config(sys, run, cc)
+        call validate_config(sys, run)
 
         ! Get options and parameters required for each particular
         ! calculation type.
@@ -181,24 +175,21 @@ contains
 
     end subroutine get_config
 
-    subroutine validate_config(sys, run, cc)
+    subroutine validate_config(sys, run)
 
         ! Validate configuration file. Exit with errors if required
 
         ! In:
         !   sys: molecular system data
         !   run: runtime configuration
-        !   cc: coupled-cluster data
 
         use system, only: sys_t, run_t, config_t
-        use cc_types, only: cc_t
 
         use printing, only: io
         use errors, only: stop_all
 
         type(sys_t), intent(in) :: sys
         type(run_t), intent(in) :: run
-        type(cc_t), intent(in) :: cc
 
         logical :: t_exists
 
@@ -274,8 +265,7 @@ contains
         type(sys_t), intent(in out) :: sys
         character(len=*), intent(in) :: fcidump
 
-        integer :: ios
-        integer :: idx, id_comma, id_equal
+        integer :: idx, ios
         character(len=line_len) :: cur_line, val
 
         integer :: norb, nelec
@@ -288,6 +278,7 @@ contains
 
         do
 
+            ! [TODO] put a check so that this doesn't become and infinite loop
             read(tmp_unit, '(a)', iostat=ios) cur_line
             idx = index(cur_line, "END")
             if (idx /= 0) exit
@@ -491,7 +482,7 @@ contains
     end subroutine process_sys_data
 
 
-    subroutine get_acc_opts(sys, run, cc, option, val)
+    subroutine get_acc_opts(cc, option, val)
 
         ! Get ACC-type methods specific configuration parameters
 
@@ -500,25 +491,19 @@ contains
         !     val: option's value
 
         ! Out:
-        !     sys: system information
-        !     run: runtime information
         !     cc: CC information
 
         use const, only: sp, dp
         use errors, only: stop_all
-        use system, only: sys_t, run_t
         use cc_types, only: cc_t
 
-        type(sys_t), intent(inout) :: sys
-        type(run_t), intent(inout) :: run
-        type(cc_t), intent(inout) :: cc
+        type(cc_t), intent(in out) :: cc
         character(len=*), intent(in) :: option
         character(len=*), intent(in) :: val
 
-        integer :: ios
-
         ! ACC options
         select case (option)
+
         case ('t2t2_t2')
             read(val, *) cc%acc%t2t2_t2
 
@@ -533,11 +518,12 @@ contains
 
         case ('t2t3_t3')
             read(val, *) cc%acc%t2t3_t3
+
         end select
 
     end subroutine get_acc_opts
 
-    subroutine get_act_opts(sys, run, cc, option, val)
+    subroutine get_act_opts(sys, run, option, val)
 
         ! Get active-space-type calculation configuration parameters
 
@@ -548,16 +534,13 @@ contains
         ! Out:
         !     sys: system information
         !     run: runtime information
-        !     cc: CC information
 
         use const, only: sp, dp
         use errors, only: stop_all
         use system, only: sys_t, run_t
-        use cc_types, only: cc_t
 
-        type(sys_t), intent(inout) :: sys
-        type(run_t), intent(inout) :: run
-        type(cc_t), intent(inout) :: cc
+        type(sys_t), intent(in out) :: sys
+        type(run_t), intent(in out) :: run
         character(len=*), intent(in) :: option
         character(len=*), intent(in) :: val
 
@@ -588,7 +571,7 @@ contains
 
     end subroutine get_act_opts
 
-    subroutine get_ext_cor_opts(sys, run, cc, option, val)
+    subroutine get_ext_cor_opts(run, option, val)
 
         ! Get externally correction configuration parameters
 
@@ -597,18 +580,13 @@ contains
         !     val: option's value
 
         ! Out:
-        !     sys: system information
         !     run: runtime information
-        !     cc: CC information
 
         use const, only: sp, dp
         use errors, only: stop_all
-        use system, only: sys_t, run_t
-        use cc_types, only: cc_t
+        use system, only: run_t
 
-        type(sys_t), intent(inout) :: sys
-        type(run_t), intent(inout) :: run
-        type(cc_t), intent(inout) :: cc
+        type(run_t), intent(in out) :: run
         character(len=*), intent(in) :: option
         character(len=*), intent(in) :: val
 

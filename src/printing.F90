@@ -298,7 +298,6 @@ contains
         real(p), intent(in) :: energy_diff
         real(p), intent(in) :: res
         real(p), intent(in) :: prev_time, new_time
-        real(p) :: cputime
 
         real(p) :: nsec
         integer :: nmin

@@ -6,6 +6,8 @@ module cc_types
     use const, only: p, sp, int_32, i0
     use ext_cor_types, only: ext_cor_t
 
+    implicit none
+
     ! ACC parameters for scaling square powers of T
     type acc_t
         real(sp) :: t2t2_t2(5)
@@ -207,6 +209,8 @@ contains
         ! [TODO] make this variable more clear.
         ! Might be temporary due to the i/o of walkers eventually changing
         integer :: id_walkers(2)
+
+        integer :: excit_rank
 
         integer(i0) :: f(sys%basis%string_len)
         integer :: occ_list(sys%nel)
