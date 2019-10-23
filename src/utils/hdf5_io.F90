@@ -2,11 +2,13 @@ module hdf5_io
 
 
     use const, only: int_32
+
+
+#ifdef ENABLE_HDF5
+
     use hdf5, only: hid_t, hsize_t
 
     implicit none
-
-#ifdef ENABLE_HDF5
 
     integer(int_32), parameter :: size_2gb = 268435456
     integer(int_32), parameter :: size_4gb = 536870912
@@ -21,6 +23,8 @@ module hdf5_io
         integer(hid_t) :: dp
     end type hdf5_kinds_t
 
+#else
+    implicit none
 #endif
 
 contains
@@ -404,6 +408,105 @@ contains
         call h5close_f(ierr)
 
     end subroutine write_column_in_mat
+
+
+    subroutine read_popsfile_h5(filename, dets, coefs, list_size)
+
+        use const, only: int_32, int_64, i0, dp
+        use system, only: run_t
+
+        use hdf5, only: h5open_f, h5fopen_f, h5dopen_f, &
+             h5dread_f, h5dget_space_f, &
+             h5sget_simple_extent_dims_f, h5sget_simple_extent_ndims_f, &
+             h5sclose_f, h5dclose_f, h5fclose_f, h5close_f, &
+             H5F_ACC_RDONLY_F
+
+        character(len=*), intent(in) :: filename
+        integer(i0), allocatable, intent(in out) :: dets(:,:)
+        real(dp), allocatable, intent(in out) :: coefs(:,:)
+        integer, intent(out) :: list_size
+
+        integer(hid_t) :: fid
+        integer(hid_t) :: dspace_id, dset_id
+
+        integer(int_32) :: rank
+        integer(hsize_t), allocatable :: dims(:)
+        integer(hsize_t), allocatable :: maxdims(:)
+
+        integer(int_32) :: ierr
+        type(hdf5_kinds_t) :: kinds
+
+        ! According to HANDE this has to be called everytime. HDF5 is tricky...
+        call h5open_f(ierr)
+        call hdf5_kinds_init(kinds)
+
+        ! Open file in RO mode
+        call h5fopen_f(trim(filename), H5F_ACC_RDONLY_F, fid, ierr)
+
+
+
+        ! Read ilut matrix
+        ! Open dataset
+        call h5dopen_f(fid, "/wavefunction/ilut", dset_id, ierr)
+
+        ! Open data space
+        call h5dget_space_f(dset_id, dspace_id, ierr)
+        call h5sget_simple_extent_ndims_f(dspace_id, rank, ierr)
+
+        ! Allocate dims and ndims
+        allocate(dims(rank), maxdims(rank))
+        call h5sget_simple_extent_dims_f(dspace_id, dims, maxdims, ierr)
+
+        allocate(dets(int(dims(1)), int(dims(2))))
+
+        call h5sclose_f(dspace_id, ierr)
+
+        ! Read ilut array
+        call h5dread_f(dset_id, kinds%i64, dets, dims, ierr)
+
+        list_size = dims(2)
+
+        deallocate(dims, maxdims)
+
+        ! Close dataset, dataspace, and file
+        call h5dclose_f(dset_id, ierr)
+
+
+
+
+        ! Read sgns matrix
+        ! Open dataset
+        call h5dopen_f(fid, "/wavefunction/sgns", dset_id, ierr)
+
+        ! Open data space
+        call h5dget_space_f(dset_id, dspace_id, ierr)
+        call h5sget_simple_extent_ndims_f(dspace_id, rank, ierr)
+
+        ! Allocate dims and ndims
+        allocate(dims(rank), maxdims(rank))
+        call h5sget_simple_extent_dims_f(dspace_id, dims, maxdims, ierr)
+
+        call h5sclose_f(dspace_id, ierr)
+
+        allocate(coefs(int(dims(1)), int(dims(2))))
+
+        ! Read ilut array
+        call h5dread_f(dset_id, kinds%dp, coefs, dims, ierr)
+        deallocate(dims, maxdims)
+
+        ! Close dataset, dataspace, and file
+        call h5dclose_f(dset_id, ierr)
+
+
+
+
+        ! Close dataset, dataspace, and file
+        call h5fclose_f(fid, ierr)
+
+        call h5close_f(ierr)
+
+
+    end subroutine read_popsfile_h5
 
     subroutine read_column_in_mat(filename, dset_name, vector, col_size, col_indx)
 
@@ -1074,6 +1177,20 @@ contains
 
     end subroutine write_ext_cor_vecs
 
+    subroutine read_popsfile_h5(filename, dets, coefs, list_size)
+
+        use const, only: i0, dp
+
+        use errors, only: stop_all
+
+        character(len=*), intent(in) :: filename
+        integer(i0), allocatable, intent(in out) :: dets(:,:)
+        real(dp), allocatable, intent(in out) :: coefs(:,:)
+        integer, intent(out) :: list_size
+
+        call stop_all('read_popsfile_h5', 'ERROR: compilation has no HDF5 support')
+
+    end subroutine read_popsfile_h5
 
 #endif
 

@@ -199,16 +199,14 @@ contains
         !         integrals will be loaded on sys%ints
 
         use const, only: p
-        use energy, only: calc_hf_energy
+        use system, only: sys_t, run_t
+
         use checking, only: check_allocate
         use errors, only: stop_all
-        use system, only: sys_t, run_t
         use utils, only: count_file_lines
 
         type(sys_t), intent(inout) :: sys
         type(run_t), intent(in) :: run
-
-        real(p), allocatable :: e2int(:,:,:,:)
 
         integer :: i, j, a, b
         integer :: onebody_lines, orbs
@@ -218,27 +216,26 @@ contains
 
         ! Initialize onebody electronic integrals array
         allocate(sys%ints%e1int(sys%orbs, sys%orbs), stat=ierr)
-        call check_allocate('sys%ints%e1int', sys%orbs * sys%orbs, ierr)
+        call check_allocate('sys%ints%e1int', sys%orbs ** 2, ierr)
         sys%ints%e1int = 0.0_p
 
 
         ! Initialize twobody electronic integrals array
-        allocate(e2int(sys%orbs, sys%orbs, sys%orbs, sys%orbs), stat=ierr)
-        call check_allocate('e2int', sys%orbs ** 4, ierr)
-        e2int = 0.0_p
+        allocate(sys%ints%e2int(sys%orbs, sys%orbs, sys%orbs, sys%orbs), stat=ierr)
+        call check_allocate('sys%ints%e2int', sys%orbs ** 4, ierr)
+        sys%ints%e2int = 0.0_p
 
 
         if (trim(run%fcidump) /= '') then
-            call load_fcidump(run%fcidump, sys%ints%e1int, e2int, sys%en_repul)
+            call load_fcidump(run%fcidump, sys%ints%e1int, sys%ints%e2int, sys%en_repul)
         else
             onebody_lines = count_file_lines(run%onebody_file)
             orbs = int(-(1 - sqrt(real(1 + 8*onebody_lines))) / 2)
             if (int(orbs) /= sys%orbs) call stop_all('load_ints', "Number of orbitals doesn't match the number of integrals")
             call load_e1int(sys%orbs, run%onebody_file, sys%ints%e1int)
 
-            call load_e2int(run%twobody_file, e2int, sys%en_repul)
+            call load_e2int(run%twobody_file, sys%ints%e2int, sys%en_repul)
         endif
-
 
         associate(froz=>sys%froz, occ_a=>sys%occ_a, occ_b=>sys%occ_b, orbs=>sys%orbs)
 
@@ -262,19 +259,16 @@ contains
                 do j=froz+1,orbs
                     do a=froz+1,orbs
                         do b=froz+1,orbs
-                            sys%ints%v_ab(i,j,a,b) = e2int(i,j,a,b)
-                            sys%ints%v_aa(i,j,a,b) = e2int(i,j,a,b) - e2int(i,j,b,a)
-                            sys%ints%v_bb(i,j,a,b) = e2int(i,j,a,b) - e2int(i,j,b,a)
+                            sys%ints%v_ab(i,j,a,b) = sys%ints%e2int(i,j,a,b)
+                            sys%ints%v_aa(i,j,a,b) = sys%ints%e2int(i,j,a,b) - sys%ints%e2int(i,j,b,a)
+                            sys%ints%v_bb(i,j,a,b) = sys%ints%e2int(i,j,a,b) - sys%ints%e2int(i,j,b,a)
                         enddo
                     enddo
                 enddo
             enddo
 
             ! Generate fock matrix
-            call gen_fock_operator(sys, sys%ints%e1int, e2int)
-            sys%en_ref = calc_hf_energy(sys, sys%ints%e1int, e2int) + sys%en_repul
-
-            deallocate(e2int)
+            call gen_fock_operator(sys, sys%ints%e1int, sys%ints%e2int)
 
         end associate
 
@@ -516,6 +510,8 @@ contains
             unocc_a = orbs - occ_a
             unocc_b = orbs - occ_b
 
+            ! [TODO] URGENT: reformat these files. Record reading is not
+            ! supported any more!
             open(part_ints_a_unit,file='part_ints_a.bin',form='unformatted', &
                 recl=(unocc_a**3)*8, access='direct')
             open(part_ints_b_unit,file='part_ints_b.bin',form='unformatted', &

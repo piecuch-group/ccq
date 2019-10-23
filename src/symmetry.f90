@@ -1,18 +1,18 @@
 module symmetry
 
-    ! Module for point-group symmetry considerations
+    ! Module for point-group symmetry calculations
 
     implicit none
 
-    integer :: mo_sym(1:200)
-    integer :: char_table(8,8)
-    integer :: group_dim
-    integer :: target_sym = 1
-    character(len=5) :: pg_sym_name
+    integer, private :: mo_sym(1:200)
+    integer, private :: char_table(8,8)
+    integer, private :: group_dim
+    integer, private :: target_sym = 1
+    character(len=5), private :: pg_sym_name
 
 contains
 
-    subroutine read_sym(filename, orbs)
+    subroutine read_sym(filename, orb_syms, point_group, orbs)
 
         ! Read symmetry file and choose character tables
 
@@ -22,8 +22,10 @@ contains
         use const, only: sym_unit
         use errors, only: stop_all
 
-        integer, intent(in) :: orbs
         character(len=*), intent(in) :: filename
+        integer, allocatable, intent(in out) :: orb_syms(:)
+        character(len=*), intent(in out) :: point_group
+        integer, intent(in) :: orbs
 
         integer :: i
         integer :: i_sym_char
@@ -34,9 +36,24 @@ contains
         logical :: t_exists
         !character(len=3) :: sym_irrep_str
 
+        if (.not. allocated(orb_syms)) &
+            allocate(orb_syms(200))
+
         inquire(file=filename, exist=t_exists)
         if (.not. t_exists) then
-            call stop_all('read_sym', 'Symmetry file, '//trim(filename)//', does not exist.')
+            !call stop_all('read_sym', 'ERROR: Symmetry file, '//trim(filename)//', does not exist.')
+
+            pg_sym_name = 'C1'
+            point_group = pg_sym_name
+
+            do i=1, orbs
+                mo_sym(i) = 1
+            enddo
+            orb_syms = mo_sym
+
+            return
+
+
         endif
 
         char_tables = reshape(&
@@ -82,9 +99,11 @@ contains
             pg_sym_name = "D2H"
 
         case default
-            call stop_all('read_sym', 'Point-group symmetry not supported')
+            call stop_all('read_sym', 'ERROR: Point-group symmetry not supported')
 
         end select
+
+        point_group = pg_sym_name
 
         group_dim = group_dims(i_sym_char)
         char_table = char_tables(:,:,i_sym_char)
@@ -93,14 +112,164 @@ contains
             read(sym_unit, *) sym_irrep
             mo_sym(i) = sym_irrep
         enddo
+        orb_syms = mo_sym
 
         close(sym_unit)
 
     end subroutine read_sym
 
+
+    ! [TODO] lousy way of writing a dictionary. Should change.
+    function map_irrep(irrep, point_group) result(irrep_num)
+
+        integer :: irrep_num
+        character(len=*), intent(in) :: irrep
+        character(len=*), intent(in) :: point_group
+
+        select case(trim(point_group))
+
+        case ('C1')
+            select case(trim(irrep))
+            case ('A')
+                irrep_num = 1
+            end select
+
+        case ('CS')
+            select case(trim(irrep))
+            case ("A'")
+                irrep_num = 1
+
+            case ('A"')
+                irrep_num = 2
+            end select
+
+        case ('C2V')
+            select case(trim(irrep))
+            case ('A1')
+                irrep_num = 1
+
+            case ('A2')
+                irrep_num = 2
+
+            case ('B1')
+                irrep_num = 3
+
+            case ('B2')
+                irrep_num = 4
+
+            end select
+
+        case ('D2H')
+            select case(trim(irrep))
+            case ('Ag')
+                irrep_num = 1
+
+            case ('B1g')
+                irrep_num = 2
+
+            case ('B2g')
+                irrep_num = 3
+
+            case ('B3g')
+                irrep_num = 4
+
+            case ('Au')
+                irrep_num = 5
+
+            case ('B1u')
+                irrep_num = 6
+
+            case ('B2u')
+                irrep_num = 7
+
+            case ('B3u')
+                irrep_num = 8
+
+
+            end select
+
+        end select
+
+
+    end function map_irrep
+
+    function reverse_map_irrep(irrep_num, point_group) result(irrep)
+
+        character(len=5) :: irrep
+        integer, intent(in) :: irrep_num
+        character(len=*), intent(in) :: point_group
+
+        select case(trim(point_group))
+
+        case ('C1')
+            select case(irrep_num)
+            case (1)
+                irrep = 'A'
+            end select
+
+        case ('CS')
+            select case(irrep_num)
+            case (1)
+                irrep = "A'"
+
+            case (2)
+                irrep = 'A"'
+
+            end select
+
+        case ('C2V')
+            select case(irrep_num)
+            case (1)
+                irrep = "A1"
+
+            case (2)
+                irrep = "A2"
+
+            case (3)
+                irrep = "B1"
+
+            case (4)
+                irrep = "B2"
+
+            end select
+
+        case ('D2H')
+            select case(irrep_num)
+            case (1)
+                irrep = "Ag"
+
+            case (2)
+                irrep = "B1g"
+
+            case (3)
+                irrep = "B2g"
+
+            case (4)
+                irrep = "B3g"
+
+            case (5)
+                irrep = "Au"
+
+            case (6)
+                irrep = "B1u"
+
+            case (7)
+                irrep = "B2u"
+
+            case (8)
+                irrep = "B3u"
+
+            end select
+
+        end select
+
+
+    end function reverse_map_irrep
+
+    ! [TODO] optimize this
     function is_sym(ex_orbs, norbs)
 
-        ! Check whether the existation is fully symmetric
+        ! Check whether the excitation is fully symmetric
 
         ! In:
         !   ex_orbs: orbitals involved in the excitation

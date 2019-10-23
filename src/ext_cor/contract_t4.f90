@@ -72,7 +72,7 @@ contains
         write(io, '(4x,a)') '=> Creating twobody configurations'
         call gen_doubles_conf(sys, cc%ext_cor%doubles_conf, f_ref)
         doubles_nconf = size(cc%ext_cor%doubles_conf, 2)
-        write(io, '(8x,a,i8,a)') '=> ', doubles_nconf,' double excitations'
+        write(io, '(8x,a,i15,a)') '=> ', doubles_nconf,' double excitations'
         cc%ext_cor%doubles_nconf = doubles_nconf
 
         ! Create a hash table for finding indices by mapping determinants
@@ -119,10 +119,120 @@ contains
         enddo
         close(walk_unit)
 
-        write(io, '(8x,a,i8,a,f8.2,a)') '=>', cnt_c4, ' amplitudes proccesed in ', &
+        write(io, '(8x,a,i15,a,f8.2,a)') '=>', cnt_c4, ' amplitudes proccesed in ', &
             get_wall_time()-prev_time, ' seconds'
 
     end subroutine process_fciqmc_c4
+
+
+    subroutine process_fciqmc_c4_h5(sys, cc, f_ref, dets, coefs, list_size, coef_norm)
+
+        ! Parse and process quadruply excited determinants from
+        ! a FCI/FCIQMC wave function. The parsed C4 coefficients
+        ! are contracted with the Hamiltonian and projected on
+        ! doubles on the fly.
+
+        ! In:
+        !   sys: molecular system information
+        !   f_ref: reference determinant. Usually Hartree--Fock
+        !   filename: filename containing the CI wave function (list of determinants)
+        !   coef_norm: coefficient of the reference determinant. Required for
+        !              the intermediate renormalization of the wave function
+
+        ! In/Out:
+        !   cc: coupled-cluster information
+
+
+        use const, only: i0, walk_unit
+        use system, only: sys_t
+        use cc_types, only: cc_t
+
+        use determinants, only: encode_det
+        use excitations, only: excit_t, get_excitation_level, shift_occ_list
+        use det_hash
+
+        use checking, only: check_allocate, check_deallocate
+        use printing, only: io
+
+        use utils, only: get_wall_time
+
+        type(sys_t), intent(in) :: sys
+        type(cc_t), intent(in out) :: cc
+
+        integer(i0), intent(in) :: f_ref(sys%basis%string_len)
+        integer(i0), intent(in) :: dets(:,:)
+        real(p), intent(in) :: coefs(:,:)
+        integer, intent(in) :: list_size
+
+        real(p), intent(in) :: coef_norm
+
+        type(dictionary_t) :: doubles_conf_hash
+
+        real(p) :: c4_amp
+
+        real(p) :: prev_time
+
+        real(p) :: read_coef
+        integer :: idx
+        integer(i0) :: f_t4(sys%basis%string_len)
+        integer(i0) :: f_doub(sys%basis%string_len)
+        integer :: doubles_nconf
+        integer :: cnt_c4 = 0
+        integer :: ierr
+        integer :: excit_rank
+
+
+        ! Generate doubly excited determinants required to calculate the
+        ! matrix elements of <ijab | [V_N, T_4] |phi>
+        ! [TODO] we might be able to move this?
+        write(io, '(4x,a)') '=> Creating twobody configurations'
+        call gen_doubles_conf(sys, cc%ext_cor%doubles_conf, f_ref)
+        doubles_nconf = size(cc%ext_cor%doubles_conf, 2)
+        write(io, '(8x,a,i15,a)') '=> ', doubles_nconf,' double excitations'
+        cc%ext_cor%doubles_nconf = doubles_nconf
+
+        ! Create a hash table for finding indices by mapping determinants
+        ! to indices
+        call doubles_conf_hash%init(doubles_nconf)
+        do idx=1, doubles_nconf
+            f_doub = cc%ext_cor%doubles_conf(:,idx)
+            call doubles_conf_hash%set(f_doub, idx)
+        enddo
+
+        ! Allocate the array that holds the  <ijab | [V_N, T_4] |phi>
+        ! projection.
+        allocate(cc%ext_cor%doubles_proj(doubles_nconf), stat=ierr)
+        cc%ext_cor%doubles_proj = 0.0_p
+
+        write(io, '(4x,a)') '=> Starting loop over stochastic quadruply excited determinants'
+        prev_time = get_wall_time()
+        ! [TODO] change name of list_size to something more appropriate
+        do idx=1, list_size
+
+            ! Read Slater determinant
+            f_t4 = dets(:, idx)
+            read_coef = coefs(1, idx)
+
+            excit_rank = get_excitation_level(f_ref, f_t4)
+
+            ! Skip non quadruply excited determinants
+            if (excit_rank /= 4) cycle
+
+            ! Update the array holding the projections <ijab | [V_N, C_4] |phi>
+            c4_amp = read_coef / coef_norm
+            if (c4_amp /= 0.0_p) then
+                cnt_c4 = cnt_c4 + 1
+                call update_doubles_projection(sys, f_t4, c4_amp, &
+                     cc%ext_cor%doubles_proj, doubles_conf_hash, f_ref)
+            endif
+
+        enddo
+        close(walk_unit)
+
+        write(io, '(8x,a,i8,a,f8.2,a)') '=>', cnt_c4, ' amplitudes proccesed in ', &
+            get_wall_time()-prev_time, ' seconds'
+
+    end subroutine process_fciqmc_c4_h5
 
     subroutine drive_t4_contraction(sys, cc)
 
@@ -399,12 +509,12 @@ contains
         call check_allocate('tmp_confs', ndoubles, ierr)
 
         ind_conf = 0
-        do a=sys%nel+1, sys%orbs*2
+        do a=sys%nel+1, sys%orbs*2-1
             do b=a+1, sys%orbs*2
 
                 excit%to_orb(1:2) = [a, b]
 
-                do i=sys%froz*2+1, sys%nel
+                do i=sys%froz*2+1, sys%nel-1
                     do j=i+1, sys%nel
 
                         excit%from_orb(1:2) = [i, j]

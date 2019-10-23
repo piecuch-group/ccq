@@ -11,7 +11,7 @@ module system
     type ints_t
         ! Bare integrals
         real(p), allocatable :: e1int(:,:)
-        ! e2int equivalent to v_ab so no needed (for now)
+        real(p), allocatable :: e2int(:,:,:,:)
 
 
         ! Unsorted integrals for older CC codes and CCSDTQ derivatives
@@ -65,6 +65,8 @@ module system
         integer :: orbs
         integer :: mult
 
+        character(len=5) :: point_group = ''
+
         ! Spin orbital molecular information
         integer :: froz_spin
         integer :: nel
@@ -88,6 +90,8 @@ module system
         type(ints_t) :: ints
 
         ! Initial energies
+        integer, allocatable :: orbital_syms(:)
+        real(p), allocatable :: orbital_energies(:)
         real(p) :: en_repul
         real(p) :: en_ref
 
@@ -112,7 +116,6 @@ module system
 
         ! Parallel
         integer(int_32) :: num_threads = 1_int_32
-
 
         ! Calculation ID
         character(len=c_len) :: label
@@ -144,7 +147,10 @@ module system
 
         character(len=c_len) :: h5_master_file
 
+        ! External correcion I/O
         character(len=c_len) :: ext_cor_file
+        logical :: ext_cor_file_h5
+
         character(len=c_len) :: sym_file
 
         character(len=c_len) :: output_file

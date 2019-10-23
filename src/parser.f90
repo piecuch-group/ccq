@@ -108,9 +108,11 @@ contains
         use system, only: sys_t, run_t, config_t
         use cc_types, only: cc_t
 
-        type(sys_t), intent(inout) :: sys
-        type(run_t), intent(inout) :: run
-        type(cc_t), intent(inout) :: cc
+        use symmetry, only: read_sym
+
+        type(sys_t), intent(in out) :: sys
+        type(run_t), intent(in out) :: run
+        type(cc_t), intent(in out) :: cc
 
         character(len=line_len) :: line
         character(len=line_len) :: option
@@ -164,6 +166,9 @@ contains
 
         ! Update system data
         call process_sys_data(sys)
+
+        ! Read symmetry file
+        call read_sym(run%sym_file, sys%orbital_syms, sys%point_group, sys%orbs)
 
         ! Validate configuration. Handle errors or exit if necessary
         call validate_config(sys, run)
@@ -230,6 +235,8 @@ contains
         if (trim(run%calc_type) == 'CADFCIQMC' .or. trim(run%calc_type) == 'DCSD-MC') then
             inquire(file=trim(run%ext_cor_file), exist=t_exists)
             if (.not. t_exists) call stop_all('get_config', 'CONFIGURATION ERROR: Walkers file not found')
+            inquire(file=trim(run%sym_file), exist=t_exists)
+            if (.not. t_exists) write(io, '(a)') 'WARNING: symmetry file not found'
         endif
 
         inquire(file=trim(run%bin_file), exist=t_exists)
@@ -599,11 +606,16 @@ contains
                 read(val, *, iostat=ios) run%ext_cor
                 if (ios /= 0) call stop_all('get_ext_cor_opts', 'CONFIGURATION ERROR: ext_cor must logical')
             endif
+
         case ('ext_cor_file')
             run%ext_cor_file = val
+
         case ('ext_cor_sd')
             read(val, *, iostat=ios) run%ext_cor_sd
             if (ios /= 0) call stop_all('get_ext_cor_opts', 'CONFIGURATION ERROR: ext_cor_sd must logical')
+
+        case ('ext_cor_file_h5')
+            run%ext_cor_file_h5 = .true.
         end select
 
     end subroutine get_ext_cor_opts
@@ -793,7 +805,7 @@ contains
         run%max_iter = 60
         run%tol = 1.0e-4_dp
         run%label = ''
-        run%sym_file = 'sym.inp'
+        run%sym_file = ''
         run%onebody_file = 'onebody.inp'
         run%twobody_file = 'twobody.inp'
         run%bin_file = 'tvec_'//trim(run%uuid)//'.bin'
@@ -801,6 +813,8 @@ contains
 
         ! Externally corrected
         run%ext_cor = .false.
+        run%ext_cor_file = ''
+        run%ext_cor_file_h5 = .false.
         run%ext_cor_sd = .true.
 
         run%num_threads = 1_int_32
