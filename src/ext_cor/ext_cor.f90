@@ -355,7 +355,14 @@ contains
         do idx=1, list_size
 
             f_walk = dets_in(:, idx)
+            ! [TODO] make this more general (i.e. POPSFILE can have multiple
+            ! reals in its coefficient array)
             read_coef = coefs_in(1, idx)
+
+            ! Get rid of the zeroed walkers. This will overlap with the good walkers
+            ! otherwise.
+            if (read_coef == 0.0_p) cycle
+
 
             excit_rank = get_excitation_level(f_ref, f_walk)
 
@@ -421,7 +428,7 @@ contains
 
         ! Check whether we have the HF coefficient. Otherwise exit with error.
         if (coef_norm == 0.0d0) then
-            call stop_all('find_fciqmc_c3', 'RUNTIME ERROR: Hartree-Fock coefficient not found in routine: find_fciqmc_c3')
+            call stop_all('find_fciqmc_c3_h5', 'RUNTIME ERROR: Hartree-Fock coefficient not found in routine: find_fciqmc_c3')
         endif
 
         ! Renormalize coeffcients to the intermediate renormalization (useful for CC)

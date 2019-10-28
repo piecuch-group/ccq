@@ -213,6 +213,10 @@ contains
             f_t4 = dets(:, idx)
             read_coef = coefs(1, idx)
 
+            ! Get rid of the zeroed walkers. This will overlap with the good walkers
+            ! otherwise.
+            if (read_coef == 0.0_p) cycle
+
             excit_rank = get_excitation_level(f_ref, f_t4)
 
             ! Skip non quadruply excited determinants
