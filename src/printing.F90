@@ -38,24 +38,13 @@ contains
 
     end subroutine close_print
 
-    subroutine print_header(run)
+    subroutine print_compilation_info()
 
         ! Print ccq information. This includes information about
         ! the compilation, the host, authors, etc.
 
         ! In:
         !   run: runtime configuration data
-
-        use system, only: run_t
-
-        type(run_t), intent(in) :: run
-
-        character(len=255) :: hostname
-        character(len=255) :: cmd
-        character(len=255) :: cwd
-        character(len=255) :: user
-        character(len=30) :: date
-
 
         write(io,'(a)') 'ccq Coupled-Cluster Program'
         write(io,'(a/)') '==========================='
@@ -102,6 +91,27 @@ contains
         write(io,'(2x,a20,1x,a)') 'Git SHA', &
             VERSION
 #endif
+        call flush(io)
+
+    end subroutine print_compilation_info
+
+    subroutine print_host_info(run)
+
+        ! Print ccq information. This includes information about
+        ! the compilation, the host, authors, etc.
+
+        ! In:
+        !   run: runtime configuration data
+
+        use system, only: run_t
+
+        type(run_t), intent(in) :: run
+
+        character(len=255) :: hostname
+        character(len=255) :: cmd
+        character(len=255) :: cwd
+        character(len=255) :: user
+        character(len=30) :: date
 
         write(io,'(/a)') 'Host information'
         write(io,'(a)') '----------------'
@@ -120,7 +130,7 @@ contains
 
         call flush(io)
 
-    end subroutine print_header
+    end subroutine print_host_info
 
     subroutine print_calc_params(sys, run, cc)
 

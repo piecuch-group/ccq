@@ -636,7 +636,7 @@ contains
 
                 enddo to_loop
 
-                ! Get next combination of to orbitals
+                ! Get next combination of from orbitals
                 call next_comb(n, inds_from, r, done)
                 if (done) exit from_loop
 

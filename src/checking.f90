@@ -6,37 +6,38 @@ module checking
     implicit none
 
     interface check_allocate
-        !module procedure check_allocate_int_32
+        module procedure check_allocate_int_32
         module procedure check_allocate_int_64
     end interface
     contains
 
-!        subroutine check_allocate_int_32(array_name, array_size, ierr)
-!
-!            ! Check whether an allocation was successful.
-!
-!            ! In:
-!            !    array_name: name of array being allocated.
-!            !    array_size: number of elements being allocated.
-!            !    ierr: error code returned by the allocate statement.
-!
-!            use utils, only: int_fmt
-!            use const, only: int_32
-!            use errors, only: stop_all
-!
-!            character(*), intent(in) :: array_name
-!            integer(int_32), intent(in) :: array_size
-!            integer, intent(in) :: ierr
-!
-!            if (array_size < 0 .or. ierr /= 0) then
-!                ! Error in allocating array.
-!                write (6,'(1X,a25,1X,a,1X,a9,1X,'//int_fmt(array_size,1)//')') &
-!                    'Error in allocating array',trim(array_name),'with size',array_size
-!                write (6,*) 'ierr',ierr
-!                call stop_all('check_allocate_int_32','Allocation error')
-!            end if
-!
-!        end subroutine check_allocate_int_32
+        subroutine check_allocate_int_32(array_name, array_size, ierr)
+
+            ! Check whether an allocation was successful.
+
+            ! In:
+            !    array_name: name of array being allocated.
+            !    array_size: number of elements being allocated.
+            !    ierr: error code returned by the allocate statement.
+
+            use utils, only: int_fmt
+            use const, only: int_32
+            use errors, only: stop_all
+
+            character(*), intent(in) :: array_name
+            integer(int_32), intent(in) :: array_size
+            integer, intent(in) :: ierr
+
+            if (array_size < 0 .or. ierr /= 0) then
+                ! Error in allocating array.
+                write (6,'(1X,a25,1X,a,1X,a9,1X,'//int_fmt(array_size,1)//')') &
+                    'Error in allocating array',trim(array_name),'with size',array_size
+                write (6,*) 'ierr',ierr
+                call stop_all('check_allocate_int_32','Allocation error')
+            end if
+
+        end subroutine check_allocate_int_32
+
         subroutine check_allocate_int_64(array_name, array_size, ierr)
 
             ! Check whether an allocation was successful.

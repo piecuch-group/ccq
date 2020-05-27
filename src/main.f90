@@ -11,7 +11,8 @@ program main
     use system, only: sys_t, run_t
     use cc_types, only: cc_t
     use parser, only: get_opts, get_config
-    use printing, only: init_print, print_header, print_config, close_print
+    use printing, only: init_print, print_compilation_info, print_host_info, &
+        print_config, close_print
 
     implicit none
 
@@ -28,7 +29,8 @@ program main
 
     ! Print settings, configurations, host, and compilation
     ! information to the output stream
-    call print_header(run)
+    call print_compilation_info()
+    call print_host_info(run)
     if (run%config%echo) call print_config(run%config)
 
     ! Run calculations

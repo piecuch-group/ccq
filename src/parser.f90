@@ -26,7 +26,7 @@ contains
         !    run: runtime information
 
         use system, only: run_t
-        use printing, only: print_help
+        use printing, only: print_help, print_compilation_info
         use errors, only: stop_all
 
         type(run_t), intent(in out) :: run
@@ -63,6 +63,10 @@ contains
 
                 case ('-h', '--help')
                     call print_help()
+
+                case ('--version')
+                    call print_compilation_info()
+                    call exit(1)
 
                 case default
                     call print_help()

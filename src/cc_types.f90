@@ -20,6 +20,9 @@ module cc_types
     end type acc_t
 
     ! Similarity transformed Hamiltonian
+    ! The indices are layout such that the first half corresponds
+    ! to the ket, and the second half, to the bra. For example,
+    ! hbar%aa(a,i,k,j) -> <jk|hbar|ia>.
     type hbar_t
         real(p), allocatable :: a(:,:)
         real(p), allocatable :: b(:,:)

@@ -8,11 +8,11 @@ module utils
     implicit none
 
     interface int_fmt
-        !module procedure int_fmt_int_32
+        module procedure int_fmt_int_32
         module procedure int_fmt_int_64
     end interface int_fmt
     interface tri_ind
-        !module procedure tri_ind_int_32
+        module procedure tri_ind_int_32
         module procedure tri_ind_int_64
     end interface tri_ind
 
@@ -213,35 +213,35 @@ contains
 
     !--- format statement formatting ---
 
-    !    elemental function int_fmt_int_32(i, padding) result(fmt1)
-    !
-    !        ! In:
-    !        !    i: an integer
-    !        !    padding (optional): amount of padding to add to format statement.
-    !        !        Default: 2.
-    !        ! Returns:
-    !        !    fmt1: a format statement for an integer field which will hold
-    !        !        i perfectly plus an amount of padding.
-    !
-    !        ! This does take i/o formatting to a slightly OCD level addmittedly...
-    !
-    !        use const, only: dp
-    !
-    !        character(4) :: fmt1
-    !        integer, intent(in) :: i
-    !        integer, intent(in), optional :: padding
-    !        real(dp) :: logi
-    !
-    !        if (i == 0 .or. i==1) then
-    !            logi = 1.0
-    !        else
-    !            logi = log10(real(abs(i)+1,dp))
-    !        end if
-    !        if (i < 0) logi = logi + 1
-    !
-    !        fmt1 = int_fmt_helper(logi, padding)
-    !
-    !    end function int_fmt_int_32
+    elemental function int_fmt_int_32(i, padding) result(fmt1)
+
+        ! In:
+        !    i: an integer
+        !    padding (optional): amount of padding to add to format statement.
+        !        Default: 2.
+        ! Returns:
+        !    fmt1: a format statement for an integer field which will hold
+        !        i perfectly plus an amount of padding.
+
+        ! This does take i/o formatting to a slightly OCD level addmittedly...
+
+        use const, only: dp
+
+        character(4) :: fmt1
+        integer, intent(in) :: i
+        integer, intent(in), optional :: padding
+        real(dp) :: logi
+
+        if (i == 0 .or. i==1) then
+            logi = 1.0
+        else
+            logi = log10(real(abs(i)+1,dp))
+        end if
+        if (i < 0) logi = logi + 1
+
+        fmt1 = int_fmt_helper(logi, padding)
+
+    end function int_fmt_int_32
 
     elemental function int_fmt_int_64(i, padding) result(fmt1)
 
