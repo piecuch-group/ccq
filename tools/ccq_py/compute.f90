@@ -14,7 +14,20 @@ module compute
 
     real(kind=8), allocatable, public :: t_vec(:)
 
+    real(kind=8), allocatable, public :: onebody(:,:)
+    real(kind=8), allocatable, public :: twobody(:,:,:,:)
+
 contains
+
+    subroutine set_ints(onebody_in, twobody_in)
+
+        real(kind=8), intent(in) :: onebody_in(:,:)
+        real(kind=8), intent(in) :: twobody_in(:,:,:,:)
+
+        if (.not. allocated(onebody)) onebody = onebody_in
+        if (.not. allocated(twobody)) twobody = twobody_in
+
+    end subroutine set_ints
 
     subroutine configure(froz, nel, nvirt, &
             onebody, twobody, &
@@ -71,8 +84,21 @@ contains
         !    correlation_energy: correlation energy
         !    total_energy: total energy (i.e. HF plus correlation)
 
-        use calc_driver, only: init_system, clean_system
+        use calc_driver, only: init_vecs, clean_system
+        use cc_types, only: init_p_space_slater
         use printing, only: print_calc_params, print_date, print_summary
+
+        use integrals, only: load_ints, load_sorted_ints
+        use energy, only: calc_hf_energy, calc_orbital_energy
+
+        use basis_types, only: init_basis_strings
+        use excitations, only: init_excitations
+
+        use cc_utils, only: get_t_sizes, get_t_sizes_act, open_t4_files
+
+        use hdf5_io, only: init_h5_file
+
+        use omp_lib, only: omp_set_num_threads
 
         use external_correction, only: ext_cor_driver
         use solver, only: solve_cc, solve_lcc
@@ -87,7 +113,47 @@ contains
 
         ! Start main wall clock
         call print_date('  ccq started on:')
-        call init_system(sys, run, cc)
+        ! [TODO] improve calculation type passing maybe use procedure pointers?
+        if (run%sorted_ints) then
+            call get_t_sizes_act(sys, cc)
+        else
+            call get_t_sizes(sys, cc, run%calc_type)
+        endif
+
+        if (.not. allocated(onebody) .and. .not. allocated(twobody)) then
+            ! Load integrals
+            call load_ints(sys, run)
+            ! [TODO] everything should be sorted in the future
+            call load_sorted_ints(sys)
+        else
+            call process_ints()
+            deallocate(onebody, twobody)
+        endif
+
+
+        ! Calculate initial energies
+        call calc_orbital_energy(sys, sys%ints%e1int, sys%ints%e2int)
+        sys%en_ref = calc_hf_energy(sys, sys%ints%e1int, sys%ints%e2int) + sys%en_repul
+
+        ! Initialize determinant and excitation systems
+        call init_basis_strings(sys%basis)
+        call init_excitations(sys%basis)
+
+        ! Initialize HDF5 master file
+        call init_h5_file(run%h5_master_file)
+
+        ! Initialize CC vectors
+        if (run%lvl_q) call open_t4_files(sys, run)
+        call init_vecs(run, cc)
+
+        ! Original p space init
+        ! [TODO] clean this
+        !if (run%stoch) call init_p_space(sys, cc%stoch)
+        if (run%stoch) call init_p_space_slater(sys, 'p_space_det', 3, cc%stoch)
+
+        ! Initialize OpenMP threads
+        call omp_set_num_threads(run%num_threads)
+
 
 
         ! Print calculation options parameters
@@ -149,5 +215,73 @@ contains
         call print_calc_params(sys, run, cc)
 
     end subroutine print_config
+
+    subroutine process_ints()
+
+        ! Load one- and two-body integrals from a file/files.
+
+        ! In:
+        !    run: runtime configuration and data
+
+        ! In/Out:
+        !    sys: molecular system data. On return, the
+        !         integrals will be loaded on sys%ints
+
+        use integrals, only: gen_fock_operator
+
+        use checking, only: check_allocate
+        use errors, only: stop_all
+        use utils, only: count_file_lines
+
+        integer :: i, j, a, b
+        integer :: onebody_lines, orbs
+
+        integer :: ierr
+
+
+        ! Initialize onebody electronic integrals array
+        sys%ints%e1int = onebody
+
+
+        ! Initialize twobody electronic integrals array
+        sys%ints%e2int = twobody
+
+
+        associate(froz=>sys%froz, occ_a=>sys%occ_a, occ_b=>sys%occ_b, orbs=>sys%orbs)
+
+            if (.not. allocated(sys%ints%f_a)) &
+                allocate(sys%ints%f_a(orbs, orbs))
+
+            if (.not. allocated(sys%ints%f_b)) &
+                allocate(sys%ints%f_b(orbs, orbs))
+
+            if (.not. allocated(sys%ints%v_aa)) &
+                allocate(sys%ints%v_aa(froz+1:orbs, froz+1:orbs, froz+1:orbs, froz+1:orbs))
+
+            if (.not. allocated(sys%ints%v_ab)) &
+                allocate(sys%ints%v_ab(froz+1:orbs, froz+1:orbs, froz+1:orbs, froz+1:orbs))
+
+            if (.not. allocated(sys%ints%v_bb)) &
+                allocate(sys%ints%v_bb(froz+1:orbs, froz+1:orbs, froz+1:orbs, froz+1:orbs))
+
+            ! Antisymmetrize two-body matrix
+            do i=froz+1,orbs
+                do j=froz+1,orbs
+                    do a=froz+1,orbs
+                        do b=froz+1,orbs
+                            sys%ints%v_ab(i,j,a,b) = sys%ints%e2int(i,j,a,b)
+                            sys%ints%v_aa(i,j,a,b) = sys%ints%e2int(i,j,a,b) - sys%ints%e2int(i,j,b,a)
+                            sys%ints%v_bb(i,j,a,b) = sys%ints%e2int(i,j,a,b) - sys%ints%e2int(i,j,b,a)
+                        enddo
+                    enddo
+                enddo
+            enddo
+
+            ! Generate fock matrix
+            call gen_fock_operator(sys, sys%ints%e1int, sys%ints%e2int)
+
+        end associate
+
+    end subroutine process_ints
 
 end module compute

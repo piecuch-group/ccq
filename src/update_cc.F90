@@ -2213,7 +2213,7 @@ contains
         ! ACC compatibility routine. Used to help transition between
         ! the new dervied type, acc, and the way Ilias wrote the
         ! original code.
-        
+
         ! [TODO] This subroutine should be deprecated at one point
 
         use const, only: sp
