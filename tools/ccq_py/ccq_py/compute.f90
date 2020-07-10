@@ -2,7 +2,7 @@ module compute
 
     ! python wrapper around ccq
 
-    use const, only: p
+    use const, only: p, int_32
     use system, only: sys_t, run_t
     use cc_types, only: cc_t
 
@@ -19,13 +19,16 @@ module compute
 
 contains
 
-    subroutine set_ints(onebody_in, twobody_in)
+    subroutine set_ints(norbs, onebody_in, twobody_in, en_repul)
 
-        real(kind=8), intent(in) :: onebody_in(:,:)
-        real(kind=8), intent(in) :: twobody_in(:,:,:,:)
+        integer(int_32), intent(in) :: norbs
+        real(kind=8), intent(in) :: onebody_in(norbs, norbs)
+        real(kind=8), intent(in) :: twobody_in(norbs, norbs, norbs, norbs)
+        real(kind=8), intent(in) :: en_repul
 
         if (.not. allocated(onebody)) onebody = onebody_in
         if (.not. allocated(twobody)) twobody = twobody_in
+        sys%en_repul = en_repul
 
     end subroutine set_ints
 
@@ -40,7 +43,9 @@ contains
         use parser, only: set_default_options, get_calc_macros
         use printing, only: init_print
 
-        integer, intent(in) :: froz, nel, nvirt
+        use symmetry, only: read_sym
+
+        integer(int_32), intent(in) :: froz, nel, nvirt
         character(len=500), intent(in) :: onebody, twobody
         logical, intent(in) :: rhf
         real(kind=8), intent(in) :: tol
@@ -53,13 +58,14 @@ contains
         call set_default_options(sys, run, cc)
         call get_calc_macros(sys, run, cc, calc_type)
 
+
         ! Set system data
-        sys%froz = froz / 2
-        sys%nel = nel
-        sys%occ_a = sys%nel / 2 + sys%froz
+        sys%froz = int(froz)
+        sys%nel = int(nel)
+        sys%occ_a = sys%nel / 2
         sys%occ_b = sys%occ_a - (sys%mult - 1) / 2
-        sys%nvirt = nvirt
-        sys%orbs = sys%froz + sys%occ_a + nvirt / 2
+        sys%nvirt = int(nvirt)
+        sys%orbs = sys%occ_a + int(nvirt) / 2
 
         run%tol = tol
         run%rhf = rhf
@@ -67,6 +73,7 @@ contains
         run%onebody_file = trim(onebody)
         run%twobody_file = trim(twobody)
 
+        call read_sym(run%sym_file, sys%orbital_syms, sys%point_group, sys%orbs)
 
     end subroutine configure
 
@@ -100,7 +107,8 @@ contains
 
         use omp_lib, only: omp_set_num_threads
 
-        use external_correction, only: ext_cor_driver
+
+        use external_correction, only: external_correction_driver
         use solver, only: solve_cc, solve_lcc
         use hbar_gen, only: hbar2
         use mm_correct, only: crcc23
@@ -135,6 +143,7 @@ contains
         call calc_orbital_energy(sys, sys%ints%e1int, sys%ints%e2int)
         sys%en_ref = calc_hf_energy(sys, sys%ints%e1int, sys%ints%e2int) + sys%en_repul
 
+
         ! Initialize determinant and excitation systems
         call init_basis_strings(sys%basis)
         call init_excitations(sys%basis)
@@ -162,7 +171,7 @@ contains
         ! Externally corrected CC methods
         ! -------------------------------
         if (run%ext_cor) then
-            call ext_cor_driver(sys, run, cc)
+            call external_correction_driver(sys, run, cc)
         endif
 
         ! Solve coupled cluster
@@ -173,7 +182,7 @@ contains
         ! ---------------
         ! [TODO] improve naming of hbar2
         if (run%hbar) then
-            call hbar2(sys, run, cc)
+            call hbar2(sys, cc)
         endif
 
         ! Solve left coupled cluster
@@ -183,14 +192,14 @@ contains
 
         ! Calculate MM correction
         if (run%mm_23) then
-            call crcc23(sys, run, cc)
+            call crcc23(sys, cc)
         endif
 
-        print *, run%calc_type
-        print *, run%lvl_t
-        print *, cc%t_size
-        print *, size(cc%t_vec)
-        t_vec = cc%t_vec
+        !print *, run%calc_type
+        !print *, run%lvl_t
+        !print *, cc%t_size
+        !print *, size(cc%t_vec)
+        !t_vec = cc%t_vec
 
         ! Wrap up
         call clean_system(sys, run, cc, cc_failed)
