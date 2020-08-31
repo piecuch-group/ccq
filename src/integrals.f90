@@ -140,33 +140,13 @@ contains
                 if (i /= 0 .and. a /= 0 .and. j /= 0 .and. b /= 0) then
                     ! Twobody integrals
                     e2int(i, j, a, b) = val
-                    if (i > a) then
-                        e2int(a, j, i, b) = val
-                        if (j > b) then
-                            e2int(i, b, a, j) = val
-                            e2int(a, b, i, j) = val
-                        endif
-                    else
-                        if (j > b) then
-                            e2int(i, b, a, j) = val
-                        endif
-                    endif
-
-                    if (i*(i-1)/2 + a > j*(j-1)/2 + b) then
-                        e2int(j, i, b, a) = val
-                        if (j > b) then
-                            e2int(b, i, j, a) = val
-                            if ( i > a ) then
-                                e2int(j, a, b, i) = val
-                                e2int(b, a, j, i) = val
-                            endif
-                        else
-                            if (i > a) then
-                                e2int(j, a, b, i) = val
-                            endif
-                        endif
-                    endif
-
+                    e2int(j, i, b, a) = val
+                    e2int(a, b, i, j) = val
+                    e2int(b, a, j, i) = val
+                    e2int(a, j, i, b) = val
+                    e2int(b, i, j, a) = val
+                    e2int(i, b, a, j) = val
+                    e2int(j, a, b, i) = val
 
                 else if (i /= 0 .and. a /= 0 .and. j + b == 0) then
                     ! Onebody integrals

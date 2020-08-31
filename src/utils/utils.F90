@@ -225,10 +225,10 @@ contains
 
         ! This does take i/o formatting to a slightly OCD level addmittedly...
 
-        use const, only: dp
+        use const, only: int_32, dp
 
         character(4) :: fmt1
-        integer, intent(in) :: i
+        integer(int_32), intent(in) :: i
         integer, intent(in), optional :: padding
         real(dp) :: logi
 

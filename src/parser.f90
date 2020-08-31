@@ -476,9 +476,9 @@ contains
         ! Convert spin orbital number to spatial
         ! [TODO] move this to a better place
         sys%froz = sys%froz_spin / 2
-        sys%occ_a = (sys%froz_spin + sys%nel) / 2
+        sys%occ_a = sys%nel / 2
         sys%occ_b = sys%occ_a - (sys%mult - 1) / 2
-        sys%orbs = (sys%froz_spin + sys%nel + sys%nvirt) / 2
+        sys%orbs = (sys%nel + sys%nvirt) / 2
 
         ! Set active space
         sys%act_occ_b = max(sys%occ_b - sys%act_occ, sys%froz)
@@ -487,7 +487,6 @@ contains
         sys%act_unocc_b = sys%act_unocc_a + sys%occ_a - sys%occ_b
 
         ! Update nel with frozen orbitals
-        sys%nel = sys%nel + sys%froz_spin
         sys%basis%nbasis = 2 * sys%orbs
 
     end subroutine process_sys_data

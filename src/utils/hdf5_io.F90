@@ -641,7 +641,7 @@ contains
                     call h5dread_f(dset_id, kinds%dp, v1, [int(size_chunk, hsize_t)], ierr, &
                         memspace, dspace_id)
 
-                    call daxpy(size_chunk, C(col_indx), v1, 1, &
+                    call daxpy(int(size_chunk), C(col_indx), v1, 1, &
                         vector( &
                         ((idx - 1) * size_chunk) + 1: &
                         idx * size_chunk), &
@@ -678,7 +678,7 @@ contains
 
                 v2(1:mod_size) = vector((full_chunks * size_chunk) + 1:(full_chunks * size_chunk) + mod_size)
 
-                call daxpy(mod_size, C(col_indx), v1, 1, v2, 1)
+                call daxpy(int(mod_size), C(col_indx), v1, 1, v2, 1)
                 vector((full_chunks * size_chunk) + 1:(full_chunks * size_chunk) + mod_size) = v2(1:mod_size)
             enddo
 
