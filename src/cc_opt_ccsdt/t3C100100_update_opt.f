@@ -553,11 +553,11 @@ C
        V3C=0.0d0
 C
        allocate(D1(N1+1:N3,N0+1:N1,M2+1:N3,N0+1:M1))
-       call reorder2431(N0,N2,N1,N3,N2,N3,N0,N1,
-     & N1,N3,N0,N1,M2,N3,N0,M1,VBHPPH,D1)
+       call reorder_shift(4,shape(VBHPPH),size(VBHPPH),shape(D1),
+     & size(D1),(/N1-N1,N0-N0,M2-N2,N0-N0/),'2431',VBHPPH,D1)
        allocate(B2(N1+1:N3,M1+1:N1))
-       call reorder12(N1,N3,N0,N1,
-     & N1,N3,M1,N1,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N1-N1,M1-N0/),'12',t1A,B2)
        allocate(S1(M1+1:N1,N0+1:N1,M2+1:N3,N0+1:M1))
        I1=K5*K6*K1
        I2=K7
@@ -568,16 +568,16 @@ C
 C
        allocate(X1(N0+1:N1,M2+1:N3,N0+1:M1,M1+1:N1))
        X1=0.0d0
-       call
-     & sum4123(N0,N1,M2,N3,N0,M1,M1,N1,X1,S1, 1.000)
+       call sum_stripe(4,shape(X1),size(X1),'4123',1.000,X1,
+     & S1)
        deallocate(S1)
 C
        allocate(D1(N0+1:N1,N1+1:N3,M2+1:N3,N0+1:M1))
-       call reorder4231(N0,N2,N1,N3,N2,N3,N0,N1,
-     & N0,N1,N1,N3,M2,N3,N0,M1,VBHPPH,D1)
+       call reorder_shift(4,shape(VBHPPH),size(VBHPPH),shape(D1),
+     & size(D1),(/N0-N0,N1-N1,M2-N2,N0-N0/),'4231',VBHPPH,D1)
        allocate(B2(N0+1:N1,N1+1:M2))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,M2,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N0-N0,N1-N1/),'21',t1A,B2)
        allocate(S2(N1+1:M2,N1+1:N3,M2+1:N3,N0+1:M1))
        I1=K5*K6*K3
        I2=K9
@@ -588,16 +588,16 @@ C
 C
        allocate(X2(N1+1:N3,M2+1:N3,N1+1:M2,N0+1:M1))
        X2=0.0d0
-       call
-     & sum3124(N1,N3,M2,N3,N1,M2,N0,M1,X2,S2,-1.000)
+       call sum_stripe(4,shape(X2),size(X2),'3124',-1.000,
+     & X2,S2)
        deallocate(S2)
 C
        allocate(D1(N0+1:N1,N0+1:N2,N0+1:M1,M1+1:N1))
-       call reorder4312(N0,N2,N0,N1,N0,N2,N0,N1,
-     & N0,N1,N0,N2,N0,M1,M1,N1,VBHHHH,D1)
+       call reorder_shift(4,shape(VBHHHH),size(VBHHHH),shape(D1),
+     & size(D1),(/N0-N0,N0-N0,N0-N0,M1-N0/),'4312',VBHHHH,D1)
        allocate(B2(N0+1:N1,N1+1:M2))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,M2,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N0-N0,N1-N1/),'21',t1A,B2)
        allocate(S3(N1+1:M2,N0+1:N2,N0+1:M1,M1+1:N1))
        I1=K7*K5*K2
        I2=K9
@@ -608,16 +608,16 @@ C
 C
        allocate(X5(N0+1:N2,N1+1:M2,N0+1:M1,M1+1:N1))
        X5=0.0d0
-       call
-     & sum2134(N0,N2,N1,M2,N0,M1,M1,N1,X5,S3,-1.000)
+       call sum_stripe(4,shape(X5),size(X5),'2134',-1.000,
+     & X5,S3)
        deallocate(S3)
 C
        allocate(D1(N0+1:N1,N2+1:N3,M2+1:N3,M1+1:N1))
-       call reorder4132(N2,N3,N0,N1,N2,N3,N0,N1,
-     & N0,N1,N2,N3,M2,N3,M1,N1,VBHPHP,D1)
+       call reorder_shift(4,shape(VBHPHP),size(VBHPHP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,M2-N2,M1-N0/),'4132',VBHPHP,D1)
        allocate(B2(N0+1:N1,N1+1:M2))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,M2,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N0-N0,N1-N1/),'21',t1A,B2)
        allocate(S4(N1+1:M2,N2+1:N3,M2+1:N3,M1+1:N1))
        I1=K7*K6*K4
        I2=K9
@@ -628,16 +628,16 @@ C
 C
        allocate(X6(N2+1:N3,M2+1:N3,N1+1:M2,M1+1:N1))
        X6=0.0d0
-       call
-     & sum3124(N2,N3,M2,N3,N1,M2,M1,N1,X6,S4,-1.000)
+       call sum_stripe(4,shape(X6),size(X6),'3124',-1.000,
+     & X6,S4)
        deallocate(S4)
 C
        allocate(D1(N1+1:N3,N0+1:N2,N1+1:M2,N0+1:M1))
-       call reorder2341(N0,N2,N1,N3,N0,N2,N1,N3,
-     & N1,N3,N0,N2,N1,M2,N0,M1,VBPHPH,D1)
+       call reorder_shift(4,shape(VBPHPH),size(VBPHPH),shape(D1),
+     & size(D1),(/N1-N1,N0-N0,N1-N1,N0-N0/),'2341',VBPHPH,D1)
        allocate(B2(N1+1:N3,M1+1:N1))
-       call reorder12(N1,N3,N0,N1,
-     & N1,N3,M1,N1,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N1-N1,M1-N0/),'12',t1A,B2)
        allocate(S5(M1+1:N1,N0+1:N2,N1+1:M2,N0+1:M1))
        I1=K5*K9*K2
        I2=K7
@@ -646,16 +646,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum4123(N0,N2,N1,M2,N0,M1,M1,N1,X5,S5, 1.000)
+       call sum_stripe(4,shape(X5),size(X5),'4123',1.000,X5,
+     & S5)
        deallocate(S5)
 C
        allocate(D1(N1+1:N3,N2+1:N3,M2+1:N3,N1+1:M2))
-       call reorder2134(N2,N3,N1,N3,N2,N3,N1,M2,
-     & N1,N3,N2,N3,M2,N3,N1,M2,VBAPPP,D1)
+       call reorder_shift(4,shape(VBAPPP),size(VBAPPP),shape(D1),
+     & size(D1),(/N1-N1,N2-N2,M2-N2,N1-N1/),'2134',VBAPPP,D1)
        allocate(B2(N1+1:N3,M1+1:N1))
-       call reorder12(N1,N3,N0,N1,
-     & N1,N3,M1,N1,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N1-N1,M1-N0/),'12',t1A,B2)
        allocate(S6(M1+1:N1,N2+1:N3,M2+1:N3,N1+1:M2))
        I1=K9*K6*K4
        I2=K7
@@ -664,16 +664,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum4123(N2,N3,M2,N3,N1,M2,M1,N1,X6,S6, 1.000)
+       call sum_stripe(4,shape(X6),size(X6),'4123',1.000,X6,
+     & S6)
        deallocate(S6)
 C
        allocate(B1(N1+1:N3,M1+1:N1))
-       call reorder12(N1,N3,N0,N1,
-     & N1,N3,M1,N1,FAHP,B1)
+       call reorder_shift(2,shape(FAHP),size(FAHP),shape(B1),size(B1),
+     & (/N1-N1,M1-N0/),'12',FAHP,B1)
        allocate(B2(N1+1:N3,M1+1:N1))
-       call reorder12(N1,N3,N0,N1,
-     & N1,N3,M1,N1,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N1-N1,M1-N0/),'12',t1A,B2)
        allocate(Q1(M1+1:N1,M1+1:N1))
        I1=K7
        I2=K7
@@ -684,16 +684,16 @@ C
 C
        allocate(X11(M1+1:N1,M1+1:N1))
        X11=0.0d0
-       call
-     & sum21(M1,N1,M1,N1,X11,Q1, 1.000)
+       call sum_stripe(2,shape(X11),size(X11),'21',1.000,
+     & X11,Q1)
        deallocate(Q1)
 C
        allocate(B1(N0+1:N1,N1+1:M2))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,M2,FAHP,B1)
+       call reorder_shift(2,shape(FAHP),size(FAHP),shape(B1),size(B1),
+     & (/N0-N0,N1-N1/),'21',FAHP,B1)
        allocate(B2(N0+1:N1,N1+1:M2))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,M2,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N0-N0,N1-N1/),'21',t1A,B2)
        allocate(Q2(N1+1:M2,N1+1:M2))
        I1=K9
        I2=K9
@@ -704,16 +704,16 @@ C
 C
        allocate(X12(N1+1:M2,N1+1:M2))
        X12=0.0d0
-       call
-     & sum21(N1,M2,N1,M2,X12,Q2,-1.000)
+       call sum_stripe(2,shape(X12),size(X12),'21',-1.000,
+     & X12,Q2)
        deallocate(Q2)
 C
        allocate(D1(N0+1:N1,M1+1:N1,N1+1:M2,M1+1:N1))
-       call reorder4312(N1,N3,N0,N1,N0,N1,N0,N1,
-     & N0,N1,M1,N1,N1,M2,M1,N1,VAHHHP,D1)
+       call reorder_shift(4,shape(VAHHHP),size(VAHHHP),shape(D1),
+     & size(D1),(/N0-N0,M1-N0,N1-N1,M1-N0/),'4312',VAHHHP,D1)
        allocate(B2(N0+1:N1,N1+1:M2))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,M2,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N0-N0,N1-N1/),'21',t1A,B2)
        allocate(S7(N1+1:M2,M1+1:N1,N1+1:M2,M1+1:N1))
        I1=K7*K9*K7
        I2=K9
@@ -723,11 +723,11 @@ C
        deallocate(B2)
 C
        allocate(D1(M1+1:N1,N1+1:M2,N1+1:M2,M1+1:N1))
-       call reorder2314(N1,M2,M1,N1,N1,M2,M1,N1,
-     & M1,N1,N1,M2,N1,M2,M1,N1,S7,D1)
+       call reorder_shift(4,shape(S7),size(S7),shape(D1),size(D1),
+     & (/M1-M1,N1-N1,N1-N1,M1-M1/),'2314',S7,D1)
        allocate(F2(M1+1:N1,N1+1:M2,M2+1:N3,M2+1:N3,N0+1:M1,N0+1:M1))
-       call reorder631245(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,
-     & M1,N1,N1,M2,M2,N3,M2,N3,N0,M1,N0,M1,t3C2,F2)
+       call reorder_shift(6,shape(t3C2),size(t3C2),shape(F2),size(F2),
+     & (/M1-M1,N1-N1,M2-M2,M2-M2,N0-N0,N0-N0/),'631245',t3C2,F2)
        allocate(Z46(M2+1:N3,M2+1:N3,N0+1:M1,N0+1:M1,N1+1:M2,M1+1:N1))
        I1=K7*K9
        I2=K5*K5*K6*K6
@@ -736,17 +736,17 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum124536(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z46,-1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'124536',
+     & -1.000,V3C,Z46)
        deallocate(Z46)
        deallocate(S7)
 C
        allocate(D1(N0+1:N1,N1+1:N3,M1+1:N1,M1+1:N1))
-       call reorder3142(N1,N3,N0,N1,N0,N1,N0,N1,
-     & N0,N1,N1,N3,M1,N1,M1,N1,VAHHHP,D1)
+       call reorder_shift(4,shape(VAHHHP),size(VAHHHP),shape(D1),
+     & size(D1),(/N0-N0,N1-N1,M1-N0,M1-N0/),'3142',VAHHHP,D1)
        allocate(B2(N0+1:N1,N1+1:N3))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,N3,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N0-N0,N1-N1/),'21',t1A,B2)
        allocate(Q3(M1+1:N1,M1+1:N1))
        I1=K7*K7
        I3=K3*K1
@@ -758,11 +758,11 @@ C
        deallocate(Q3)
 C
        allocate(D1(N1+1:N3,M1+1:N1,N1+1:M2,N1+1:M2))
-       call reorder2413(N1,N3,N1,N3,N1,N3,N0,N1,
-     & N1,N3,M1,N1,N1,M2,N1,M2,VAHPPP,D1)
+       call reorder_shift(4,shape(VAHPPP),size(VAHPPP),shape(D1),
+     & size(D1),(/N1-N1,M1-N0,N1-N1,N1-N1/),'2413',VAHPPP,D1)
        allocate(B2(N1+1:N3,M1+1:N1))
-       call reorder12(N1,N3,N0,N1,
-     & N1,N3,M1,N1,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N1-N1,M1-N0/),'12',t1A,B2)
        allocate(S8(M1+1:N1,M1+1:N1,N1+1:M2,N1+1:M2))
        I1=K9*K9*K7
        I2=K7
@@ -772,11 +772,11 @@ C
        deallocate(B2)
 C
        allocate(D1(M1+1:N1,N1+1:M2,N1+1:M2,M1+1:N1))
-       call reorder2341(M1,N1,M1,N1,N1,M2,N1,M2,
-     & M1,N1,N1,M2,N1,M2,M1,N1,S8,D1)
+       call reorder_shift(4,shape(S8),size(S8),shape(D1),size(D1),
+     & (/M1-M1,N1-N1,N1-N1,M1-M1/),'2341',S8,D1)
        allocate(F2(M1+1:N1,N1+1:M2,M2+1:N3,M2+1:N3,N0+1:M1,N0+1:M1))
-       call reorder631245(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,
-     & M1,N1,N1,M2,M2,N3,M2,N3,N0,M1,N0,M1,t3C2,F2)
+       call reorder_shift(6,shape(t3C2),size(t3C2),shape(F2),size(F2),
+     & (/M1-M1,N1-N1,M2-M2,M2-M2,N0-N0,N0-N0/),'631245',t3C2,F2)
        allocate(Z48(M2+1:N3,M2+1:N3,N0+1:M1,N0+1:M1,N1+1:M2,M1+1:N1))
        I1=K7*K9
        I2=K5*K5*K6*K6
@@ -785,17 +785,17 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum124536(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z48,-1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'124536',
+     & -1.000,V3C,Z48)
        deallocate(Z48)
        deallocate(S8)
 C
        allocate(D1(N0+1:N1,N1+1:N3,N1+1:M2,N1+1:M2))
-       call reorder4123(N1,N3,N1,N3,N1,N3,N0,N1,
-     & N0,N1,N1,N3,N1,M2,N1,M2,VAHPPP,D1)
+       call reorder_shift(4,shape(VAHPPP),size(VAHPPP),shape(D1),
+     & size(D1),(/N0-N0,N1-N1,N1-N1,N1-N1/),'4123',VAHPPP,D1)
        allocate(B2(N0+1:N1,N1+1:N3))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,N3,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N0-N0,N1-N1/),'21',t1A,B2)
        allocate(Q4(N1+1:M2,N1+1:M2))
        I1=K9*K9
        I3=K3*K1
@@ -807,11 +807,11 @@ C
        deallocate(Q4)
 C
        allocate(D1(N1+1:N3,M1+1:N2,N0+1:M1,N0+1:M1))
-       call reorder2341(N0,N2,N1,N3,N0,N2,N0,N1,
-     & N1,N3,M1,N2,N0,M1,N0,M1,VBHHPH,D1)
+       call reorder_shift(4,shape(VBHHPH),size(VBHHPH),shape(D1),
+     & size(D1),(/N1-N1,M1-N0,N0-N0,N0-N0/),'2341',VBHHPH,D1)
        allocate(B2(N1+1:N3,M1+1:N1))
-       call reorder12(N1,N3,N0,N1,
-     & N1,N3,M1,N1,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N1-N1,M1-N0/),'12',t1A,B2)
        allocate(S9(M1+1:N1,M1+1:N2,N0+1:M1,N0+1:M1))
        I1=K5*K5*K8
        I2=K7
@@ -822,16 +822,16 @@ C
 C
        allocate(X18(M1+1:N2,N0+1:M1,N0+1:M1,M1+1:N1))
        X18=0.0d0
-       call
-     & sum4123(M1,N2,N0,M1,N0,M1,M1,N1,X18,S9, 1.000)
+       call sum_stripe(4,shape(X18),size(X18),'4123',1.000,
+     & X18,S9)
        deallocate(S9)
 C
        allocate(D1(N1+1:N3,N0+1:M1,M1+1:N1,N0+1:M1))
-       call reorder2341(N0,N2,N1,N3,N0,N2,N0,N1,
-     & N1,N3,N0,M1,M1,N1,N0,M1,VBHHPH,D1)
+       call reorder_shift(4,shape(VBHHPH),size(VBHHPH),shape(D1),
+     & size(D1),(/N1-N1,N0-N0,M1-N0,N0-N0/),'2341',VBHHPH,D1)
        allocate(B2(N1+1:N3,M1+1:N1))
-       call reorder12(N1,N3,N0,N1,
-     & N1,N3,M1,N1,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N1-N1,M1-N0/),'12',t1A,B2)
        allocate(S10(M1+1:N1,N0+1:M1,M1+1:N1,N0+1:M1))
        I1=K5*K7*K5
        I2=K7
@@ -842,16 +842,16 @@ C
 C
        allocate(X19(N0+1:M1,M1+1:N1,N0+1:M1,M1+1:N1))
        X19=0.0d0
-       call
-     & sum4123(N0,M1,M1,N1,N0,M1,M1,N1,X19,S10, 1.000)
+       call sum_stripe(4,shape(X19),size(X19),'4123',1.000,
+     & X19,S10)
        deallocate(S10)
 C
        allocate(D1(N1+1:N3,M1+1:N2,M1+1:N1,N0+1:M1))
-       call reorder2341(N0,N2,N1,N3,N0,N2,N0,N1,
-     & N1,N3,M1,N2,M1,N1,N0,M1,VBHHPH,D1)
+       call reorder_shift(4,shape(VBHHPH),size(VBHHPH),shape(D1),
+     & size(D1),(/N1-N1,M1-N0,M1-N0,N0-N0/),'2341',VBHHPH,D1)
        allocate(B2(N1+1:N3,M1+1:N1))
-       call reorder12(N1,N3,N0,N1,
-     & N1,N3,M1,N1,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N1-N1,M1-N0/),'12',t1A,B2)
        allocate(S11(M1+1:N1,M1+1:N2,M1+1:N1,N0+1:M1))
        I1=K5*K7*K8
        I2=K7
@@ -862,16 +862,16 @@ C
 C
        allocate(X20(M1+1:N2,M1+1:N1,N0+1:M1,M1+1:N1))
        X20=0.0d0
-       call
-     & sum4123(M1,N2,M1,N1,N0,M1,M1,N1,X20,S11, 1.000)
+       call sum_stripe(4,shape(X20),size(X20),'4123',1.000,
+     & X20,S11)
        deallocate(S11)
 C
        allocate(D1(N1+1:N3,M1+1:N1,M2+1:N3,M2+1:N3))
-       call reorder2413(N2,N3,N1,N3,N2,N3,N0,N1,
-     & N1,N3,M1,N1,M2,N3,M2,N3,VBHPPP,D1)
+       call reorder_shift(4,shape(VBHPPP),size(VBHPPP),shape(D1),
+     & size(D1),(/N1-N1,M1-N0,M2-N2,M2-N2/),'2413',VBHPPP,D1)
        allocate(B2(N1+1:N3,M1+1:N1))
-       call reorder12(N1,N3,N0,N1,
-     & N1,N3,M1,N1,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N1-N1,M1-N0/),'12',t1A,B2)
        allocate(S12(M1+1:N1,M1+1:N1,M2+1:N3,M2+1:N3))
        I1=K6*K6*K7
        I2=K7
@@ -882,16 +882,16 @@ C
 C
        allocate(X37(M1+1:N1,M2+1:N3,M2+1:N3,M1+1:N1))
        X37=0.0d0
-       call
-     & sum4123(M1,N1,M2,N3,M2,N3,M1,N1,X37,S12, 1.000)
+       call sum_stripe(4,shape(X37),size(X37),'4123',1.000,
+     & X37,S12)
        deallocate(S12)
 C
        allocate(D1(N1+1:N3,M1+1:N1,N2+1:M2,M2+1:N3))
-       call reorder2413(N2,N3,N1,N3,N2,N3,N0,N1,
-     & N1,N3,M1,N1,N2,M2,M2,N3,VBHPPP,D1)
+       call reorder_shift(4,shape(VBHPPP),size(VBHPPP),shape(D1),
+     & size(D1),(/N1-N1,M1-N0,N2-N2,M2-N2/),'2413',VBHPPP,D1)
        allocate(B2(N1+1:N3,M1+1:N1))
-       call reorder12(N1,N3,N0,N1,
-     & N1,N3,M1,N1,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N1-N1,M1-N0/),'12',t1A,B2)
        allocate(S13(M1+1:N1,M1+1:N1,N2+1:M2,M2+1:N3))
        I1=K6*K0*K7
        I2=K7
@@ -902,16 +902,16 @@ C
 C
        allocate(X38(M1+1:N1,N2+1:M2,M2+1:N3,M1+1:N1))
        X38=0.0d0
-       call
-     & sum4123(M1,N1,N2,M2,M2,N3,M1,N1,X38,S13, 1.000)
+       call sum_stripe(4,shape(X38),size(X38),'4123',1.000,
+     & X38,S13)
        deallocate(S13)
 C
        allocate(D1(N0+1:N1,N0+1:M1,N1+1:M2,N0+1:M1))
-       call reorder4321(N0,N2,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N0,M1,N1,M2,N0,M1,VBHHPH,D1)
+       call reorder_shift(4,shape(VBHHPH),size(VBHHPH),shape(D1),
+     & size(D1),(/N0-N0,N0-N0,N1-N1,N0-N0/),'4321',VBHHPH,D1)
        allocate(B2(N0+1:N1,N1+1:M2))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,M2,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N0-N0,N1-N1/),'21',t1A,B2)
        allocate(S14(N1+1:M2,N0+1:M1,N1+1:M2,N0+1:M1))
        I1=K5*K9*K5
        I2=K9
@@ -922,16 +922,16 @@ C
 C
        allocate(X39(N0+1:M1,N1+1:M2,N1+1:M2,N0+1:M1))
        X39=0.0d0
-       call
-     & sum3124(N0,M1,N1,M2,N1,M2,N0,M1,X39,S14, 1.000)
+       call sum_stripe(4,shape(X39),size(X39),'3124',1.000,
+     & X39,S14)
        deallocate(S14)
 C
        allocate(D1(N0+1:N1,M1+1:N2,N1+1:M2,N0+1:M1))
-       call reorder4321(N0,N2,N1,N3,N0,N2,N0,N1,
-     & N0,N1,M1,N2,N1,M2,N0,M1,VBHHPH,D1)
+       call reorder_shift(4,shape(VBHHPH),size(VBHHPH),shape(D1),
+     & size(D1),(/N0-N0,M1-N0,N1-N1,N0-N0/),'4321',VBHHPH,D1)
        allocate(B2(N0+1:N1,N1+1:M2))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,M2,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N0-N0,N1-N1/),'21',t1A,B2)
        allocate(S15(N1+1:M2,M1+1:N2,N1+1:M2,N0+1:M1))
        I1=K5*K9*K8
        I2=K9
@@ -942,16 +942,16 @@ C
 C
        allocate(X40(M1+1:N2,N1+1:M2,N1+1:M2,N0+1:M1))
        X40=0.0d0
-       call
-     & sum3124(M1,N2,N1,M2,N1,M2,N0,M1,X40,S15, 1.000)
+       call sum_stripe(4,shape(X40),size(X40),'3124',1.000,
+     & X40,S15)
        deallocate(S15)
 C
        allocate(D1(N0+1:N1,N1+1:N3,N0+1:M1,N0+1:M1))
-       call reorder4231(N0,N2,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N1,N3,N0,M1,N0,M1,VBHHPH,D1)
+       call reorder_shift(4,shape(VBHHPH),size(VBHHPH),shape(D1),
+     & size(D1),(/N0-N0,N1-N1,N0-N0,N0-N0/),'4231',VBHHPH,D1)
        allocate(B2(N0+1:N1,N1+1:N3))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,N3,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N0-N0,N1-N1/),'21',t1A,B2)
        allocate(Q5(N0+1:M1,N0+1:M1))
        I1=K5*K5
        I3=K3*K1
@@ -965,11 +965,11 @@ C
        deallocate(Q5)
 C
        allocate(D1(N0+1:N1,N1+1:N3,M1+1:N2,N0+1:M1))
-       call reorder4231(N0,N2,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N1,N3,M1,N2,N0,M1,VBHHPH,D1)
+       call reorder_shift(4,shape(VBHHPH),size(VBHHPH),shape(D1),
+     & size(D1),(/N0-N0,N1-N1,M1-N0,N0-N0/),'4231',VBHHPH,D1)
        allocate(B2(N0+1:N1,N1+1:N3))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,N3,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N0-N0,N1-N1/),'21',t1A,B2)
        allocate(Q6(M1+1:N2,N0+1:M1))
        I1=K5*K8
        I3=K3*K1
@@ -983,11 +983,11 @@ C
        deallocate(Q6)
 C
        allocate(D1(N0+1:N1,N2+1:M2,M2+1:N3,M2+1:N3))
-       call reorder4123(N2,N3,N1,N3,N2,N3,N0,N1,
-     & N0,N1,N2,M2,M2,N3,M2,N3,VBHPPP,D1)
+       call reorder_shift(4,shape(VBHPPP),size(VBHPPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,M2-N1,M2-N2/),'4123',VBHPPP,D1)
        allocate(B2(N0+1:N1,N1+1:M2))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,M2,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N0-N0,N1-N1/),'21',t1A,B2)
        allocate(S16(N1+1:M2,N2+1:M2,M2+1:N3,M2+1:N3))
        I1=K6*K6*K0
        I2=K9
@@ -998,16 +998,16 @@ C
 C
        allocate(X25(N2+1:M2,M2+1:N3,M2+1:N3,N1+1:M2))
        X25=0.0d0
-       call
-     & sum4123(N2,M2,M2,N3,M2,N3,N1,M2,X25,S16,-1.000)
+       call sum_stripe(4,shape(X25),size(X25),'4123',-1.000,
+     & X25,S16)
        deallocate(S16)
 C
        allocate(D1(N0+1:N1,M2+1:N3,N1+1:M2,M2+1:N3))
-       call reorder4123(N2,N3,N1,N3,N2,N3,N0,N1,
-     & N0,N1,M2,N3,N1,M2,M2,N3,VBHPPP,D1)
+       call reorder_shift(4,shape(VBHPPP),size(VBHPPP),shape(D1),
+     & size(D1),(/N0-N0,M2-N2,N1-N1,M2-N2/),'4123',VBHPPP,D1)
        allocate(B2(N0+1:N1,N1+1:M2))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,M2,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N0-N0,N1-N1/),'21',t1A,B2)
        allocate(S17(N1+1:M2,M2+1:N3,N1+1:M2,M2+1:N3))
        I1=K6*K9*K6
        I2=K9
@@ -1018,16 +1018,16 @@ C
 C
        allocate(X26(M2+1:N3,N1+1:M2,M2+1:N3,N1+1:M2))
        X26=0.0d0
-       call
-     & sum4123(M2,N3,N1,M2,M2,N3,N1,M2,X26,S17,-1.000)
+       call sum_stripe(4,shape(X26),size(X26),'4123',-1.000,
+     & X26,S17)
        deallocate(S17)
 C
        allocate(D1(N0+1:N1,N2+1:M2,N1+1:M2,M2+1:N3))
-       call reorder4123(N2,N3,N1,N3,N2,N3,N0,N1,
-     & N0,N1,N2,M2,N1,M2,M2,N3,VBHPPP,D1)
+       call reorder_shift(4,shape(VBHPPP),size(VBHPPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,N1-N1,M2-N2/),'4123',VBHPPP,D1)
        allocate(B2(N0+1:N1,N1+1:M2))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,M2,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N0-N0,N1-N1/),'21',t1A,B2)
        allocate(S18(N1+1:M2,N2+1:M2,N1+1:M2,M2+1:N3))
        I1=K6*K9*K0
        I2=K9
@@ -1038,16 +1038,16 @@ C
 C
        allocate(X27(N2+1:M2,N1+1:M2,M2+1:N3,N1+1:M2))
        X27=0.0d0
-       call
-     & sum4123(N2,M2,N1,M2,M2,N3,N1,M2,X27,S18,-1.000)
+       call sum_stripe(4,shape(X27),size(X27),'4123',-1.000,
+     & X27,S18)
        deallocate(S18)
 C
        allocate(D1(N0+1:N1,N1+1:N3,M2+1:N3,M2+1:N3))
-       call reorder4213(N2,N3,N1,N3,N2,N3,N0,N1,
-     & N0,N1,N1,N3,M2,N3,M2,N3,VBHPPP,D1)
+       call reorder_shift(4,shape(VBHPPP),size(VBHPPP),shape(D1),
+     & size(D1),(/N0-N0,N1-N1,M2-N2,M2-N2/),'4213',VBHPPP,D1)
        allocate(B2(N0+1:N1,N1+1:N3))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,N3,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N0-N0,N1-N1/),'21',t1A,B2)
        allocate(Q7(M2+1:N3,M2+1:N3))
        I1=K6*K6
        I3=K3*K1
@@ -1061,11 +1061,11 @@ C
        deallocate(Q7)
 C
        allocate(D1(N0+1:N1,N1+1:N3,N2+1:M2,M2+1:N3))
-       call reorder4213(N2,N3,N1,N3,N2,N3,N0,N1,
-     & N0,N1,N1,N3,N2,M2,M2,N3,VBHPPP,D1)
+       call reorder_shift(4,shape(VBHPPP),size(VBHPPP),shape(D1),
+     & size(D1),(/N0-N0,N1-N1,N2-N2,M2-N2/),'4213',VBHPPP,D1)
        allocate(B2(N0+1:N1,N1+1:N3))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,N3,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N0-N0,N1-N1/),'21',t1A,B2)
        allocate(Q8(N2+1:M2,M2+1:N3))
        I1=K6*K0
        I3=K3*K1
@@ -1079,11 +1079,11 @@ C
        deallocate(Q8)
 C
        allocate(D1(N0+1:N1,M1+1:N2,N2+1:M2,M1+1:N1))
-       call reorder4312(N2,N3,N0,N1,N0,N2,N0,N1,
-     & N0,N1,M1,N2,N2,M2,M1,N1,VBHHHP,D1)
+       call reorder_shift(4,shape(VBHHHP),size(VBHHHP),shape(D1),
+     & size(D1),(/N0-N0,M1-N0,N2-N2,M1-N0/),'4312',VBHHHP,D1)
        allocate(B2(N0+1:N1,N1+1:M2))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,M2,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N0-N0,N1-N1/),'21',t1A,B2)
        allocate(S19(N1+1:M2,M1+1:N2,N2+1:M2,M1+1:N1))
        I1=K7*K0*K8
        I2=K9
@@ -1093,11 +1093,11 @@ C
        deallocate(B2)
 C
        allocate(D1(M1+1:N2,N2+1:M2,N1+1:M2,M1+1:N1))
-       call reorder2314(N1,M2,M1,N2,N2,M2,M1,N1,
-     & M1,N2,N2,M2,N1,M2,M1,N1,S19,D1)
+       call reorder_shift(4,shape(S19),size(S19),shape(D1),size(D1),
+     & (/M1-M1,N2-N2,N1-N1,M1-M1/),'2314',S19,D1)
        allocate(F2(M1+1:N2,N2+1:M2,M2+1:N3,M2+1:N3,N0+1:M1,N0+1:M1))
-       call reorder631245(N2,N3,N2,N3,N2,M2,N0,N2,N0,N2,M1,N2,
-     & M1,N2,N2,M2,M2,N3,M2,N3,N0,M1,N0,M1,t3D,F2)
+       call reorder_shift(6,shape(t3D),size(t3D),shape(F2),size(F2),
+     & (/M1-M1,N2-N2,M2-N2,M2-N2,N0-N0,N0-N0/),'631245',t3D,F2)
        allocate(Z64(M2+1:N3,M2+1:N3,N0+1:M1,N0+1:M1,N1+1:M2,M1+1:N1))
        I1=K7*K9
        I2=K5*K5*K6*K6
@@ -1106,17 +1106,17 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum124536(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z64,-1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'124536',
+     & -1.000,V3C,Z64)
        deallocate(Z64)
        deallocate(S19)
 C
        allocate(D1(N1+1:N3,M1+1:N2,N2+1:M2,N1+1:M2))
-       call reorder2314(N2,N3,N1,N3,N0,N2,N1,N3,
-     & N1,N3,M1,N2,N2,M2,N1,M2,VBPHPP,D1)
+       call reorder_shift(4,shape(VBPHPP),size(VBPHPP),shape(D1),
+     & size(D1),(/N1-N1,M1-N0,N2-N2,N1-N1/),'2314',VBPHPP,D1)
        allocate(B2(N1+1:N3,M1+1:N1))
-       call reorder12(N1,N3,N0,N1,
-     & N1,N3,M1,N1,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N1-N1,M1-N0/),'12',t1A,B2)
        allocate(S20(M1+1:N1,M1+1:N2,N2+1:M2,N1+1:M2))
        I1=K9*K0*K8
        I2=K7
@@ -1126,11 +1126,11 @@ C
        deallocate(B2)
 C
        allocate(D1(M1+1:N2,N2+1:M2,N1+1:M2,M1+1:N1))
-       call reorder2341(M1,N1,M1,N2,N2,M2,N1,M2,
-     & M1,N2,N2,M2,N1,M2,M1,N1,S20,D1)
+       call reorder_shift(4,shape(S20),size(S20),shape(D1),size(D1),
+     & (/M1-M1,N2-N2,N1-N1,M1-M1/),'2341',S20,D1)
        allocate(F2(M1+1:N2,N2+1:M2,M2+1:N3,M2+1:N3,N0+1:M1,N0+1:M1))
-       call reorder631245(N2,N3,N2,N3,N2,M2,N0,N2,N0,N2,M1,N2,
-     & M1,N2,N2,M2,M2,N3,M2,N3,N0,M1,N0,M1,t3D,F2)
+       call reorder_shift(6,shape(t3D),size(t3D),shape(F2),size(F2),
+     & (/M1-M1,N2-N2,M2-N2,M2-N2,N0-N0,N0-N0/),'631245',t3D,F2)
        allocate(Z65(M2+1:N3,M2+1:N3,N0+1:M1,N0+1:M1,N1+1:M2,M1+1:N1))
        I1=K7*K9
        I2=K5*K5*K6*K6
@@ -1139,17 +1139,17 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum124536(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z65, 1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'124536',
+     & 1.000,V3C,Z65)
        deallocate(Z65)
        deallocate(S20)
 C
        allocate(D1(N0+1:N2,N0+1:N1,N0+1:M1,M1+1:N1))
-       call reorder3412(N0,N2,N0,N1,N0,N2,N0,N1,
-     & N0,N2,N0,N1,N0,M1,M1,N1,VBHHHH,D1)
+       call reorder_shift(4,shape(VBHHHH),size(VBHHHH),shape(D1),
+     & size(D1),(/N0-N0,N0-N0,N0-N0,M1-N0/),'3412',VBHHHH,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S21(M2+1:N3,N0+1:N1,N0+1:M1,M1+1:N1))
        I1=K7*K5*K1
        I2=K6
@@ -1158,16 +1158,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum2134(N0,N1,M2,N3,N0,M1,M1,N1,X1,S21,-1.000)
+       call sum_stripe(4,shape(X1),size(X1),'2134',-1.000,
+     & X1,S21)
        deallocate(S21)
 C
        allocate(D1(N2+1:N3,N0+1:N1,M2+1:N3,M1+1:N1))
-       call reorder1432(N2,N3,N0,N1,N2,N3,N0,N1,
-     & N2,N3,N0,N1,M2,N3,M1,N1,VBHPHP,D1)
+       call reorder_shift(4,shape(VBHPHP),size(VBHPHP),shape(D1),
+     & size(D1),(/N2-N2,N0-N0,M2-N2,M1-N0/),'1432',VBHPHP,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S22(N0+1:M1,N0+1:N1,M2+1:N3,M1+1:N1))
        I1=K7*K6*K1
        I2=K5
@@ -1176,16 +1176,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum3124(N0,N1,M2,N3,N0,M1,M1,N1,X1,S22, 1.000)
+       call sum_stripe(4,shape(X1),size(X1),'3124',1.000,X1,
+     & S22)
        deallocate(S22)
 C
        allocate(D1(N0+1:N2,N1+1:N3,N1+1:M2,N0+1:M1))
-       call reorder3241(N0,N2,N1,N3,N0,N2,N1,N3,
-     & N0,N2,N1,N3,N1,M2,N0,M1,VBPHPH,D1)
+       call reorder_shift(4,shape(VBPHPH),size(VBPHPH),shape(D1),
+     & size(D1),(/N0-N0,N1-N1,N1-N1,N0-N0/),'3241',VBPHPH,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S23(M2+1:N3,N1+1:N3,N1+1:M2,N0+1:M1))
        I1=K5*K9*K3
        I2=K6
@@ -1194,16 +1194,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum2134(N1,N3,M2,N3,N1,M2,N0,M1,X2,S23,-1.000)
+       call sum_stripe(4,shape(X2),size(X2),'2134',-1.000,
+     & X2,S23)
        deallocate(S23)
 C
        allocate(D1(N2+1:N3,N1+1:N3,M2+1:N3,N1+1:M2))
-       call reorder1234(N2,N3,N1,N3,N2,N3,N1,M2,
-     & N2,N3,N1,N3,M2,N3,N1,M2,VBAPPP,D1)
+       call reorder_shift(4,shape(VBAPPP),size(VBAPPP),shape(D1),
+     & size(D1),(/N2-N2,N1-N1,M2-N2,N1-N1/),'1234',VBAPPP,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S24(N0+1:M1,N1+1:N3,M2+1:N3,N1+1:M2))
        I1=K9*K6*K3
        I2=K5
@@ -1212,16 +1212,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum4123(N1,N3,M2,N3,N1,M2,N0,M1,X2,S24, 1.000)
+       call sum_stripe(4,shape(X2),size(X2),'4123',1.000,X2,
+     & S24)
        deallocate(S24)
 C
        allocate(D1(N0+1:N2,N0+1:N2,N0+1:M1,N0+1:M1))
-       call reorder3412(N0,N2,N0,N2,N0,N2,N0,N2,
-     & N0,N2,N0,N2,N0,M1,N0,M1,VCHHHH,D1)
+       call reorder_shift(4,shape(VCHHHH),size(VCHHHH),shape(D1),
+     & size(D1),(/N0-N0,N0-N0,N0-N0,N0-N0/),'3412',VCHHHH,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S25(M2+1:N3,N0+1:N2,N0+1:M1,N0+1:M1))
        I1=K5*K5*K2
        I2=K6
@@ -1232,16 +1232,16 @@ C
 C
        allocate(X3(N0+1:N2,M2+1:N3,N0+1:M1,N0+1:M1))
        X3=0.0d0
-       call
-     & sum2134(N0,N2,M2,N3,N0,M1,N0,M1,X3,S25,-1.000)
+       call sum_stripe(4,shape(X3),size(X3),'2134',-1.000,
+     & X3,S25)
        deallocate(S25)
 C
        allocate(D1(N2+1:N3,N0+1:N2,M2+1:N3,N0+1:M1))
-       call reorder1432(N2,N3,N0,N2,N2,N3,N0,N2,
-     & N2,N3,N0,N2,M2,N3,N0,M1,VCHPHP,D1)
+       call reorder_shift(4,shape(VCHPHP),size(VCHPHP),shape(D1),
+     & size(D1),(/N2-N2,N0-N0,M2-N2,N0-N0/),'1432',VCHPHP,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S26(N0+1:M1,N0+1:N2,M2+1:N3,N0+1:M1))
        I1=K5*K6*K2
        I2=K5
@@ -1252,16 +1252,16 @@ C
 C
        allocate(X45(N0+1:N2,M2+1:N3,N0+1:M1,N0+1:M1))
        X45=0.0d0
-       call
-     & sum3124(N0,N2,M2,N3,N0,M1,N0,M1,X45,S26, 1.000)
+       call sum_stripe(4,shape(X45),size(X45),'3124',1.000,
+     & X45,S26)
        deallocate(S26)
 C
        allocate(D1(N0+1:N2,N2+1:N3,M2+1:N3,N0+1:M1))
-       call reorder4132(N2,N3,N0,N2,N2,N3,N0,N2,
-     & N0,N2,N2,N3,M2,N3,N0,M1,VCHPHP,D1)
+       call reorder_shift(4,shape(VCHPHP),size(VCHPHP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,M2-N2,N0-N0/),'4132',VCHPHP,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S27(M2+1:N3,N2+1:N3,M2+1:N3,N0+1:M1))
        I1=K5*K6*K4
        I2=K6
@@ -1272,16 +1272,16 @@ C
 C
        allocate(X46(N2+1:N3,M2+1:N3,M2+1:N3,N0+1:M1))
        X46=0.0d0
-       call
-     & sum3124(N2,N3,M2,N3,M2,N3,N0,M1,X46,S27, 1.000)
+       call sum_stripe(4,shape(X46),size(X46),'3124',1.000,
+     & X46,S27)
        deallocate(S27)
 C
        allocate(D1(N2+1:N3,N0+1:N2,N1+1:M2,M1+1:N1))
-       call reorder3124(N0,N2,N1,N3,N2,N3,N0,N1,
-     & N2,N3,N0,N2,N1,M2,M1,N1,VBHPPH,D1)
+       call reorder_shift(4,shape(VBHPPH),size(VBHPPH),shape(D1),
+     & size(D1),(/N2-N2,N0-N0,N1-N1,M1-N0/),'3124',VBHPPH,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S28(N0+1:M1,N0+1:N2,N1+1:M2,M1+1:N1))
        I1=K7*K9*K2
        I2=K5
@@ -1290,16 +1290,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum3124(N0,N2,N1,M2,N0,M1,M1,N1,X5,S28, 1.000)
+       call sum_stripe(4,shape(X5),size(X5),'3124',1.000,X5,
+     & S28)
        deallocate(S28)
 C
        allocate(D1(N0+1:N2,N2+1:N3,N1+1:M2,M1+1:N1))
-       call reorder1324(N0,N2,N1,N3,N2,N3,N0,N1,
-     & N0,N2,N2,N3,N1,M2,M1,N1,VBHPPH,D1)
+       call reorder_shift(4,shape(VBHPPH),size(VBHPPH),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,N1-N1,M1-N0/),'1324',VBHPPH,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S29(M2+1:N3,N2+1:N3,N1+1:M2,M1+1:N1))
        I1=K7*K9*K4
        I2=K6
@@ -1308,16 +1308,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum2134(N2,N3,M2,N3,N1,M2,M1,N1,X6,S29,-1.000)
+       call sum_stripe(4,shape(X6),size(X6),'2134',-1.000,
+     & X6,S29)
        deallocate(S29)
 C
        allocate(D1(N0+1:N2,N0+1:M1,M2+1:N3,N0+1:M1))
-       call reorder3421(N0,N2,N1,N3,N0,N2,N0,N1,
-     & N0,N2,N0,M1,M2,N3,N0,M1,VBHHPH,D1)
+       call reorder_shift(4,shape(VBHHPH),size(VBHHPH),shape(D1),
+     & size(D1),(/N0-N0,N0-N0,M2-N1,N0-N0/),'3421',VBHHPH,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S30(M2+1:N3,N0+1:M1,M2+1:N3,N0+1:M1))
        I1=K5*K6*K5
        I2=K6
@@ -1328,16 +1328,16 @@ C
 C
        allocate(X7(N0+1:M1,M2+1:N3,M2+1:N3,N0+1:M1))
        X7=0.0d0
-       call
-     & sum3124(N0,M1,M2,N3,M2,N3,N0,M1,X7,S30,-1.000)
+       call sum_stripe(4,shape(X7),size(X7),'3124',-1.000,
+     & X7,S30)
        deallocate(S30)
 C
        allocate(D1(N0+1:N2,M1+1:N1,M2+1:N3,N0+1:M1))
-       call reorder3421(N0,N2,N1,N3,N0,N2,N0,N1,
-     & N0,N2,M1,N1,M2,N3,N0,M1,VBHHPH,D1)
+       call reorder_shift(4,shape(VBHHPH),size(VBHHPH),shape(D1),
+     & size(D1),(/N0-N0,M1-N0,M2-N1,N0-N0/),'3421',VBHHPH,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S31(M2+1:N3,M1+1:N1,M2+1:N3,N0+1:M1))
        I1=K5*K6*K7
        I2=K6
@@ -1348,16 +1348,16 @@ C
 C
        allocate(X8(M1+1:N1,M2+1:N3,M2+1:N3,N0+1:M1))
        X8=0.0d0
-       call
-     & sum3124(M1,N1,M2,N3,M2,N3,N0,M1,X8,S31,-1.000)
+       call sum_stripe(4,shape(X8),size(X8),'3124',-1.000,
+     & X8,S31)
        deallocate(S31)
 C
        allocate(D1(N0+1:N2,N0+1:M1,N1+1:M2,N0+1:M1))
-       call reorder3421(N0,N2,N1,N3,N0,N2,N0,N1,
-     & N0,N2,N0,M1,N1,M2,N0,M1,VBHHPH,D1)
+       call reorder_shift(4,shape(VBHHPH),size(VBHHPH),shape(D1),
+     & size(D1),(/N0-N0,N0-N0,N1-N1,N0-N0/),'3421',VBHHPH,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S32(M2+1:N3,N0+1:M1,N1+1:M2,N0+1:M1))
        I1=K5*K9*K5
        I2=K6
@@ -1368,16 +1368,16 @@ C
 C
        allocate(X9(N0+1:M1,N1+1:M2,M2+1:N3,N0+1:M1))
        X9=0.0d0
-       call
-     & sum3124(N0,M1,N1,M2,M2,N3,N0,M1,X9,S32,-1.000)
+       call sum_stripe(4,shape(X9),size(X9),'3124',-1.000,
+     & X9,S32)
        deallocate(S32)
 C
        allocate(D1(N0+1:N2,M1+1:N1,N1+1:M2,N0+1:M1))
-       call reorder3421(N0,N2,N1,N3,N0,N2,N0,N1,
-     & N0,N2,M1,N1,N1,M2,N0,M1,VBHHPH,D1)
+       call reorder_shift(4,shape(VBHHPH),size(VBHHPH),shape(D1),
+     & size(D1),(/N0-N0,M1-N0,N1-N1,N0-N0/),'3421',VBHHPH,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S33(M2+1:N3,M1+1:N1,N1+1:M2,N0+1:M1))
        I1=K5*K9*K7
        I2=K6
@@ -1388,16 +1388,16 @@ C
 C
        allocate(X10(M1+1:N1,N1+1:M2,M2+1:N3,N0+1:M1))
        X10=0.0d0
-       call
-     & sum3124(M1,N1,N1,M2,M2,N3,N0,M1,X10,S33,-1.000)
+       call sum_stripe(4,shape(X10),size(X10),'3124',-1.000,
+     & X10,S33)
        deallocate(S33)
 C
        allocate(D1(N2+1:N3,N0+1:M1,M2+1:N3,M2+1:N3))
-       call reorder1423(N2,N3,N1,N3,N2,N3,N0,N1,
-     & N2,N3,N0,M1,M2,N3,M2,N3,VBHPPP,D1)
+       call reorder_shift(4,shape(VBHPPP),size(VBHPPP),shape(D1),
+     & size(D1),(/N2-N2,N0-N0,M2-N1,M2-N2/),'1423',VBHPPP,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S34(N0+1:M1,N0+1:M1,M2+1:N3,M2+1:N3))
        I1=K6*K6*K5
        I2=K5
@@ -1406,16 +1406,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum4123(N0,M1,M2,N3,M2,N3,N0,M1,X7,S34, 1.000)
+       call sum_stripe(4,shape(X7),size(X7),'4123',1.000,X7,
+     & S34)
        deallocate(S34)
 C
        allocate(D1(N2+1:N3,M1+1:N1,M2+1:N3,M2+1:N3))
-       call reorder1423(N2,N3,N1,N3,N2,N3,N0,N1,
-     & N2,N3,M1,N1,M2,N3,M2,N3,VBHPPP,D1)
+       call reorder_shift(4,shape(VBHPPP),size(VBHPPP),shape(D1),
+     & size(D1),(/N2-N2,M1-N0,M2-N1,M2-N2/),'1423',VBHPPP,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S35(N0+1:M1,M1+1:N1,M2+1:N3,M2+1:N3))
        I1=K6*K6*K7
        I2=K5
@@ -1424,16 +1424,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum4123(M1,N1,M2,N3,M2,N3,N0,M1,X8,S35, 1.000)
+       call sum_stripe(4,shape(X8),size(X8),'4123',1.000,X8,
+     & S35)
        deallocate(S35)
 C
        allocate(D1(N2+1:N3,N0+1:M1,N1+1:M2,M2+1:N3))
-       call reorder1423(N2,N3,N1,N3,N2,N3,N0,N1,
-     & N2,N3,N0,M1,N1,M2,M2,N3,VBHPPP,D1)
+       call reorder_shift(4,shape(VBHPPP),size(VBHPPP),shape(D1),
+     & size(D1),(/N2-N2,N0-N0,N1-N1,M2-N2/),'1423',VBHPPP,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S36(N0+1:M1,N0+1:M1,N1+1:M2,M2+1:N3))
        I1=K6*K9*K5
        I2=K5
@@ -1442,16 +1442,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum4123(N0,M1,N1,M2,M2,N3,N0,M1,X9,S36, 1.000)
+       call sum_stripe(4,shape(X9),size(X9),'4123',1.000,X9,
+     & S36)
        deallocate(S36)
 C
        allocate(D1(N2+1:N3,M1+1:N1,N1+1:M2,M2+1:N3))
-       call reorder1423(N2,N3,N1,N3,N2,N3,N0,N1,
-     & N2,N3,M1,N1,N1,M2,M2,N3,VBHPPP,D1)
+       call reorder_shift(4,shape(VBHPPP),size(VBHPPP),shape(D1),
+     & size(D1),(/N2-N2,M1-N0,N1-N1,M2-N2/),'1423',VBHPPP,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S37(N0+1:M1,M1+1:N1,N1+1:M2,M2+1:N3))
        I1=K6*K9*K7
        I2=K5
@@ -1460,16 +1460,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum4123(M1,N1,N1,M2,M2,N3,N0,M1,X10,S37, 1.000)
+       call sum_stripe(4,shape(X10),size(X10),'4123',1.000,
+     & X10,S37)
        deallocate(S37)
 C
        allocate(B1(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,FBHP,B1)
+       call reorder_shift(2,shape(FBHP),size(FBHP),shape(B1),size(B1),
+     & (/N2-N2,N0-N0/),'12',FBHP,B1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(Q9(N0+1:M1,N0+1:M1))
        I1=K5
        I2=K5
@@ -1480,16 +1480,16 @@ C
 C
        allocate(X13(N0+1:M1,N0+1:M1))
        X13=0.0d0
-       call
-     & sum21(N0,M1,N0,M1,X13,Q9, 1.000)
+       call sum_stripe(2,shape(X13),size(X13),'21',1.000,
+     & X13,Q9)
        deallocate(Q9)
 C
        allocate(B1(N2+1:N3,M1+1:N2))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,M1,N2,FBHP,B1)
+       call reorder_shift(2,shape(FBHP),size(FBHP),shape(B1),size(B1),
+     & (/N2-N2,M1-N0/),'12',FBHP,B1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(Q10(N0+1:M1,M1+1:N2))
        I1=K8
        I2=K5
@@ -1500,16 +1500,16 @@ C
 C
        allocate(X14(M1+1:N2,N0+1:M1))
        X14=0.0d0
-       call
-     & sum21(M1,N2,N0,M1,X14,Q10, 1.000)
+       call sum_stripe(2,shape(X14),size(X14),'21',1.000,
+     & X14,Q10)
        deallocate(Q10)
 C
        allocate(B1(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,FBHP,B1)
+       call reorder_shift(2,shape(FBHP),size(FBHP),shape(B1),size(B1),
+     & (/N0-N0,M2-N2/),'21',FBHP,B1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(Q11(M2+1:N3,M2+1:N3))
        I1=K6
        I2=K6
@@ -1520,16 +1520,16 @@ C
 C
        allocate(X15(M2+1:N3,M2+1:N3))
        X15=0.0d0
-       call
-     & sum21(M2,N3,M2,N3,X15,Q11,-1.000)
+       call sum_stripe(2,shape(X15),size(X15),'21',-1.000,
+     & X15,Q11)
        deallocate(Q11)
 C
        allocate(B1(N0+1:N2,N2+1:M2))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,N2,M2,FBHP,B1)
+       call reorder_shift(2,shape(FBHP),size(FBHP),shape(B1),size(B1),
+     & (/N0-N0,N2-N2/),'21',FBHP,B1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(Q12(M2+1:N3,N2+1:M2))
        I1=K0
        I2=K6
@@ -1540,16 +1540,16 @@ C
 C
        allocate(X16(N2+1:M2,M2+1:N3))
        X16=0.0d0
-       call
-     & sum21(N2,M2,M2,N3,X16,Q12,-1.000)
+       call sum_stripe(2,shape(X16),size(X16),'21',-1.000,
+     & X16,Q12)
        deallocate(Q12)
 C
        allocate(D1(N2+1:N3,M1+1:N2,N0+1:M1,M1+1:N1))
-       call reorder1342(N2,N3,N0,N1,N0,N2,N0,N1,
-     & N2,N3,M1,N2,N0,M1,M1,N1,VBHHHP,D1)
+       call reorder_shift(4,shape(VBHHHP),size(VBHHHP),shape(D1),
+     & size(D1),(/N2-N2,M1-N0,N0-N0,M1-N0/),'1342',VBHHHP,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S38(N0+1:M1,M1+1:N2,N0+1:M1,M1+1:N1))
        I1=K7*K5*K8
        I2=K5
@@ -1558,16 +1558,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum3124(M1,N2,N0,M1,N0,M1,M1,N1,X18,S38, 1.000)
+       call sum_stripe(4,shape(X18),size(X18),'3124',1.000,
+     & X18,S38)
        deallocate(S38)
 C
        allocate(D1(N2+1:N3,N0+1:M1,M1+1:N1,M1+1:N1))
-       call reorder1342(N2,N3,N0,N1,N0,N2,N0,N1,
-     & N2,N3,N0,M1,M1,N1,M1,N1,VBHHHP,D1)
+       call reorder_shift(4,shape(VBHHHP),size(VBHHHP),shape(D1),
+     & size(D1),(/N2-N2,N0-N0,M1-N0,M1-N0/),'1342',VBHHHP,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S39(N0+1:M1,N0+1:M1,M1+1:N1,M1+1:N1))
        I1=K7*K7*K5
        I2=K5
@@ -1576,16 +1576,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum3124(N0,M1,M1,N1,N0,M1,M1,N1,X19,S39, 1.000)
+       call sum_stripe(4,shape(X19),size(X19),'3124',1.000,
+     & X19,S39)
        deallocate(S39)
 C
        allocate(D1(N2+1:N3,M1+1:N2,M1+1:N1,M1+1:N1))
-       call reorder1342(N2,N3,N0,N1,N0,N2,N0,N1,
-     & N2,N3,M1,N2,M1,N1,M1,N1,VBHHHP,D1)
+       call reorder_shift(4,shape(VBHHHP),size(VBHHHP),shape(D1),
+     & size(D1),(/N2-N2,M1-N0,M1-N0,M1-N0/),'1342',VBHHHP,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S40(N0+1:M1,M1+1:N2,M1+1:N1,M1+1:N1))
        I1=K7*K7*K8
        I2=K5
@@ -1594,16 +1594,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum3124(M1,N2,M1,N1,N0,M1,M1,N1,X20,S40, 1.000)
+       call sum_stripe(4,shape(X20),size(X20),'3124',1.000,
+     & X20,S40)
        deallocate(S40)
 C
        allocate(D1(N0+1:N2,M1+1:N1,M2+1:N3,M1+1:N1))
-       call reorder3412(N2,N3,N0,N1,N0,N2,N0,N1,
-     & N0,N2,M1,N1,M2,N3,M1,N1,VBHHHP,D1)
+       call reorder_shift(4,shape(VBHHHP),size(VBHHHP),shape(D1),
+     & size(D1),(/N0-N0,M1-N0,M2-N2,M1-N0/),'3412',VBHHHP,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S41(M2+1:N3,M1+1:N1,M2+1:N3,M1+1:N1))
        I1=K7*K6*K7
        I2=K6
@@ -1614,16 +1614,16 @@ C
 C
        allocate(X21(M1+1:N1,M2+1:N3,M2+1:N3,M1+1:N1))
        X21=0.0d0
-       call
-     & sum3124(M1,N1,M2,N3,M2,N3,M1,N1,X21,S41,-1.000)
+       call sum_stripe(4,shape(X21),size(X21),'3124',-1.000,
+     & X21,S41)
        deallocate(S41)
 C
        call sumx_sorted2431(N2,N3,N0,N1,N2,N3,N0,N1,
      & M1,N1,M2,N3,M2,N3,M1,N1,X21,VBHPHP, 1.000)
 C
        allocate(F2(M1+1:N1,M2+1:N3,M2+1:N3,N1+1:M2,N0+1:M1,N0+1:M1))
-       call reorder612345(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,
-     & M1,N1,M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,t3C2,F2)
+       call reorder_shift(6,shape(t3C2),size(t3C2),shape(F2),size(F2),
+     & (/M1-M1,M2-M2,M2-M2,N1-N1,N0-N0,N0-N0/),'612345',t3C2,F2)
        allocate(Z21(M2+1:N3,N1+1:M2,N0+1:M1,N0+1:M1,M2+1:N3,M1+1:N1))
        I1=K7*K6
        I2=K5*K5*K9*K6
@@ -1631,19 +1631,19 @@ C
        call EGEMM(I1,I2,I3,X21,F2,Z21)
        deallocate(F2)
 C
-       call
-     & sum234516(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z21,-1.000)
-       call
-     & sum134526(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z21, 1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'234516',
+     & -1.000,V3C,Z21)
+       call sum_stripe(6,shape(V3C),size(V3C),'134526',
+     & 1.000,V3C,Z21)
        deallocate(Z21)
        deallocate(X21)
 C
        allocate(D1(N0+1:N2,M1+1:N1,N2+1:M2,M1+1:N1))
-       call reorder3412(N2,N3,N0,N1,N0,N2,N0,N1,
-     & N0,N2,M1,N1,N2,M2,M1,N1,VBHHHP,D1)
+       call reorder_shift(4,shape(VBHHHP),size(VBHHHP),shape(D1),
+     & size(D1),(/N0-N0,M1-N0,N2-N2,M1-N0/),'3412',VBHHHP,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S42(M2+1:N3,M1+1:N1,N2+1:M2,M1+1:N1))
        I1=K7*K0*K7
        I2=K6
@@ -1654,16 +1654,16 @@ C
 C
        allocate(X22(M1+1:N1,N2+1:M2,M2+1:N3,M1+1:N1))
        X22=0.0d0
-       call
-     & sum3124(M1,N1,N2,M2,M2,N3,M1,N1,X22,S42,-1.000)
+       call sum_stripe(4,shape(X22),size(X22),'3124',-1.000,
+     & X22,S42)
        deallocate(S42)
 C
        call sumx_sorted2431(N2,N3,N0,N1,N2,N3,N0,N1,
      & M1,N1,N2,M2,M2,N3,M1,N1,X22,VBHPHP, 1.000)
 C
        allocate(F2(M1+1:N1,N2+1:M2,M2+1:N3,N1+1:M2,N0+1:M1,N0+1:M1))
-       call reorder621345(N2,N3,N2,M2,N1,N3,N0,M1,N0,M1,M1,N1,
-     & M1,N1,N2,M2,M2,N3,N1,M2,N0,M1,N0,M1,t3C4,F2)
+       call reorder_shift(6,shape(t3C4),size(t3C4),shape(F2),size(F2),
+     & (/M1-M1,N2-N2,M2-N2,N1-N1,N0-N0,N0-N0/),'621345',t3C4,F2)
        allocate(Z22(M2+1:N3,N1+1:M2,N0+1:M1,N0+1:M1,M2+1:N3,M1+1:N1))
        I1=K7*K6
        I2=K5*K5*K9*K6
@@ -1671,19 +1671,19 @@ C
        call EGEMM(I1,I2,I3,X22,F2,Z22)
        deallocate(F2)
 C
-       call
-     & sum234516(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z22, 1.000)
-       call
-     & sum134526(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z22,-1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'234516',
+     & 1.000,V3C,Z22)
+       call sum_stripe(6,shape(V3C),size(V3C),'134526',
+     & -1.000,V3C,Z22)
        deallocate(Z22)
        deallocate(X22)
 C
        allocate(D1(N0+1:N2,N2+1:N3,M1+1:N1,M1+1:N1))
-       call reorder3142(N2,N3,N0,N1,N0,N2,N0,N1,
-     & N0,N2,N2,N3,M1,N1,M1,N1,VBHHHP,D1)
+       call reorder_shift(4,shape(VBHHHP),size(VBHHHP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,M1-N0,M1-N0/),'3142',VBHHHP,D1)
        allocate(B2(N0+1:N2,N2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,N2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,N2-N2/),'21',t1B,B2)
        allocate(Q13(M1+1:N1,M1+1:N1))
        I1=K7*K7
        I3=K4*K2
@@ -1695,11 +1695,11 @@ C
        deallocate(Q13)
 C
        allocate(D1(N2+1:N3,N0+1:M1,N1+1:M2,N1+1:M2))
-       call reorder1324(N2,N3,N1,N3,N0,N2,N1,N3,
-     & N2,N3,N0,M1,N1,M2,N1,M2,VBPHPP,D1)
+       call reorder_shift(4,shape(VBPHPP),size(VBPHPP),shape(D1),
+     & size(D1),(/N2-N2,N0-N0,N1-N1,N1-N1/),'1324',VBPHPP,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S43(N0+1:M1,N0+1:M1,N1+1:M2,N1+1:M2))
        I1=K9*K9*K5
        I2=K5
@@ -1710,16 +1710,16 @@ C
 C
        allocate(X23(N0+1:M1,N1+1:M2,N1+1:M2,N0+1:M1))
        X23=0.0d0
-       call
-     & sum4123(N0,M1,N1,M2,N1,M2,N0,M1,X23,S43, 1.000)
+       call sum_stripe(4,shape(X23),size(X23),'4123',1.000,
+     & X23,S43)
        deallocate(S43)
 C
        call sumx_sorted4213(N0,N2,N1,N3,N0,N2,N1,N3,
      & N0,M1,N1,M2,N1,M2,N0,M1,X23,VBPHPH, 1.000)
 C
        allocate(F2(N0+1:M1,N1+1:M2,M2+1:N3,M2+1:N3,N0+1:M1,M1+1:N1))
-       call reorder431256(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,
-     & N0,M1,N1,M2,M2,N3,M2,N3,N0,M1,M1,N1,t3C2,F2)
+       call reorder_shift(6,shape(t3C2),size(t3C2),shape(F2),size(F2),
+     & (/N0-N0,N1-N1,M2-M2,M2-M2,N0-N0,M1-M1/),'431256',t3C2,F2)
        allocate(Z23(M2+1:N3,M2+1:N3,N0+1:M1,M1+1:N1,N1+1:M2,N0+1:M1))
        I1=K5*K9
        I2=K7*K5*K6*K6
@@ -1727,19 +1727,19 @@ C
        call EGEMM(I1,I2,I3,X23,F2,Z23)
        deallocate(F2)
 C
-       call
-     & sum124635(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z23, 1.000)
-       call
-     & sum125634(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z23,-1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'124635',
+     & 1.000,V3C,Z23)
+       call sum_stripe(6,shape(V3C),size(V3C),'125634',
+     & -1.000,V3C,Z23)
        deallocate(Z23)
        deallocate(X23)
 C
        allocate(D1(N2+1:N3,M1+1:N2,N1+1:M2,N1+1:M2))
-       call reorder1324(N2,N3,N1,N3,N0,N2,N1,N3,
-     & N2,N3,M1,N2,N1,M2,N1,M2,VBPHPP,D1)
+       call reorder_shift(4,shape(VBPHPP),size(VBPHPP),shape(D1),
+     & size(D1),(/N2-N2,M1-N0,N1-N1,N1-N1/),'1324',VBPHPP,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S44(N0+1:M1,M1+1:N2,N1+1:M2,N1+1:M2))
        I1=K9*K9*K8
        I2=K5
@@ -1750,16 +1750,16 @@ C
 C
        allocate(X24(M1+1:N2,N1+1:M2,N1+1:M2,N0+1:M1))
        X24=0.0d0
-       call
-     & sum4123(M1,N2,N1,M2,N1,M2,N0,M1,X24,S44, 1.000)
+       call sum_stripe(4,shape(X24),size(X24),'4123',1.000,
+     & X24,S44)
        deallocate(S44)
 C
        call sumx_sorted4213(N0,N2,N1,N3,N0,N2,N1,N3,
      & M1,N2,N1,M2,N1,M2,N0,M1,X24,VBPHPH, 1.000)
 C
        allocate(F2(M1+1:N2,N1+1:M2,M2+1:N3,M2+1:N3,N0+1:M1,M1+1:N1))
-       call reorder531246(M2,N3,M2,N3,N1,M2,N0,N2,M1,N2,N0,N1,
-     & M1,N2,N1,M2,M2,N3,M2,N3,N0,M1,M1,N1,t3C3,F2)
+       call reorder_shift(6,shape(t3C3),size(t3C3),shape(F2),size(F2),
+     & (/M1-M1,N1-N1,M2-M2,M2-M2,N0-N0,M1-N0/),'531246',t3C3,F2)
        allocate(Z24(M2+1:N3,M2+1:N3,N0+1:M1,M1+1:N1,N1+1:M2,N0+1:M1))
        I1=K5*K9
        I2=K7*K5*K6*K6
@@ -1767,19 +1767,19 @@ C
        call EGEMM(I1,I2,I3,X24,F2,Z24)
        deallocate(F2)
 C
-       call
-     & sum124635(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z24,-1.000)
-       call
-     & sum125634(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z24, 1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'124635',
+     & -1.000,V3C,Z24)
+       call sum_stripe(6,shape(V3C),size(V3C),'125634',
+     & 1.000,V3C,Z24)
        deallocate(Z24)
        deallocate(X24)
 C
        allocate(D1(N0+1:N2,N2+1:M2,M2+1:N3,N1+1:M2))
-       call reorder3124(N2,N3,N1,N3,N0,N2,N1,N3,
-     & N0,N2,N2,M2,M2,N3,N1,M2,VBPHPP,D1)
+       call reorder_shift(4,shape(VBPHPP),size(VBPHPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,M2-N1,N1-N1/),'3124',VBPHPP,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S45(M2+1:N3,N2+1:M2,M2+1:N3,N1+1:M2))
        I1=K9*K6*K0
        I2=K6
@@ -1788,16 +1788,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum3124(N2,M2,M2,N3,M2,N3,N1,M2,X25,S45,-1.000)
+       call sum_stripe(4,shape(X25),size(X25),'3124',-1.000,
+     & X25,S45)
        deallocate(S45)
 C
        allocate(D1(N0+1:N2,M2+1:N3,N1+1:M2,N1+1:M2))
-       call reorder3124(N2,N3,N1,N3,N0,N2,N1,N3,
-     & N0,N2,M2,N3,N1,M2,N1,M2,VBPHPP,D1)
+       call reorder_shift(4,shape(VBPHPP),size(VBPHPP),shape(D1),
+     & size(D1),(/N0-N0,M2-N2,N1-N1,N1-N1/),'3124',VBPHPP,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S46(M2+1:N3,M2+1:N3,N1+1:M2,N1+1:M2))
        I1=K9*K9*K6
        I2=K6
@@ -1806,16 +1806,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum3124(M2,N3,N1,M2,M2,N3,N1,M2,X26,S46,-1.000)
+       call sum_stripe(4,shape(X26),size(X26),'3124',-1.000,
+     & X26,S46)
        deallocate(S46)
 C
        allocate(D1(N0+1:N2,N2+1:M2,N1+1:M2,N1+1:M2))
-       call reorder3124(N2,N3,N1,N3,N0,N2,N1,N3,
-     & N0,N2,N2,M2,N1,M2,N1,M2,VBPHPP,D1)
+       call reorder_shift(4,shape(VBPHPP),size(VBPHPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,N1-N1,N1-N1/),'3124',VBPHPP,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S47(M2+1:N3,N2+1:M2,N1+1:M2,N1+1:M2))
        I1=K9*K9*K0
        I2=K6
@@ -1824,16 +1824,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum3124(N2,M2,N1,M2,M2,N3,N1,M2,X27,S47,-1.000)
+       call sum_stripe(4,shape(X27),size(X27),'3124',-1.000,
+     & X27,S47)
        deallocate(S47)
 C
        allocate(D1(N0+1:N2,N2+1:N3,N1+1:M2,N1+1:M2))
-       call reorder3124(N2,N3,N1,N3,N0,N2,N1,N3,
-     & N0,N2,N2,N3,N1,M2,N1,M2,VBPHPP,D1)
+       call reorder_shift(4,shape(VBPHPP),size(VBPHPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,N1-N1,N1-N1/),'3124',VBPHPP,D1)
        allocate(B2(N0+1:N2,N2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,N2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,N2-N2/),'21',t1B,B2)
        allocate(Q14(N1+1:M2,N1+1:M2))
        I1=K9*K9
        I3=K4*K2
@@ -1845,11 +1845,11 @@ C
        deallocate(Q14)
 C
        allocate(D1(N2+1:N3,N0+1:M1,N0+1:M1,N0+1:M1))
-       call reorder1342(N2,N3,N0,N2,N0,N2,N0,N2,
-     & N2,N3,N0,M1,N0,M1,N0,M1,VCHHHP,D1)
+       call reorder_shift(4,shape(VCHHHP),size(VCHHHP),shape(D1),
+     & size(D1),(/N2-N2,N0-N0,N0-N0,N0-N0/),'1342',VCHHHP,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S48(N0+1:M1,N0+1:M1,N0+1:M1,N0+1:M1))
        I1=K5*K5*K5
        I2=K5
@@ -1859,11 +1859,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N0+1:M1,N0+1:M1,N0+1:M1,N0+1:M1))
-       call reorder2314(N0,M1,N0,M1,N0,M1,N0,M1,
-     & N0,M1,N0,M1,N0,M1,N0,M1,S48,D1)
+       call reorder_shift(4,shape(S48),size(S48),shape(D1),size(D1),
+     & (/N0-N0,N0-N0,N0-N0,N0-N0/),'2314',S48,D1)
        allocate(F2(N0+1:M1,N0+1:M1,M2+1:N3,M2+1:N3,N1+1:M2,M1+1:N1))
-       call reorder451236(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,
-     & N0,M1,N0,M1,M2,N3,M2,N3,N1,M2,M1,N1,t3C2,F2)
+       call reorder_shift(6,shape(t3C2),size(t3C2),shape(F2),size(F2),
+     & (/N0-N0,N0-N0,M2-M2,M2-M2,N1-N1,M1-M1/),'451236',t3C2,F2)
        allocate(Z99(M2+1:N3,M2+1:N3,N1+1:M2,M1+1:N1,N0+1:M1,N0+1:M1))
        I1=K5*K5
        I2=K7*K9*K6*K6
@@ -1872,19 +1872,19 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum123645(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z99, 0.500)
-       call
-     & sum123654(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z99,-0.500)
+       call sum_stripe(6,shape(V3C),size(V3C),'123645',
+     & 0.500,V3C,Z99)
+       call sum_stripe(6,shape(V3C),size(V3C),'123654',
+     & -0.500,V3C,Z99)
        deallocate(Z99)
        deallocate(S48)
 C
        allocate(D1(N2+1:N3,N0+1:M1,M1+1:N2,N0+1:M1))
-       call reorder1342(N2,N3,N0,N2,N0,N2,N0,N2,
-     & N2,N3,N0,M1,M1,N2,N0,M1,VCHHHP,D1)
+       call reorder_shift(4,shape(VCHHHP),size(VCHHHP),shape(D1),
+     & size(D1),(/N2-N2,N0-N0,M1-N0,N0-N0/),'1342',VCHHHP,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S49(N0+1:M1,N0+1:M1,M1+1:N2,N0+1:M1))
        I1=K5*K8*K5
        I2=K5
@@ -1894,11 +1894,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N0+1:M1,M1+1:N2,N0+1:M1,N0+1:M1))
-       call reorder2314(N0,M1,N0,M1,M1,N2,N0,M1,
-     & N0,M1,M1,N2,N0,M1,N0,M1,S49,D1)
+       call reorder_shift(4,shape(S49),size(S49),shape(D1),size(D1),
+     & (/N0-N0,M1-M1,N0-N0,N0-N0/),'2314',S49,D1)
        allocate(F2(N0+1:M1,M1+1:N2,M2+1:N3,M2+1:N3,N1+1:M2,M1+1:N1))
-       call reorder451236(M2,N3,M2,N3,N1,M2,N0,N2,M1,N2,N0,N1,
-     & N0,M1,M1,N2,M2,N3,M2,N3,N1,M2,M1,N1,t3C3,F2)
+       call reorder_shift(6,shape(t3C3),size(t3C3),shape(F2),size(F2),
+     & (/N0-N0,M1-M1,M2-M2,M2-M2,N1-N1,M1-N0/),'451236',t3C3,F2)
        allocate(Z100(M2+1:N3,M2+1:N3,N1+1:M2,M1+1:N1,N0+1:M1,N0+1:M1))
        I1=K5*K5
        I2=K7*K9*K6*K6
@@ -1907,19 +1907,19 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum123645(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z100, 1.000)
-       call
-     & sum123654(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z100,-1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'123645',
+     & 1.000,V3C,Z100)
+       call sum_stripe(6,shape(V3C),size(V3C),'123654',
+     & -1.000,V3C,Z100)
        deallocate(Z100)
        deallocate(S49)
 C
        allocate(D1(N2+1:N3,M1+1:N2,M1+1:N2,N0+1:M1))
-       call reorder1342(N2,N3,N0,N2,N0,N2,N0,N2,
-     & N2,N3,M1,N2,M1,N2,N0,M1,VCHHHP,D1)
+       call reorder_shift(4,shape(VCHHHP),size(VCHHHP),shape(D1),
+     & size(D1),(/N2-N2,M1-N0,M1-N0,N0-N0/),'1342',VCHHHP,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S50(N0+1:M1,M1+1:N2,M1+1:N2,N0+1:M1))
        I1=K5*K8*K8
        I2=K5
@@ -1929,11 +1929,11 @@ C
        deallocate(B2)
 C
        allocate(D1(M1+1:N2,M1+1:N2,N0+1:M1,N0+1:M1))
-       call reorder2314(N0,M1,M1,N2,M1,N2,N0,M1,
-     & M1,N2,M1,N2,N0,M1,N0,M1,S50,D1)
+       call reorder_shift(4,shape(S50),size(S50),shape(D1),size(D1),
+     & (/M1-M1,M1-M1,N0-N0,N0-N0/),'2314',S50,D1)
        allocate(F2(M1+1:N2,M1+1:N2,M2+1:N3,M2+1:N3,N1+1:M2,M1+1:N1))
-       call reorder451236(M2,N3,M2,N3,N1,M2,N0,N2,M1,N2,N0,N1,
-     & M1,N2,M1,N2,M2,N3,M2,N3,N1,M2,M1,N1,t3C3,F2)
+       call reorder_shift(6,shape(t3C3),size(t3C3),shape(F2),size(F2),
+     & (/M1-N0,M1-M1,M2-M2,M2-M2,N1-N1,M1-N0/),'451236',t3C3,F2)
        allocate(Z101(M2+1:N3,M2+1:N3,N1+1:M2,M1+1:N1,N0+1:M1,N0+1:M1))
        I1=K5*K5
        I2=K7*K9*K6*K6
@@ -1942,19 +1942,19 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum123645(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z101, 0.500)
-       call
-     & sum123654(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z101,-0.500)
+       call sum_stripe(6,shape(V3C),size(V3C),'123645',
+     & 0.500,V3C,Z101)
+       call sum_stripe(6,shape(V3C),size(V3C),'123654',
+     & -0.500,V3C,Z101)
        deallocate(Z101)
        deallocate(S50)
 C
        allocate(D1(N0+1:N2,N0+1:M1,M2+1:N3,N0+1:M1))
-       call reorder3412(N2,N3,N0,N2,N0,N2,N0,N2,
-     & N0,N2,N0,M1,M2,N3,N0,M1,VCHHHP,D1)
+       call reorder_shift(4,shape(VCHHHP),size(VCHHHP),shape(D1),
+     & size(D1),(/N0-N0,N0-N0,M2-N2,N0-N0/),'3412',VCHHHP,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S51(M2+1:N3,N0+1:M1,M2+1:N3,N0+1:M1))
        I1=K5*K6*K5
        I2=K6
@@ -1965,16 +1965,16 @@ C
 C
        allocate(X31(N0+1:M1,M2+1:N3,M2+1:N3,N0+1:M1))
        X31=0.0d0
-       call
-     & sum3124(N0,M1,M2,N3,M2,N3,N0,M1,X31,S51,-1.000)
+       call sum_stripe(4,shape(X31),size(X31),'3124',-1.000,
+     & X31,S51)
        deallocate(S51)
 C
        allocate(D1(N0+1:N2,M1+1:N2,M2+1:N3,N0+1:M1))
-       call reorder3412(N2,N3,N0,N2,N0,N2,N0,N2,
-     & N0,N2,M1,N2,M2,N3,N0,M1,VCHHHP,D1)
+       call reorder_shift(4,shape(VCHHHP),size(VCHHHP),shape(D1),
+     & size(D1),(/N0-N0,M1-N0,M2-N2,N0-N0/),'3412',VCHHHP,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S52(M2+1:N3,M1+1:N2,M2+1:N3,N0+1:M1))
        I1=K5*K6*K8
        I2=K6
@@ -1985,16 +1985,16 @@ C
 C
        allocate(X32(M1+1:N2,M2+1:N3,M2+1:N3,N0+1:M1))
        X32=0.0d0
-       call
-     & sum3124(M1,N2,M2,N3,M2,N3,N0,M1,X32,S52,-1.000)
+       call sum_stripe(4,shape(X32),size(X32),'3124',-1.000,
+     & X32,S52)
        deallocate(S52)
 C
        allocate(D1(N0+1:N2,N0+1:M1,N2+1:M2,N0+1:M1))
-       call reorder3412(N2,N3,N0,N2,N0,N2,N0,N2,
-     & N0,N2,N0,M1,N2,M2,N0,M1,VCHHHP,D1)
+       call reorder_shift(4,shape(VCHHHP),size(VCHHHP),shape(D1),
+     & size(D1),(/N0-N0,N0-N0,N2-N2,N0-N0/),'3412',VCHHHP,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S53(M2+1:N3,N0+1:M1,N2+1:M2,N0+1:M1))
        I1=K5*K0*K5
        I2=K6
@@ -2005,16 +2005,16 @@ C
 C
        allocate(X33(N0+1:M1,N2+1:M2,M2+1:N3,N0+1:M1))
        X33=0.0d0
-       call
-     & sum3124(N0,M1,N2,M2,M2,N3,N0,M1,X33,S53,-1.000)
+       call sum_stripe(4,shape(X33),size(X33),'3124',-1.000,
+     & X33,S53)
        deallocate(S53)
 C
        allocate(D1(N0+1:N2,M1+1:N2,N2+1:M2,N0+1:M1))
-       call reorder3412(N2,N3,N0,N2,N0,N2,N0,N2,
-     & N0,N2,M1,N2,N2,M2,N0,M1,VCHHHP,D1)
+       call reorder_shift(4,shape(VCHHHP),size(VCHHHP),shape(D1),
+     & size(D1),(/N0-N0,M1-N0,N2-N2,N0-N0/),'3412',VCHHHP,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S54(M2+1:N3,M1+1:N2,N2+1:M2,N0+1:M1))
        I1=K5*K0*K8
        I2=K6
@@ -2025,16 +2025,16 @@ C
 C
        allocate(X34(M1+1:N2,N2+1:M2,M2+1:N3,N0+1:M1))
        X34=0.0d0
-       call
-     & sum3124(M1,N2,N2,M2,M2,N3,N0,M1,X34,S54,-1.000)
+       call sum_stripe(4,shape(X34),size(X34),'3124',-1.000,
+     & X34,S54)
        deallocate(S54)
 C
        allocate(D1(N0+1:N2,N2+1:N3,N0+1:M1,N0+1:M1))
-       call reorder3142(N2,N3,N0,N2,N0,N2,N0,N2,
-     & N0,N2,N2,N3,N0,M1,N0,M1,VCHHHP,D1)
+       call reorder_shift(4,shape(VCHHHP),size(VCHHHP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,N0-N0,N0-N0/),'3142',VCHHHP,D1)
        allocate(B2(N0+1:N2,N2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,N2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,N2-N2/),'21',t1B,B2)
        allocate(Q15(N0+1:M1,N0+1:M1))
        I1=K5*K5
        I3=K4*K2
@@ -2046,11 +2046,11 @@ C
        deallocate(Q15)
 C
        allocate(D1(N0+1:N2,N2+1:N3,M1+1:N2,N0+1:M1))
-       call reorder3142(N2,N3,N0,N2,N0,N2,N0,N2,
-     & N0,N2,N2,N3,M1,N2,N0,M1,VCHHHP,D1)
+       call reorder_shift(4,shape(VCHHHP),size(VCHHHP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,M1-N0,N0-N0/),'3142',VCHHHP,D1)
        allocate(B2(N0+1:N2,N2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,N2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,N2-N2/),'21',t1B,B2)
        allocate(Q16(M1+1:N2,N0+1:M1))
        I1=K5*K8
        I3=K4*K2
@@ -2062,11 +2062,11 @@ C
        deallocate(Q16)
 C
        allocate(D1(N2+1:N3,N0+1:M1,M2+1:N3,M2+1:N3))
-       call reorder1423(N2,N3,N2,N3,N2,N3,N0,N2,
-     & N2,N3,N0,M1,M2,N3,M2,N3,VCHPPP,D1)
+       call reorder_shift(4,shape(VCHPPP),size(VCHPPP),shape(D1),
+     & size(D1),(/N2-N2,N0-N0,M2-N2,M2-N2/),'1423',VCHPPP,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S55(N0+1:M1,N0+1:M1,M2+1:N3,M2+1:N3))
        I1=K6*K6*K5
        I2=K5
@@ -2075,16 +2075,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum4123(N0,M1,M2,N3,M2,N3,N0,M1,X31,S55,-1.000)
+       call sum_stripe(4,shape(X31),size(X31),'4123',-1.000,
+     & X31,S55)
        deallocate(S55)
 C
        allocate(D1(N2+1:N3,M1+1:N2,M2+1:N3,M2+1:N3))
-       call reorder1423(N2,N3,N2,N3,N2,N3,N0,N2,
-     & N2,N3,M1,N2,M2,N3,M2,N3,VCHPPP,D1)
+       call reorder_shift(4,shape(VCHPPP),size(VCHPPP),shape(D1),
+     & size(D1),(/N2-N2,M1-N0,M2-N2,M2-N2/),'1423',VCHPPP,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S56(N0+1:M1,M1+1:N2,M2+1:N3,M2+1:N3))
        I1=K6*K6*K8
        I2=K5
@@ -2093,16 +2093,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum4123(M1,N2,M2,N3,M2,N3,N0,M1,X32,S56,-1.000)
+       call sum_stripe(4,shape(X32),size(X32),'4123',-1.000,
+     & X32,S56)
        deallocate(S56)
 C
        allocate(D1(N2+1:N3,N0+1:M1,N2+1:M2,M2+1:N3))
-       call reorder1423(N2,N3,N2,N3,N2,N3,N0,N2,
-     & N2,N3,N0,M1,N2,M2,M2,N3,VCHPPP,D1)
+       call reorder_shift(4,shape(VCHPPP),size(VCHPPP),shape(D1),
+     & size(D1),(/N2-N2,N0-N0,N2-N2,M2-N2/),'1423',VCHPPP,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S57(N0+1:M1,N0+1:M1,N2+1:M2,M2+1:N3))
        I1=K6*K0*K5
        I2=K5
@@ -2111,16 +2111,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum4123(N0,M1,N2,M2,M2,N3,N0,M1,X33,S57,-1.000)
+       call sum_stripe(4,shape(X33),size(X33),'4123',-1.000,
+     & X33,S57)
        deallocate(S57)
 C
        allocate(D1(N2+1:N3,M1+1:N2,N2+1:M2,M2+1:N3))
-       call reorder1423(N2,N3,N2,N3,N2,N3,N0,N2,
-     & N2,N3,M1,N2,N2,M2,M2,N3,VCHPPP,D1)
+       call reorder_shift(4,shape(VCHPPP),size(VCHPPP),shape(D1),
+     & size(D1),(/N2-N2,M1-N0,N2-N2,M2-N2/),'1423',VCHPPP,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S58(N0+1:M1,M1+1:N2,N2+1:M2,M2+1:N3))
        I1=K6*K0*K8
        I2=K5
@@ -2129,16 +2129,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum4123(M1,N2,N2,M2,M2,N3,N0,M1,X34,S58,-1.000)
+       call sum_stripe(4,shape(X34),size(X34),'4123',-1.000,
+     & X34,S58)
        deallocate(S58)
 C
        allocate(D1(M2+1:N3,M2+1:N3,N0+1:N2,M2+1:N3))
-       call reorder1243(N2,N3,N2,N3,N2,N3,N0,N2,
-     & M2,N3,M2,N3,N0,N2,M2,N3,VCHPPP,D1)
+       call reorder_shift(4,shape(VCHPPP),size(VCHPPP),shape(D1),
+     & size(D1),(/M2-N2,M2-N2,N0-N0,M2-N2/),'1243',VCHPPP,D1)
        allocate(F2(M2+1:N3,M2+1:N3,N1+1:M2,N0+1:M1,N0+1:M1,M1+1:N1))
-       call reorder123456(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,
-     & M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,t3C2,F2)
+       call reorder_shift(6,shape(t3C2),size(t3C2),shape(F2),size(F2),
+     & (/M2-M2,M2-M2,N1-N1,N0-N0,N0-N0,M1-M1/),'123456',t3C2,F2)
        allocate(U112(N1+1:M2,N0+1:M1,N0+1:M1,M1+1:N1,N0+1:N2,M2+1:N3))
        I1=K6*K2
        I2=K7*K5*K5*K9
@@ -2148,11 +2148,11 @@ C
        deallocate(F2)
 C
        allocate(F1(N0+1:N2,M2+1:N3,N1+1:M2,N0+1:M1,N0+1:M1,M1+1:N1))
-       call reorder561234(N1,M2,N0,M1,N0,M1,M1,N1,N0,N2,M2,N3,
-     & N0,N2,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,U112,F1)
+       call reorder_shift(6,shape(U112),size(U112),shape(F1),size(F1),
+     & (/N0-N0,M2-M2,N1-N1,N0-N0,N0-N0,M1-M1/),'561234',U112,F1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(Z113(M2+1:N3,M2+1:N3,N1+1:M2,N0+1:M1,N0+1:M1,M1+1:N1))
        I1=K7*K5*K5*K9*K6
        I2=K6
@@ -2161,18 +2161,18 @@ C
        deallocate(F1)
        deallocate(B2)
 C
-       call
-     & sum213456(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z113,-0.500)
+       call sum_stripe(6,shape(V3C),size(V3C),'213456',
+     & -0.500,V3C,Z113)
        V3C=V3C+0.500*Z113
        deallocate(Z113)
        deallocate(U112)
 C
        allocate(D1(N0+1:N2,M2+1:N3,N2+1:M2,M2+1:N3))
-       call reorder4123(N2,N3,N2,N3,N2,N3,N0,N2,
-     & N0,N2,M2,N3,N2,M2,M2,N3,VCHPPP,D1)
+       call reorder_shift(4,shape(VCHPPP),size(VCHPPP),shape(D1),
+     & size(D1),(/N0-N0,M2-N2,N2-N2,M2-N2/),'4123',VCHPPP,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S59(M2+1:N3,M2+1:N3,N2+1:M2,M2+1:N3))
        I1=K6*K0*K6
        I2=K6
@@ -2182,11 +2182,11 @@ C
        deallocate(B2)
 C
        allocate(D1(M2+1:N3,N2+1:M2,M2+1:N3,M2+1:N3))
-       call reorder2341(M2,N3,M2,N3,N2,M2,M2,N3,
-     & M2,N3,N2,M2,M2,N3,M2,N3,S59,D1)
+       call reorder_shift(4,shape(S59),size(S59),shape(D1),size(D1),
+     & (/M2-M2,N2-N2,M2-M2,M2-M2/),'2341',S59,D1)
        allocate(F2(M2+1:N3,N2+1:M2,N1+1:M2,N0+1:M1,N0+1:M1,M1+1:N1))
-       call reorder123456(N2,N3,N2,M2,N1,N3,N0,M1,N0,M1,M1,N1,
-     & M2,N3,N2,M2,N1,M2,N0,M1,N0,M1,M1,N1,t3C4,F2)
+       call reorder_shift(6,shape(t3C4),size(t3C4),shape(F2),size(F2),
+     & (/M2-N2,N2-N2,N1-N1,N0-N0,N0-N0,M1-M1/),'123456',t3C4,F2)
        allocate(Z114(N1+1:M2,N0+1:M1,N0+1:M1,M1+1:N1,M2+1:N3,M2+1:N3))
        I1=K6*K6
        I2=K7*K5*K5*K9
@@ -2195,19 +2195,19 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum345612(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z114,-1.000)
-       call
-     & sum345621(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z114, 1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'345612',
+     & -1.000,V3C,Z114)
+       call sum_stripe(6,shape(V3C),size(V3C),'345621',
+     & 1.000,V3C,Z114)
        deallocate(Z114)
        deallocate(S59)
 C
        allocate(D1(N0+1:N2,N2+1:M2,N2+1:M2,M2+1:N3))
-       call reorder4123(N2,N3,N2,N3,N2,N3,N0,N2,
-     & N0,N2,N2,M2,N2,M2,M2,N3,VCHPPP,D1)
+       call reorder_shift(4,shape(VCHPPP),size(VCHPPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,N2-N2,M2-N2/),'4123',VCHPPP,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S60(M2+1:N3,N2+1:M2,N2+1:M2,M2+1:N3))
        I1=K6*K0*K0
        I2=K6
@@ -2217,11 +2217,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N2+1:M2,N2+1:M2,M2+1:N3,M2+1:N3))
-       call reorder2341(M2,N3,N2,M2,N2,M2,M2,N3,
-     & N2,M2,N2,M2,M2,N3,M2,N3,S60,D1)
+       call reorder_shift(4,shape(S60),size(S60),shape(D1),size(D1),
+     & (/N2-N2,N2-N2,M2-M2,M2-M2/),'2341',S60,D1)
        allocate(F2(N2+1:M2,N2+1:M2,N1+1:M2,N0+1:M1,N0+1:M1,M1+1:N1))
-       call reorder123456(N2,N3,N2,M2,N1,N3,N0,M1,N0,M1,M1,N1,
-     & N2,M2,N2,M2,N1,M2,N0,M1,N0,M1,M1,N1,t3C4,F2)
+       call reorder_shift(6,shape(t3C4),size(t3C4),shape(F2),size(F2),
+     & (/N2-N2,N2-N2,N1-N1,N0-N0,N0-N0,M1-M1/),'123456',t3C4,F2)
        allocate(Z115(N1+1:M2,N0+1:M1,N0+1:M1,M1+1:N1,M2+1:N3,M2+1:N3))
        I1=K6*K6
        I2=K7*K5*K5*K9
@@ -2230,19 +2230,19 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum345612(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z115,-0.500)
-       call
-     & sum345621(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z115, 0.500)
+       call sum_stripe(6,shape(V3C),size(V3C),'345612',
+     & -0.500,V3C,Z115)
+       call sum_stripe(6,shape(V3C),size(V3C),'345621',
+     & 0.500,V3C,Z115)
        deallocate(Z115)
        deallocate(S60)
 C
        allocate(D1(N0+1:N2,N2+1:N3,M2+1:N3,M2+1:N3))
-       call reorder4123(N2,N3,N2,N3,N2,N3,N0,N2,
-     & N0,N2,N2,N3,M2,N3,M2,N3,VCHPPP,D1)
+       call reorder_shift(4,shape(VCHPPP),size(VCHPPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,M2-N2,M2-N2/),'4123',VCHPPP,D1)
        allocate(B2(N0+1:N2,N2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,N2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,N2-N2/),'21',t1B,B2)
        allocate(Q17(M2+1:N3,M2+1:N3))
        I1=K6*K6
        I3=K4*K2
@@ -2254,11 +2254,11 @@ C
        deallocate(Q17)
 C
        allocate(D1(N0+1:N2,N2+1:N3,N2+1:M2,M2+1:N3))
-       call reorder4123(N2,N3,N2,N3,N2,N3,N0,N2,
-     & N0,N2,N2,N3,N2,M2,M2,N3,VCHPPP,D1)
+       call reorder_shift(4,shape(VCHPPP),size(VCHPPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,N2-N2,M2-N2/),'4123',VCHPPP,D1)
        allocate(B2(N0+1:N2,N2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,N2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,N2-N2/),'21',t1B,B2)
        allocate(Q18(N2+1:M2,M2+1:N3))
        I1=K6*K0
        I3=K4*K2
@@ -2270,11 +2270,11 @@ C
        deallocate(Q18)
 C
        allocate(D1(N0+1:N1,N1+1:N3,N0+1:N2,N0+1:M1))
-       call reorder4231(N0,N2,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N1,N3,N0,N2,N0,M1,VBHHPH,D1)
+       call reorder_shift(4,shape(VBHHPH),size(VBHHPH),shape(D1),
+     & size(D1),(/N0-N0,N1-N1,N0-N0,N0-N0/),'4231',VBHHPH,D1)
        allocate(D2(N0+1:N1,N1+1:N3,N1+1:M2,M1+1:N1))
-       call reorder3124(N1,N3,N1,N3,N0,N1,N0,N1,
-     & N0,N1,N1,N3,N1,M2,M1,N1,t2A,D2)
+       call reorder_shift(4,shape(t2A),size(t2A),shape(D2),size(D2),
+     & (/N0-N0,N1-N1,N1-N1,M1-N0/),'3124',t2A,D2)
        allocate(S61(N1+1:M2,M1+1:N1,N0+1:N2,N0+1:M1))
        I1=K5*K2
        I2=K7*K9
@@ -2283,16 +2283,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum2413(N0,N2,N1,M2,N0,M1,M1,N1,X5,S61, 1.000)
+       call sum_stripe(4,shape(X5),size(X5),'2413',1.000,X5,
+     & S61)
        deallocate(S61)
 C
        allocate(D1(N0+1:N1,N1+1:N3,N2+1:N3,M2+1:N3))
-       call reorder4213(N2,N3,N1,N3,N2,N3,N0,N1,
-     & N0,N1,N1,N3,N2,N3,M2,N3,VBHPPP,D1)
+       call reorder_shift(4,shape(VBHPPP),size(VBHPPP),shape(D1),
+     & size(D1),(/N0-N0,N1-N1,N2-N2,M2-N2/),'4213',VBHPPP,D1)
        allocate(D2(N0+1:N1,N1+1:N3,N1+1:M2,M1+1:N1))
-       call reorder3124(N1,N3,N1,N3,N0,N1,N0,N1,
-     & N0,N1,N1,N3,N1,M2,M1,N1,t2A,D2)
+       call reorder_shift(4,shape(t2A),size(t2A),shape(D2),size(D2),
+     & (/N0-N0,N1-N1,N1-N1,M1-N0/),'3124',t2A,D2)
        allocate(S62(N1+1:M2,M1+1:N1,N2+1:N3,M2+1:N3))
        I1=K6*K4
        I2=K7*K9
@@ -2301,16 +2301,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum3412(N2,N3,M2,N3,N1,M2,M1,N1,X6,S62, 1.000)
+       call sum_stripe(4,shape(X6),size(X6),'3412',1.000,X6,
+     & S62)
        deallocate(S62)
 C
        allocate(D1(N0+1:N1,N1+1:N3,M1+1:N1,N1+1:M2))
-       call reorder4231(N1,N3,N1,N3,N0,N1,N0,N1,
-     & N0,N1,N1,N3,M1,N1,N1,M2,VAHHPP,D1)
+       call reorder_shift(4,shape(VAHHPP),size(VAHHPP),shape(D1),
+     & size(D1),(/N0-N0,N1-N1,M1-N0,N1-N1/),'4231',VAHHPP,D1)
        allocate(D2(N0+1:N1,N1+1:N3,N1+1:M2,M1+1:N1))
-       call reorder3124(N1,N3,N1,N3,N0,N1,N0,N1,
-     & N0,N1,N1,N3,N1,M2,M1,N1,t2A,D2)
+       call reorder_shift(4,shape(t2A),size(t2A),shape(D2),size(D2),
+     & (/N0-N0,N1-N1,N1-N1,M1-N0/),'3124',t2A,D2)
        allocate(S63(N1+1:M2,M1+1:N1,M1+1:N1,N1+1:M2))
        I1=K9*K7
        I2=K7*K9
@@ -2321,16 +2321,16 @@ C
 C
        allocate(X47(M1+1:N1,N1+1:M2,N1+1:M2,M1+1:N1))
        X47=0.0d0
-       call
-     & sum3412(M1,N1,N1,M2,N1,M2,M1,N1,X47,S63, 1.000)
+       call sum_stripe(4,shape(X47),size(X47),'3412',1.000,
+     & X47,S63)
        deallocate(S63)
 C
        allocate(D1(N0+1:N1,N1+1:N3,N1+1:N3,M1+1:N1))
-       call reorder3124(N1,N3,N1,N3,N0,N1,N0,N1,
-     & N0,N1,N1,N3,N1,N3,M1,N1,VAHHPP,D1)
+       call reorder_shift(4,shape(VAHHPP),size(VAHHPP),shape(D1),
+     & size(D1),(/N0-N0,N1-N1,N1-N1,M1-N0/),'3124',VAHHPP,D1)
        allocate(D2(N0+1:N1,N1+1:N3,N1+1:N3,M1+1:N1))
-       call reorder3124(N1,N3,N1,N3,N0,N1,N0,N1,
-     & N0,N1,N1,N3,N1,N3,M1,N1,t2A,D2)
+       call reorder_shift(4,shape(t2A),size(t2A),shape(D2),size(D2),
+     & (/N0-N0,N1-N1,N1-N1,M1-N0/),'3124',t2A,D2)
        allocate(Q19(M1+1:N1,M1+1:N1))
        I1=K7
        I2=K7
@@ -2339,16 +2339,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum21(M1,N1,M1,N1,X11,Q19, 0.500)
+       call sum_stripe(2,shape(X11),size(X11),'21',0.500,
+     & X11,Q19)
        deallocate(Q19)
 C
        allocate(D1(N0+1:N1,N0+1:N1,N1+1:N3,N1+1:M2))
-       call reorder3421(N1,N3,N1,N3,N0,N1,N0,N1,
-     & N0,N1,N0,N1,N1,N3,N1,M2,VAHHPP,D1)
+       call reorder_shift(4,shape(VAHHPP),size(VAHHPP),shape(D1),
+     & size(D1),(/N0-N0,N0-N0,N1-N1,N1-N1/),'3421',VAHHPP,D1)
        allocate(D2(N0+1:N1,N0+1:N1,N1+1:N3,N1+1:M2))
-       call reorder3412(N1,N3,N1,N3,N0,N1,N0,N1,
-     & N0,N1,N0,N1,N1,N3,N1,M2,t2A,D2)
+       call reorder_shift(4,shape(t2A),size(t2A),shape(D2),size(D2),
+     & (/N0-N0,N0-N0,N1-N1,N1-N1/),'3412',t2A,D2)
        allocate(Q20(N1+1:M2,N1+1:M2))
        I1=K9
        I2=K9
@@ -2358,11 +2358,11 @@ C
        deallocate(D2)
 C
        allocate(B1(N1+1:M2,N1+1:M2))
-       call reorder21(N1,M2,N1,M2,
-     & N1,M2,N1,M2,Q20,B1)
+       call reorder_shift(2,shape(Q20),size(Q20),shape(B1),size(B1),
+     & (/N1-N1,N1-N1/),'21',Q20,B1)
        allocate(F2(N1+1:M2,M2+1:N3,M2+1:N3,N0+1:M1,N0+1:M1,M1+1:N1))
-       call reorder312456(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,
-     & N1,M2,M2,N3,M2,N3,N0,M1,N0,M1,M1,N1,t3C2,F2)
+       call reorder_shift(6,shape(t3C2),size(t3C2),shape(F2),size(F2),
+     & (/N1-N1,M2-M2,M2-M2,N0-N0,N0-N0,M1-M1/),'312456',t3C2,F2)
        allocate(Z122(M2+1:N3,M2+1:N3,N0+1:M1,N0+1:M1,M1+1:N1,N1+1:M2))
        I1=K9
        I2=K7*K5*K5*K6*K6
@@ -2371,17 +2371,17 @@ C
        deallocate(B1)
        deallocate(F2)
 C
-       call
-     & sum124563(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z122, 0.500)
+       call sum_stripe(6,shape(V3C),size(V3C),'124563',
+     & 0.500,V3C,Z122)
        deallocate(Z122)
        deallocate(Q20)
 C
        allocate(D1(N0+1:N1,N1+1:N3,M1+1:N2,N2+1:M2))
-       call reorder4231(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N1,N3,M1,N2,N2,M2,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,N1-N1,M1-N0,N2-N2/),'4231',VBHHPP,D1)
        allocate(D2(N0+1:N1,N1+1:N3,N1+1:M2,M1+1:N1))
-       call reorder3124(N1,N3,N1,N3,N0,N1,N0,N1,
-     & N0,N1,N1,N3,N1,M2,M1,N1,t2A,D2)
+       call reorder_shift(4,shape(t2A),size(t2A),shape(D2),size(D2),
+     & (/N0-N0,N1-N1,N1-N1,M1-N0/),'3124',t2A,D2)
        allocate(S64(N1+1:M2,M1+1:N1,M1+1:N2,N2+1:M2))
        I1=K0*K8
        I2=K7*K9
@@ -2392,16 +2392,16 @@ C
 C
        allocate(X48(M1+1:N2,N2+1:M2,N1+1:M2,M1+1:N1))
        X48=0.0d0
-       call
-     & sum3412(M1,N2,N2,M2,N1,M2,M1,N1,X48,S64, 1.000)
+       call sum_stripe(4,shape(X48),size(X48),'3412',1.000,
+     & X48,S64)
        deallocate(S64)
 C
        allocate(B1(N1+1:N3,N0+1:N1))
-       call reorder12(N1,N3,N0,N1,
-     & N1,N3,N0,N1,FAHP,B1)
+       call reorder_shift(2,shape(FAHP),size(FAHP),shape(B1),size(B1),
+     & (/N1-N1,N0-N0/),'12',FAHP,B1)
        allocate(D2(N1+1:N3,M2+1:N3,N0+1:M1,M1+1:N1))
-       call reorder2134(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N1,N3,M2,N3,N0,M1,M1,N1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N1-N1,M2-N2,N0-N0,M1-N0/),'2134',t2B,D2)
        allocate(S65(M2+1:N3,N0+1:M1,M1+1:N1,N0+1:N1))
        I1=K1
        I2=K7*K5*K6
@@ -2410,16 +2410,16 @@ C
        deallocate(B1)
        deallocate(D2)
 C
-       call
-     & sum2341(N0,N1,M2,N3,N0,M1,M1,N1,X1,S65, 1.000)
+       call sum_stripe(4,shape(X1),size(X1),'2341',1.000,X1,
+     & S65)
        deallocate(S65)
 C
        allocate(D1(N0+1:N1,N1+1:N3,N0+1:N1,M1+1:N1))
-       call reorder3142(N1,N3,N0,N1,N0,N1,N0,N1,
-     & N0,N1,N1,N3,N0,N1,M1,N1,VAHHHP,D1)
+       call reorder_shift(4,shape(VAHHHP),size(VAHHHP),shape(D1),
+     & size(D1),(/N0-N0,N1-N1,N0-N0,M1-N0/),'3142',VAHHHP,D1)
        allocate(D2(N0+1:N1,N1+1:N3,M2+1:N3,N0+1:M1))
-       call reorder4213(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N1,N3,M2,N3,N0,M1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N1-N1,M2-N2,N0-N0/),'4213',t2B,D2)
        allocate(S66(M2+1:N3,N0+1:M1,N0+1:N1,M1+1:N1))
        I1=K7*K1
        I2=K5*K6
@@ -2428,16 +2428,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum2314(N0,N1,M2,N3,N0,M1,M1,N1,X1,S66, 1.000)
+       call sum_stripe(4,shape(X1),size(X1),'2314',1.000,X1,
+     & S66)
        deallocate(S66)
 C
        allocate(D1(N0+1:N1,N1+1:N3,N1+1:N3,N1+1:M2))
-       call reorder4123(N1,N3,N1,N3,N1,N3,N0,N1,
-     & N0,N1,N1,N3,N1,N3,N1,M2,VAHPPP,D1)
+       call reorder_shift(4,shape(VAHPPP),size(VAHPPP),shape(D1),
+     & size(D1),(/N0-N0,N1-N1,N1-N1,N1-N1/),'4123',VAHPPP,D1)
        allocate(D2(N0+1:N1,N1+1:N3,M2+1:N3,N0+1:M1))
-       call reorder4213(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N1,N3,M2,N3,N0,M1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N1-N1,M2-N2,N0-N0/),'4213',t2B,D2)
        allocate(S67(M2+1:N3,N0+1:M1,N1+1:N3,N1+1:M2))
        I1=K9*K3
        I2=K5*K6
@@ -2446,16 +2446,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum2413(N1,N3,M2,N3,N1,M2,N0,M1,X2,S67,-1.000)
+       call sum_stripe(4,shape(X2),size(X2),'2413',-1.000,
+     & X2,S67)
        deallocate(S67)
 C
        allocate(D1(N0+1:N2,N0+1:N1,N1+1:N3,N0+1:M1))
-       call reorder3421(N0,N2,N1,N3,N0,N2,N0,N1,
-     & N0,N2,N0,N1,N1,N3,N0,M1,VBHHPH,D1)
+       call reorder_shift(4,shape(VBHHPH),size(VBHHPH),shape(D1),
+     & size(D1),(/N0-N0,N0-N0,N1-N1,N0-N0/),'3421',VBHHPH,D1)
        allocate(D2(N0+1:N2,N0+1:N1,M2+1:N3,N1+1:M2))
-       call reorder3412(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N2,N0,N1,M2,N3,N1,M2,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N0-N0,M2-N2,N1-N1/),'3412',t2B,D2)
        allocate(S68(M2+1:N3,N1+1:M2,N1+1:N3,N0+1:M1))
        I1=K5*K3
        I2=K9*K6
@@ -2464,16 +2464,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum2314(N1,N3,M2,N3,N1,M2,N0,M1,X2,S68, 1.000)
+       call sum_stripe(4,shape(X2),size(X2),'2314',1.000,X2,
+     & S68)
        deallocate(S68)
 C
        allocate(D1(N0+1:N1,N1+1:N3,N0+1:N2,N0+1:M1))
-       call reorder4231(N0,N2,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N1,N3,N0,N2,N0,M1,VBHHPH,D1)
+       call reorder_shift(4,shape(VBHHPH),size(VBHHPH),shape(D1),
+     & size(D1),(/N0-N0,N1-N1,N0-N0,N0-N0/),'4231',VBHHPH,D1)
        allocate(D2(N0+1:N1,N1+1:N3,M2+1:N3,N0+1:M1))
-       call reorder4213(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N1,N3,M2,N3,N0,M1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N1-N1,M2-N2,N0-N0/),'4213',t2B,D2)
        allocate(S69(M2+1:N3,N0+1:M1,N0+1:N2,N0+1:M1))
        I1=K5*K2
        I2=K5*K6
@@ -2482,16 +2482,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum2314(N0,N2,M2,N3,N0,M1,N0,M1,X45,S69, 1.000)
+       call sum_stripe(4,shape(X45),size(X45),'2314',1.000,
+     & X45,S69)
        deallocate(S69)
 C
        allocate(D1(N0+1:N2,N1+1:N3,N0+1:N1,N0+1:M1))
-       call reorder3241(N0,N2,N1,N3,N0,N2,N0,N1,
-     & N0,N2,N1,N3,N0,N1,N0,M1,VBHHPH,D1)
+       call reorder_shift(4,shape(VBHHPH),size(VBHHPH),shape(D1),
+     & size(D1),(/N0-N0,N1-N1,N0-N0,N0-N0/),'3241',VBHHPH,D1)
        allocate(D2(N0+1:N2,N1+1:N3,M2+1:N3,M1+1:N1))
-       call reorder3214(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N2,N1,N3,M2,N3,M1,N1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N1-N1,M2-N2,M1-N0/),'3214',t2B,D2)
        allocate(S70(M2+1:N3,M1+1:N1,N0+1:N1,N0+1:M1))
        I1=K5*K1
        I2=K7*K6
@@ -2500,16 +2500,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum2413(N0,N1,M2,N3,N0,M1,M1,N1,X1,S70,-1.000)
+       call sum_stripe(4,shape(X1),size(X1),'2413',-1.000,
+     & X1,S70)
        deallocate(S70)
 C
        allocate(D1(N0+1:N1,N2+1:N3,N1+1:N3,M2+1:N3))
-       call reorder4123(N2,N3,N1,N3,N2,N3,N0,N1,
-     & N0,N1,N2,N3,N1,N3,M2,N3,VBHPPP,D1)
+       call reorder_shift(4,shape(VBHPPP),size(VBHPPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,N1-N1,M2-N2/),'4123',VBHPPP,D1)
        allocate(D2(N0+1:N1,N2+1:N3,N1+1:M2,N0+1:M1))
-       call reorder4123(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N2,N3,N1,M2,N0,M1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N2-N2,N1-N1,N0-N0/),'4123',t2B,D2)
        allocate(S71(N1+1:M2,N0+1:M1,N1+1:N3,M2+1:N3))
        I1=K6*K3
        I2=K5*K9
@@ -2518,16 +2518,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum3412(N1,N3,M2,N3,N1,M2,N0,M1,X2,S71,-1.000)
+       call sum_stripe(4,shape(X2),size(X2),'3412',-1.000,
+     & X2,S71)
        deallocate(S71)
 C
        allocate(D1(N0+1:N1,N1+1:N3,N2+1:N3,M2+1:N3))
-       call reorder4213(N2,N3,N1,N3,N2,N3,N0,N1,
-     & N0,N1,N1,N3,N2,N3,M2,N3,VBHPPP,D1)
+       call reorder_shift(4,shape(VBHPPP),size(VBHPPP),shape(D1),
+     & size(D1),(/N0-N0,N1-N1,N2-N2,M2-N2/),'4213',VBHPPP,D1)
        allocate(D2(N0+1:N1,N1+1:N3,M2+1:N3,N0+1:M1))
-       call reorder4213(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N1,N3,M2,N3,N0,M1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N1-N1,M2-N2,N0-N0/),'4213',t2B,D2)
        allocate(S72(M2+1:N3,N0+1:M1,N2+1:N3,M2+1:N3))
        I1=K6*K4
        I2=K5*K6
@@ -2536,16 +2536,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum3412(N2,N3,M2,N3,M2,N3,N0,M1,X46,S72,-1.000)
+       call sum_stripe(4,shape(X46),size(X46),'3412',-1.000,
+     & X46,S72)
        deallocate(S72)
 C
        allocate(D1(N2+1:N3,N1+1:N3,N0+1:N1,M2+1:N3))
-       call reorder1243(N2,N3,N1,N3,N2,N3,N0,N1,
-     & N2,N3,N1,N3,N0,N1,M2,N3,VBHPPP,D1)
+       call reorder_shift(4,shape(VBHPPP),size(VBHPPP),shape(D1),
+     & size(D1),(/N2-N2,N1-N1,N0-N0,M2-N2/),'1243',VBHPPP,D1)
        allocate(D2(N2+1:N3,N1+1:N3,N0+1:M1,M1+1:N1))
-       call reorder1234(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N2,N3,N1,N3,N0,M1,M1,N1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N2-N2,N1-N1,N0-N0,M1-N0/),'1234',t2B,D2)
        allocate(S73(N0+1:M1,M1+1:N1,N0+1:N1,M2+1:N3))
        I1=K6*K1
        I2=K7*K5
@@ -2554,16 +2554,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum3412(N0,N1,M2,N3,N0,M1,M1,N1,X1,S73, 1.000)
+       call sum_stripe(4,shape(X1),size(X1),'3412',1.000,X1,
+     & S73)
        deallocate(S73)
 C
        allocate(B1(N2+1:N3,N0+1:N2))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,N2,FBHP,B1)
+       call reorder_shift(2,shape(FBHP),size(FBHP),shape(B1),size(B1),
+     & (/N2-N2,N0-N0/),'12',FBHP,B1)
        allocate(D2(N2+1:N3,N1+1:M2,N0+1:M1,M1+1:N1))
-       call reorder1234(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N2,N3,N1,M2,N0,M1,M1,N1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N2-N2,N1-N1,N0-N0,M1-N0/),'1234',t2B,D2)
        allocate(S74(N1+1:M2,N0+1:M1,M1+1:N1,N0+1:N2))
        I1=K2
        I2=K7*K5*K9
@@ -2572,16 +2572,16 @@ C
        deallocate(B1)
        deallocate(D2)
 C
-       call
-     & sum2341(N0,N2,N1,M2,N0,M1,M1,N1,X5,S74, 1.000)
+       call sum_stripe(4,shape(X5),size(X5),'2341',1.000,X5,
+     & S74)
        deallocate(S74)
 C
        allocate(B1(N2+1:N3,N0+1:N2))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,N2,FBHP,B1)
+       call reorder_shift(2,shape(FBHP),size(FBHP),shape(B1),size(B1),
+     & (/N2-N2,N0-N0/),'12',FBHP,B1)
        allocate(D2(N2+1:N3,M2+1:N3,N0+1:M1,N0+1:M1))
-       call reorder1234(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N2,N3,M2,N3,N0,M1,N0,M1,t2C,D2)
+       call reorder_shift(4,shape(t2C),size(t2C),shape(D2),size(D2),
+     & (/N2-N2,M2-N2,N0-N0,N0-N0/),'1234',t2C,D2)
        allocate(S75(M2+1:N3,N0+1:M1,N0+1:M1,N0+1:N2))
        I1=K2
        I2=K5*K5*K6
@@ -2590,16 +2590,16 @@ C
        deallocate(B1)
        deallocate(D2)
 C
-       call
-     & sum2341(N0,N2,M2,N3,N0,M1,N0,M1,X3,S75,-1.000)
+       call sum_stripe(4,shape(X3),size(X3),'2341',-1.000,
+     & X3,S75)
        deallocate(S75)
 C
        allocate(D1(N0+1:N2,N2+1:N3,N0+1:N1,M1+1:N1))
-       call reorder3142(N2,N3,N0,N1,N0,N2,N0,N1,
-     & N0,N2,N2,N3,N0,N1,M1,N1,VBHHHP,D1)
+       call reorder_shift(4,shape(VBHHHP),size(VBHHHP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,N0-N0,M1-N0/),'3142',VBHHHP,D1)
        allocate(D2(N0+1:N2,N2+1:N3,M2+1:N3,N0+1:M1))
-       call reorder3124(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N2,N3,M2,N3,N0,M1,t2C,D2)
+       call reorder_shift(4,shape(t2C),size(t2C),shape(D2),size(D2),
+     & (/N0-N0,N2-N2,M2-N2,N0-N0/),'3124',t2C,D2)
        allocate(S76(M2+1:N3,N0+1:M1,N0+1:N1,M1+1:N1))
        I1=K7*K1
        I2=K5*K6
@@ -2608,16 +2608,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum2314(N0,N1,M2,N3,N0,M1,M1,N1,X1,S76, 1.000)
+       call sum_stripe(4,shape(X1),size(X1),'2314',1.000,X1,
+     & S76)
        deallocate(S76)
 C
        allocate(D1(N0+1:N1,N2+1:N3,N0+1:N2,M1+1:N1))
-       call reorder4132(N2,N3,N0,N1,N0,N2,N0,N1,
-     & N0,N1,N2,N3,N0,N2,M1,N1,VBHHHP,D1)
+       call reorder_shift(4,shape(VBHHHP),size(VBHHHP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,N0-N0,M1-N0/),'4132',VBHHHP,D1)
        allocate(D2(N0+1:N1,N2+1:N3,N1+1:M2,N0+1:M1))
-       call reorder4123(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N2,N3,N1,M2,N0,M1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N2-N2,N1-N1,N0-N0/),'4123',t2B,D2)
        allocate(S77(N1+1:M2,N0+1:M1,N0+1:N2,M1+1:N1))
        I1=K7*K2
        I2=K5*K9
@@ -2626,16 +2626,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum2314(N0,N2,N1,M2,N0,M1,M1,N1,X5,S77,-1.000)
+       call sum_stripe(4,shape(X5),size(X5),'2314',-1.000,
+     & X5,S77)
        deallocate(S77)
 C
        allocate(D1(N0+1:N2,N0+1:N1,N2+1:N3,M1+1:N1))
-       call reorder3412(N2,N3,N0,N1,N0,N2,N0,N1,
-     & N0,N2,N0,N1,N2,N3,M1,N1,VBHHHP,D1)
+       call reorder_shift(4,shape(VBHHHP),size(VBHHHP),shape(D1),
+     & size(D1),(/N0-N0,N0-N0,N2-N2,M1-N0/),'3412',VBHHHP,D1)
        allocate(D2(N0+1:N2,N0+1:N1,M2+1:N3,N1+1:M2))
-       call reorder3412(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N2,N0,N1,M2,N3,N1,M2,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N0-N0,M2-N2,N1-N1/),'3412',t2B,D2)
        allocate(S78(M2+1:N3,N1+1:M2,N2+1:N3,M1+1:N1))
        I1=K7*K4
        I2=K9*K6
@@ -2644,16 +2644,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum2314(N2,N3,M2,N3,N1,M2,M1,N1,X6,S78, 1.000)
+       call sum_stripe(4,shape(X6),size(X6),'2314',1.000,X6,
+     & S78)
        deallocate(S78)
 C
        allocate(D1(N0+1:N2,N2+1:N3,N1+1:N3,N1+1:M2))
-       call reorder3124(N2,N3,N1,N3,N0,N2,N1,N3,
-     & N0,N2,N2,N3,N1,N3,N1,M2,VBPHPP,D1)
+       call reorder_shift(4,shape(VBPHPP),size(VBPHPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,N1-N1,N1-N1/),'3124',VBPHPP,D1)
        allocate(D2(N0+1:N2,N2+1:N3,M2+1:N3,N0+1:M1))
-       call reorder3124(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N2,N3,M2,N3,N0,M1,t2C,D2)
+       call reorder_shift(4,shape(t2C),size(t2C),shape(D2),size(D2),
+     & (/N0-N0,N2-N2,M2-N2,N0-N0/),'3124',t2C,D2)
        allocate(S79(M2+1:N3,N0+1:M1,N1+1:N3,N1+1:M2))
        I1=K9*K3
        I2=K5*K6
@@ -2662,16 +2662,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum2413(N1,N3,M2,N3,N1,M2,N0,M1,X2,S79, 1.000)
+       call sum_stripe(4,shape(X2),size(X2),'2413',1.000,X2,
+     & S79)
        deallocate(S79)
 C
        allocate(D1(N2+1:N3,N1+1:N3,N0+1:N2,N1+1:M2))
-       call reorder1234(N2,N3,N1,N3,N0,N2,N1,N3,
-     & N2,N3,N1,N3,N0,N2,N1,M2,VBPHPP,D1)
+       call reorder_shift(4,shape(VBPHPP),size(VBPHPP),shape(D1),
+     & size(D1),(/N2-N2,N1-N1,N0-N0,N1-N1/),'1234',VBPHPP,D1)
        allocate(D2(N2+1:N3,N1+1:N3,N0+1:M1,M1+1:N1))
-       call reorder1234(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N2,N3,N1,N3,N0,M1,M1,N1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N2-N2,N1-N1,N0-N0,M1-N0/),'1234',t2B,D2)
        allocate(S80(N0+1:M1,M1+1:N1,N0+1:N2,N1+1:M2))
        I1=K9*K2
        I2=K7*K5
@@ -2680,16 +2680,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum3412(N0,N2,N1,M2,N0,M1,M1,N1,X5,S80, 1.000)
+       call sum_stripe(4,shape(X5),size(X5),'3412',1.000,X5,
+     & S80)
        deallocate(S80)
 C
        allocate(D1(N0+1:N2,N1+1:N3,N2+1:N3,N1+1:M2))
-       call reorder3214(N2,N3,N1,N3,N0,N2,N1,N3,
-     & N0,N2,N1,N3,N2,N3,N1,M2,VBPHPP,D1)
+       call reorder_shift(4,shape(VBPHPP),size(VBPHPP),shape(D1),
+     & size(D1),(/N0-N0,N1-N1,N2-N2,N1-N1/),'3214',VBPHPP,D1)
        allocate(D2(N0+1:N2,N1+1:N3,M2+1:N3,M1+1:N1))
-       call reorder3214(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N2,N1,N3,M2,N3,M1,N1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N1-N1,M2-N2,M1-N0/),'3214',t2B,D2)
        allocate(S81(M2+1:N3,M1+1:N1,N2+1:N3,N1+1:M2))
        I1=K9*K4
        I2=K7*K6
@@ -2698,16 +2698,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum2413(N2,N3,M2,N3,N1,M2,M1,N1,X6,S81,-1.000)
+       call sum_stripe(4,shape(X6),size(X6),'2413',-1.000,
+     & X6,S81)
        deallocate(S81)
 C
        allocate(D1(N0+1:N2,N0+1:N2,N2+1:N3,N0+1:M1))
-       call reorder3412(N2,N3,N0,N2,N0,N2,N0,N2,
-     & N0,N2,N0,N2,N2,N3,N0,M1,VCHHHP,D1)
+       call reorder_shift(4,shape(VCHHHP),size(VCHHHP),shape(D1),
+     & size(D1),(/N0-N0,N0-N0,N2-N2,N0-N0/),'3412',VCHHHP,D1)
        allocate(D2(N0+1:N2,N0+1:N2,M2+1:N3,M2+1:N3))
-       call reorder3412(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N0,N2,M2,N3,M2,N3,t2C,D2)
+       call reorder_shift(4,shape(t2C),size(t2C),shape(D2),size(D2),
+     & (/N0-N0,N0-N0,M2-N2,M2-N2/),'3412',t2C,D2)
        allocate(S82(M2+1:N3,M2+1:N3,N2+1:N3,N0+1:M1))
        I1=K5*K4
        I2=K6*K6
@@ -2718,16 +2718,16 @@ C
 C
        allocate(X4(N2+1:N3,M2+1:N3,M2+1:N3,N0+1:M1))
        X4=0.0d0
-       call
-     & sum2314(N2,N3,M2,N3,M2,N3,N0,M1,X4,S82, 0.500)
+       call sum_stripe(4,shape(X4),size(X4),'2314',0.500,X4,
+     & S82)
        deallocate(S82)
 C
        allocate(D1(N0+1:N2,N2+1:N3,N0+1:N2,N0+1:M1))
-       call reorder3142(N2,N3,N0,N2,N0,N2,N0,N2,
-     & N0,N2,N2,N3,N0,N2,N0,M1,VCHHHP,D1)
+       call reorder_shift(4,shape(VCHHHP),size(VCHHHP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,N0-N0,N0-N0/),'3142',VCHHHP,D1)
        allocate(D2(N0+1:N2,N2+1:N3,M2+1:N3,N0+1:M1))
-       call reorder3124(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N2,N3,M2,N3,N0,M1,t2C,D2)
+       call reorder_shift(4,shape(t2C),size(t2C),shape(D2),size(D2),
+     & (/N0-N0,N2-N2,M2-N2,N0-N0/),'3124',t2C,D2)
        allocate(S83(M2+1:N3,N0+1:M1,N0+1:N2,N0+1:M1))
        I1=K5*K2
        I2=K5*K6
@@ -2736,16 +2736,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum2314(N0,N2,M2,N3,N0,M1,N0,M1,X45,S83, 1.000)
+       call sum_stripe(4,shape(X45),size(X45),'2314',1.000,
+     & X45,S83)
        deallocate(S83)
 C
        allocate(D1(N0+1:N2,N2+1:N3,N0+1:N2,N0+1:M1))
-       call reorder4132(N2,N3,N0,N2,N0,N2,N0,N2,
-     & N0,N2,N2,N3,N0,N2,N0,M1,VCHHHP,D1)
+       call reorder_shift(4,shape(VCHHHP),size(VCHHHP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,N0-N0,N0-N0/),'4132',VCHHHP,D1)
        allocate(D2(N0+1:N2,N2+1:N3,N1+1:M2,M1+1:N1))
-       call reorder3124(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N2,N2,N3,N1,M2,M1,N1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N2-N2,N1-N1,M1-N0/),'3124',t2B,D2)
        allocate(S84(N1+1:M2,M1+1:N1,N0+1:N2,N0+1:M1))
        I1=K5*K2
        I2=K7*K9
@@ -2754,16 +2754,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum2413(N0,N2,N1,M2,N0,M1,M1,N1,X5,S84,-1.000)
+       call sum_stripe(4,shape(X5),size(X5),'2413',-1.000,
+     & X5,S84)
        deallocate(S84)
 C
        allocate(D1(N0+1:N2,N2+1:N3,N2+1:N3,M2+1:N3))
-       call reorder4123(N2,N3,N2,N3,N2,N3,N0,N2,
-     & N0,N2,N2,N3,N2,N3,M2,N3,VCHPPP,D1)
+       call reorder_shift(4,shape(VCHPPP),size(VCHPPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,N2-N2,M2-N2/),'4123',VCHPPP,D1)
        allocate(D2(N0+1:N2,N2+1:N3,M2+1:N3,N0+1:M1))
-       call reorder3124(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N2,N3,M2,N3,N0,M1,t2C,D2)
+       call reorder_shift(4,shape(t2C),size(t2C),shape(D2),size(D2),
+     & (/N0-N0,N2-N2,M2-N2,N0-N0/),'3124',t2C,D2)
        allocate(S85(M2+1:N3,N0+1:M1,N2+1:N3,M2+1:N3))
        I1=K6*K4
        I2=K5*K6
@@ -2772,16 +2772,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum3412(N2,N3,M2,N3,M2,N3,N0,M1,X46,S85, 1.000)
+       call sum_stripe(4,shape(X46),size(X46),'3412',1.000,
+     & X46,S85)
        deallocate(S85)
 C
        allocate(D1(N2+1:N3,N2+1:N3,N0+1:N2,M2+1:N3))
-       call reorder1243(N2,N3,N2,N3,N2,N3,N0,N2,
-     & N2,N3,N2,N3,N0,N2,M2,N3,VCHPPP,D1)
+       call reorder_shift(4,shape(VCHPPP),size(VCHPPP),shape(D1),
+     & size(D1),(/N2-N2,N2-N2,N0-N0,M2-N2/),'1243',VCHPPP,D1)
        allocate(D2(N2+1:N3,N2+1:N3,N0+1:M1,N0+1:M1))
-       call reorder1234(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N2,N3,N2,N3,N0,M1,N0,M1,t2C,D2)
+       call reorder_shift(4,shape(t2C),size(t2C),shape(D2),size(D2),
+     & (/N2-N2,N2-N2,N0-N0,N0-N0/),'1234',t2C,D2)
        allocate(S86(N0+1:M1,N0+1:M1,N0+1:N2,M2+1:N3))
        I1=K6*K2
        I2=K5*K5
@@ -2790,16 +2790,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum3412(N0,N2,M2,N3,N0,M1,N0,M1,X3,S86, 0.500)
+       call sum_stripe(4,shape(X3),size(X3),'3412',0.500,X3,
+     & S86)
        deallocate(S86)
 C
        allocate(D1(N0+1:N2,N2+1:N3,N2+1:N3,M2+1:N3))
-       call reorder4213(N2,N3,N2,N3,N2,N3,N0,N2,
-     & N0,N2,N2,N3,N2,N3,M2,N3,VCHPPP,D1)
+       call reorder_shift(4,shape(VCHPPP),size(VCHPPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,N2-N2,M2-N2/),'4213',VCHPPP,D1)
        allocate(D2(N0+1:N2,N2+1:N3,N1+1:M2,M1+1:N1))
-       call reorder3124(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N2,N2,N3,N1,M2,M1,N1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N2-N2,N1-N1,M1-N0/),'3124',t2B,D2)
        allocate(S87(N1+1:M2,M1+1:N1,N2+1:N3,M2+1:N3))
        I1=K6*K4
        I2=K7*K9
@@ -2808,16 +2808,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum3412(N2,N3,M2,N3,N1,M2,M1,N1,X6,S87, 1.000)
+       call sum_stripe(4,shape(X6),size(X6),'3412',1.000,X6,
+     & S87)
        deallocate(S87)
 C
        allocate(D1(N0+1:M1,M1+1:N1,M2+1:N3,N1+1:N3))
-       call reorder3421(N1,N3,N1,N3,N0,N1,N0,N1,
-     & N0,M1,M1,N1,M2,N3,N1,N3,VAHHPP,D1)
+       call reorder_shift(4,shape(VAHHPP),size(VAHHPP),shape(D1),
+     & size(D1),(/N0-N0,M1-N0,M2-N1,N1-N1/),'3421',VAHHPP,D1)
        allocate(F2(N0+1:M1,M1+1:N1,M2+1:N3,M2+1:N3,N1+1:M2,N0+1:M1))
-       call reorder562134(N2,N3,N1,N3,N1,M2,N0,N2,N0,N1,M1,N1,
-     & N0,M1,M1,N1,M2,N3,M2,N3,N1,M2,N0,M1,t3B1,F2)
+       call reorder_shift(6,shape(t3B1),size(t3B1),shape(F2),size(F2),
+     & (/N0-N0,M1-M1,M2-N1,M2-N2,N1-N1,N0-N0/),'562134',t3B1,F2)
        allocate(S88(M2+1:N3,N1+1:M2,N0+1:M1,N1+1:N3))
        I1=K3
        I2=K5*K9*K6
@@ -2826,16 +2826,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N1,N3,M2,N3,N1,M2,N0,M1,X2,S88, 1.000)
+       call sum_stripe(4,shape(X2),size(X2),'2341',1.000,X2,
+     & S88)
        deallocate(S88)
 C
        allocate(D1(M1+1:N1,M1+1:N1,M2+1:N3,N1+1:N3))
-       call reorder3421(N1,N3,N1,N3,N0,N1,N0,N1,
-     & M1,N1,M1,N1,M2,N3,N1,N3,VAHHPP,D1)
+       call reorder_shift(4,shape(VAHHPP),size(VAHHPP),shape(D1),
+     & size(D1),(/M1-N0,M1-N0,M2-N1,N1-N1/),'3421',VAHHPP,D1)
        allocate(F2(M1+1:N1,M1+1:N1,M2+1:N3,M2+1:N3,N1+1:M2,N0+1:M1))
-       call reorder562134(N2,N3,N1,N3,N1,M2,N0,N2,N0,N1,M1,N1,
-     & M1,N1,M1,N1,M2,N3,M2,N3,N1,M2,N0,M1,t3B1,F2)
+       call reorder_shift(6,shape(t3B1),size(t3B1),shape(F2),size(F2),
+     & (/M1-N0,M1-M1,M2-N1,M2-N2,N1-N1,N0-N0/),'562134',t3B1,F2)
        allocate(S89(M2+1:N3,N1+1:M2,N0+1:M1,N1+1:N3))
        I1=K3
        I2=K5*K9*K6
@@ -2844,16 +2844,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N1,N3,M2,N3,N1,M2,N0,M1,X2,S89, 0.500)
+       call sum_stripe(4,shape(X2),size(X2),'2341',0.500,X2,
+     & S89)
        deallocate(S89)
 C
        allocate(D1(N0+1:M1,M1+1:N1,N1+1:M2,N1+1:N3))
-       call reorder3421(N1,N3,N1,N3,N0,N1,N0,N1,
-     & N0,M1,M1,N1,N1,M2,N1,N3,VAHHPP,D1)
+       call reorder_shift(4,shape(VAHHPP),size(VAHHPP),shape(D1),
+     & size(D1),(/N0-N0,M1-N0,N1-N1,N1-N1/),'3421',VAHHPP,D1)
        allocate(F2(N0+1:M1,M1+1:N1,N1+1:M2,M2+1:N3,N1+1:M2,N0+1:M1))
-       call reorder562134(N2,N3,N1,N3,N1,M2,N0,N2,N0,N1,M1,N1,
-     & N0,M1,M1,N1,N1,M2,M2,N3,N1,M2,N0,M1,t3B1,F2)
+       call reorder_shift(6,shape(t3B1),size(t3B1),shape(F2),size(F2),
+     & (/N0-N0,M1-M1,N1-N1,M2-N2,N1-N1,N0-N0/),'562134',t3B1,F2)
        allocate(S90(M2+1:N3,N1+1:M2,N0+1:M1,N1+1:N3))
        I1=K3
        I2=K5*K9*K6
@@ -2862,16 +2862,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N1,N3,M2,N3,N1,M2,N0,M1,X2,S90, 1.000)
+       call sum_stripe(4,shape(X2),size(X2),'2341',1.000,X2,
+     & S90)
        deallocate(S90)
 C
        allocate(D1(M1+1:N1,M1+1:N1,N1+1:M2,N1+1:N3))
-       call reorder3421(N1,N3,N1,N3,N0,N1,N0,N1,
-     & M1,N1,M1,N1,N1,M2,N1,N3,VAHHPP,D1)
+       call reorder_shift(4,shape(VAHHPP),size(VAHHPP),shape(D1),
+     & size(D1),(/M1-N0,M1-N0,N1-N1,N1-N1/),'3421',VAHHPP,D1)
        allocate(F2(M1+1:N1,M1+1:N1,N1+1:M2,M2+1:N3,N1+1:M2,N0+1:M1))
-       call reorder562134(N2,N3,N1,N3,N1,M2,N0,N2,N0,N1,M1,N1,
-     & M1,N1,M1,N1,N1,M2,M2,N3,N1,M2,N0,M1,t3B1,F2)
+       call reorder_shift(6,shape(t3B1),size(t3B1),shape(F2),size(F2),
+     & (/M1-N0,M1-M1,N1-N1,M2-N2,N1-N1,N0-N0/),'562134',t3B1,F2)
        allocate(S91(M2+1:N3,N1+1:M2,N0+1:M1,N1+1:N3))
        I1=K3
        I2=K5*K9*K6
@@ -2880,16 +2880,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N1,N3,M2,N3,N1,M2,N0,M1,X2,S91, 0.500)
+       call sum_stripe(4,shape(X2),size(X2),'2341',0.500,X2,
+     & S91)
        deallocate(S91)
 C
        allocate(D1(N0+1:M1,M2+1:N3,N1+1:M2,N0+1:N1))
-       call reorder3124(N1,N3,N1,N3,N0,N1,N0,N1,
-     & N0,M1,M2,N3,N1,M2,N0,N1,VAHHPP,D1)
+       call reorder_shift(4,shape(VAHHPP),size(VAHHPP),shape(D1),
+     & size(D1),(/N0-N0,M2-N1,N1-N1,N0-N0/),'3124',VAHHPP,D1)
        allocate(F2(N0+1:M1,M2+1:N3,N1+1:M2,M2+1:N3,N0+1:M1,M1+1:N1))
-       call reorder523146(N2,N3,N1,N3,N1,M2,N0,N2,N0,N1,M1,N1,
-     & N0,M1,M2,N3,N1,M2,M2,N3,N0,M1,M1,N1,t3B1,F2)
+       call reorder_shift(6,shape(t3B1),size(t3B1),shape(F2),size(F2),
+     & (/N0-N0,M2-N1,N1-N1,M2-N2,N0-N0,M1-M1/),'523146',t3B1,F2)
        allocate(S92(M2+1:N3,N0+1:M1,M1+1:N1,N0+1:N1))
        I1=K1
        I2=K7*K5*K6
@@ -2898,16 +2898,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N0,N1,M2,N3,N0,M1,M1,N1,X1,S92, 1.000)
+       call sum_stripe(4,shape(X1),size(X1),'2341',1.000,X1,
+     & S92)
        deallocate(S92)
 C
        allocate(D1(M1+1:N1,M2+1:N3,N1+1:M2,N0+1:N1))
-       call reorder3124(N1,N3,N1,N3,N0,N1,N0,N1,
-     & M1,N1,M2,N3,N1,M2,N0,N1,VAHHPP,D1)
+       call reorder_shift(4,shape(VAHHPP),size(VAHHPP),shape(D1),
+     & size(D1),(/M1-N0,M2-N1,N1-N1,N0-N0/),'3124',VAHHPP,D1)
        allocate(F2(M1+1:N1,M2+1:N3,N1+1:M2,M2+1:N3,N0+1:M1,M1+1:N1))
-       call reorder523146(N2,N3,N1,N3,N1,M2,N0,N2,N0,N1,M1,N1,
-     & M1,N1,M2,N3,N1,M2,M2,N3,N0,M1,M1,N1,t3B1,F2)
+       call reorder_shift(6,shape(t3B1),size(t3B1),shape(F2),size(F2),
+     & (/M1-N0,M2-N1,N1-N1,M2-N2,N0-N0,M1-M1/),'523146',t3B1,F2)
        allocate(S93(M2+1:N3,N0+1:M1,M1+1:N1,N0+1:N1))
        I1=K1
        I2=K7*K5*K6
@@ -2916,16 +2916,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N0,N1,M2,N3,N0,M1,M1,N1,X1,S93, 1.000)
+       call sum_stripe(4,shape(X1),size(X1),'2341',1.000,X1,
+     & S93)
        deallocate(S93)
 C
        allocate(D1(N0+1:M1,N1+1:M2,N1+1:M2,N0+1:N1))
-       call reorder3124(N1,N3,N1,N3,N0,N1,N0,N1,
-     & N0,M1,N1,M2,N1,M2,N0,N1,VAHHPP,D1)
+       call reorder_shift(4,shape(VAHHPP),size(VAHHPP),shape(D1),
+     & size(D1),(/N0-N0,N1-N1,N1-N1,N0-N0/),'3124',VAHHPP,D1)
        allocate(F2(N0+1:M1,N1+1:M2,N1+1:M2,M2+1:N3,N0+1:M1,M1+1:N1))
-       call reorder523146(N2,N3,N1,N3,N1,M2,N0,N2,N0,N1,M1,N1,
-     & N0,M1,N1,M2,N1,M2,M2,N3,N0,M1,M1,N1,t3B1,F2)
+       call reorder_shift(6,shape(t3B1),size(t3B1),shape(F2),size(F2),
+     & (/N0-N0,N1-N1,N1-N1,M2-N2,N0-N0,M1-M1/),'523146',t3B1,F2)
        allocate(S94(M2+1:N3,N0+1:M1,M1+1:N1,N0+1:N1))
        I1=K1
        I2=K7*K5*K6
@@ -2934,16 +2934,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N0,N1,M2,N3,N0,M1,M1,N1,X1,S94, 0.500)
+       call sum_stripe(4,shape(X1),size(X1),'2341',0.500,X1,
+     & S94)
        deallocate(S94)
 C
        allocate(D1(M1+1:N1,N1+1:M2,N1+1:M2,N0+1:N1))
-       call reorder3124(N1,N3,N1,N3,N0,N1,N0,N1,
-     & M1,N1,N1,M2,N1,M2,N0,N1,VAHHPP,D1)
+       call reorder_shift(4,shape(VAHHPP),size(VAHHPP),shape(D1),
+     & size(D1),(/M1-N0,N1-N1,N1-N1,N0-N0/),'3124',VAHHPP,D1)
        allocate(F2(M1+1:N1,N1+1:M2,N1+1:M2,M2+1:N3,N0+1:M1,M1+1:N1))
-       call reorder523146(N2,N3,N1,N3,N1,M2,N0,N2,N0,N1,M1,N1,
-     & M1,N1,N1,M2,N1,M2,M2,N3,N0,M1,M1,N1,t3B1,F2)
+       call reorder_shift(6,shape(t3B1),size(t3B1),shape(F2),size(F2),
+     & (/M1-N0,N1-N1,N1-N1,M2-N2,N0-N0,M1-M1/),'523146',t3B1,F2)
        allocate(S95(M2+1:N3,N0+1:M1,M1+1:N1,N0+1:N1))
        I1=K1
        I2=K7*K5*K6
@@ -2952,16 +2952,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N0,N1,M2,N3,N0,M1,M1,N1,X1,S95, 0.500)
+       call sum_stripe(4,shape(X1),size(X1),'2341',0.500,X1,
+     & S95)
        deallocate(S95)
 C
        allocate(D1(N0+1:N1,N1+1:N3,N0+1:M1,M2+1:N3))
-       call reorder3142(N1,N3,N1,N3,N0,N1,N0,N1,
-     & N0,N1,N1,N3,N0,M1,M2,N3,VAHHPP,D1)
+       call reorder_shift(4,shape(VAHHPP),size(VAHHPP),shape(D1),
+     & size(D1),(/N0-N0,N1-N1,N0-N0,M2-N1/),'3142',VAHHPP,D1)
        allocate(D2(N0+1:N1,N1+1:N3,M2+1:N3,N0+1:M1))
-       call reorder4213(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N1,N3,M2,N3,N0,M1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N1-N1,M2-N2,N0-N0/),'4213',t2B,D2)
        allocate(S96(M2+1:N3,N0+1:M1,N0+1:M1,M2+1:N3))
        I1=K6*K5
        I2=K5*K6
@@ -2970,16 +2970,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum3412(N0,M1,M2,N3,M2,N3,N0,M1,X7,S96, 1.000)
+       call sum_stripe(4,shape(X7),size(X7),'3412',1.000,X7,
+     & S96)
        deallocate(S96)
 C
        allocate(D1(N0+1:N1,N1+1:N3,M1+1:N1,M2+1:N3))
-       call reorder3142(N1,N3,N1,N3,N0,N1,N0,N1,
-     & N0,N1,N1,N3,M1,N1,M2,N3,VAHHPP,D1)
+       call reorder_shift(4,shape(VAHHPP),size(VAHHPP),shape(D1),
+     & size(D1),(/N0-N0,N1-N1,M1-N0,M2-N1/),'3142',VAHHPP,D1)
        allocate(D2(N0+1:N1,N1+1:N3,M2+1:N3,N0+1:M1))
-       call reorder4213(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N1,N3,M2,N3,N0,M1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N1-N1,M2-N2,N0-N0/),'4213',t2B,D2)
        allocate(S97(M2+1:N3,N0+1:M1,M1+1:N1,M2+1:N3))
        I1=K6*K7
        I2=K5*K6
@@ -2988,16 +2988,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum3412(M1,N1,M2,N3,M2,N3,N0,M1,X8,S97, 1.000)
+       call sum_stripe(4,shape(X8),size(X8),'3412',1.000,X8,
+     & S97)
        deallocate(S97)
 C
        allocate(D1(N0+1:N1,N1+1:N3,N0+1:M1,N1+1:M2))
-       call reorder3142(N1,N3,N1,N3,N0,N1,N0,N1,
-     & N0,N1,N1,N3,N0,M1,N1,M2,VAHHPP,D1)
+       call reorder_shift(4,shape(VAHHPP),size(VAHHPP),shape(D1),
+     & size(D1),(/N0-N0,N1-N1,N0-N0,N1-N1/),'3142',VAHHPP,D1)
        allocate(D2(N0+1:N1,N1+1:N3,M2+1:N3,N0+1:M1))
-       call reorder4213(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N1,N3,M2,N3,N0,M1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N1-N1,M2-N2,N0-N0/),'4213',t2B,D2)
        allocate(S98(M2+1:N3,N0+1:M1,N0+1:M1,N1+1:M2))
        I1=K9*K5
        I2=K5*K6
@@ -3006,16 +3006,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum3412(N0,M1,N1,M2,M2,N3,N0,M1,X9,S98, 1.000)
+       call sum_stripe(4,shape(X9),size(X9),'3412',1.000,X9,
+     & S98)
        deallocate(S98)
 C
        allocate(D1(N0+1:N1,N1+1:N3,M1+1:N1,N1+1:M2))
-       call reorder3142(N1,N3,N1,N3,N0,N1,N0,N1,
-     & N0,N1,N1,N3,M1,N1,N1,M2,VAHHPP,D1)
+       call reorder_shift(4,shape(VAHHPP),size(VAHHPP),shape(D1),
+     & size(D1),(/N0-N0,N1-N1,M1-N0,N1-N1/),'3142',VAHHPP,D1)
        allocate(D2(N0+1:N1,N1+1:N3,M2+1:N3,N0+1:M1))
-       call reorder4213(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N1,N3,M2,N3,N0,M1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N1-N1,M2-N2,N0-N0/),'4213',t2B,D2)
        allocate(S99(M2+1:N3,N0+1:M1,M1+1:N1,N1+1:M2))
        I1=K9*K7
        I2=K5*K6
@@ -3024,16 +3024,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum3412(M1,N1,N1,M2,M2,N3,N0,M1,X10,S99, 1.000)
+       call sum_stripe(4,shape(X10),size(X10),'3412',1.000,
+     & X10,S99)
        deallocate(S99)
 C
        allocate(D1(M1+1:N2,N0+1:M1,M2+1:N3,N1+1:N3))
-       call reorder3412(N2,N3,N1,N3,N0,N2,N0,N1,
-     & M1,N2,N0,M1,M2,N3,N1,N3,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/M1-N0,N0-N0,M2-N2,N1-N1/),'3412',VBHHPP,D1)
        allocate(F2(M1+1:N2,N0+1:M1,M2+1:N3,M2+1:N3,N1+1:M2,N0+1:M1))
-       call reorder561234(M2,N3,M2,N3,N1,M2,N0,N2,M1,N2,N0,N1,
-     & M1,N2,N0,M1,M2,N3,M2,N3,N1,M2,N0,M1,t3C3,F2)
+       call reorder_shift(6,shape(t3C3),size(t3C3),shape(F2),size(F2),
+     & (/M1-M1,N0-N0,M2-M2,M2-M2,N1-N1,N0-N0/),'561234',t3C3,F2)
        allocate(S100(M2+1:N3,N1+1:M2,N0+1:M1,N1+1:N3))
        I1=K3
        I2=K5*K9*K6
@@ -3042,16 +3042,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N1,N3,M2,N3,N1,M2,N0,M1,X2,S100, 1.000)
+       call sum_stripe(4,shape(X2),size(X2),'2341',1.000,X2,
+     & S100)
        deallocate(S100)
 C
        allocate(D1(N0+1:M1,M1+1:N1,M2+1:N3,N1+1:N3))
-       call reorder3412(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,M1,M1,N1,M2,N3,N1,N3,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,M1-N0,M2-N2,N1-N1/),'3412',VBHHPP,D1)
        allocate(F2(N0+1:M1,M1+1:N1,M2+1:N3,M2+1:N3,N1+1:M2,N0+1:M1))
-       call reorder461235(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,
-     & N0,M1,M1,N1,M2,N3,M2,N3,N1,M2,N0,M1,t3C2,F2)
+       call reorder_shift(6,shape(t3C2),size(t3C2),shape(F2),size(F2),
+     & (/N0-N0,M1-M1,M2-M2,M2-M2,N1-N1,N0-N0/),'461235',t3C2,F2)
        allocate(S101(M2+1:N3,N1+1:M2,N0+1:M1,N1+1:N3))
        I1=K3
        I2=K5*K9*K6
@@ -3060,16 +3060,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N1,N3,M2,N3,N1,M2,N0,M1,X2,S101,-1.000)
+       call sum_stripe(4,shape(X2),size(X2),'2341',-1.000,
+     & X2,S101)
        deallocate(S101)
 C
        allocate(D1(M1+1:N2,M1+1:N1,M2+1:N3,N1+1:N3))
-       call reorder3412(N2,N3,N1,N3,N0,N2,N0,N1,
-     & M1,N2,M1,N1,M2,N3,N1,N3,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/M1-N0,M1-N0,M2-N2,N1-N1/),'3412',VBHHPP,D1)
        allocate(F2(M1+1:N2,M1+1:N1,M2+1:N3,M2+1:N3,N1+1:M2,N0+1:M1))
-       call reorder561234(M2,N3,M2,N3,N1,M2,N0,N2,M1,N2,N0,N1,
-     & M1,N2,M1,N1,M2,N3,M2,N3,N1,M2,N0,M1,t3C3,F2)
+       call reorder_shift(6,shape(t3C3),size(t3C3),shape(F2),size(F2),
+     & (/M1-M1,M1-N0,M2-M2,M2-M2,N1-N1,N0-N0/),'561234',t3C3,F2)
        allocate(S102(M2+1:N3,N1+1:M2,N0+1:M1,N1+1:N3))
        I1=K3
        I2=K5*K9*K6
@@ -3078,16 +3078,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N1,N3,M2,N3,N1,M2,N0,M1,X2,S102, 1.000)
+       call sum_stripe(4,shape(X2),size(X2),'2341',1.000,X2,
+     & S102)
        deallocate(S102)
 C
        allocate(D1(M1+1:N2,N0+1:M1,N2+1:M2,N1+1:N3))
-       call reorder3412(N2,N3,N1,N3,N0,N2,N0,N1,
-     & M1,N2,N0,M1,N2,M2,N1,N3,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/M1-N0,N0-N0,N2-N2,N1-N1/),'3412',VBHHPP,D1)
        allocate(F2(M1+1:N2,N0+1:M1,N2+1:M2,M2+1:N3,N1+1:M2,N0+1:M1))
-       call reorder562134(N2,N3,N2,M2,N1,N3,N0,N2,M1,N2,N0,N1,
-     & M1,N2,N0,M1,N2,M2,M2,N3,N1,M2,N0,M1,t3C1,F2)
+       call reorder_shift(6,shape(t3C1),size(t3C1),shape(F2),size(F2),
+     & (/M1-M1,N0-N0,N2-N2,M2-N2,N1-N1,N0-N0/),'562134',t3C1,F2)
        allocate(S103(M2+1:N3,N1+1:M2,N0+1:M1,N1+1:N3))
        I1=K3
        I2=K5*K9*K6
@@ -3096,16 +3096,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N1,N3,M2,N3,N1,M2,N0,M1,X2,S103,-1.000)
+       call sum_stripe(4,shape(X2),size(X2),'2341',-1.000,
+     & X2,S103)
        deallocate(S103)
 C
        allocate(D1(N0+1:M1,M1+1:N1,N2+1:M2,N1+1:N3))
-       call reorder3412(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,M1,M1,N1,N2,M2,N1,N3,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,M1-N0,N2-N2,N1-N1/),'3412',VBHHPP,D1)
        allocate(F2(N0+1:M1,M1+1:N1,N2+1:M2,M2+1:N3,N1+1:M2,N0+1:M1))
-       call reorder462135(N2,N3,N2,M2,N1,N3,N0,M1,N0,M1,M1,N1,
-     & N0,M1,M1,N1,N2,M2,M2,N3,N1,M2,N0,M1,t3C4,F2)
+       call reorder_shift(6,shape(t3C4),size(t3C4),shape(F2),size(F2),
+     & (/N0-N0,M1-M1,N2-N2,M2-N2,N1-N1,N0-N0/),'462135',t3C4,F2)
        allocate(S104(M2+1:N3,N1+1:M2,N0+1:M1,N1+1:N3))
        I1=K3
        I2=K5*K9*K6
@@ -3114,16 +3114,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N1,N3,M2,N3,N1,M2,N0,M1,X2,S104, 1.000)
+       call sum_stripe(4,shape(X2),size(X2),'2341',1.000,X2,
+     & S104)
        deallocate(S104)
 C
        allocate(D1(M1+1:N2,M1+1:N1,N2+1:M2,N1+1:N3))
-       call reorder3412(N2,N3,N1,N3,N0,N2,N0,N1,
-     & M1,N2,M1,N1,N2,M2,N1,N3,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/M1-N0,M1-N0,N2-N2,N1-N1/),'3412',VBHHPP,D1)
        allocate(F2(M1+1:N2,M1+1:N1,N2+1:M2,M2+1:N3,N1+1:M2,N0+1:M1))
-       call reorder562134(N2,N3,N2,M2,N1,N3,N0,N2,M1,N2,N0,N1,
-     & M1,N2,M1,N1,N2,M2,M2,N3,N1,M2,N0,M1,t3C1,F2)
+       call reorder_shift(6,shape(t3C1),size(t3C1),shape(F2),size(F2),
+     & (/M1-M1,M1-N0,N2-N2,M2-N2,N1-N1,N0-N0/),'562134',t3C1,F2)
        allocate(S105(M2+1:N3,N1+1:M2,N0+1:M1,N1+1:N3))
        I1=K3
        I2=K5*K9*K6
@@ -3132,16 +3132,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N1,N3,M2,N3,N1,M2,N0,M1,X2,S105,-1.000)
+       call sum_stripe(4,shape(X2),size(X2),'2341',-1.000,
+     & X2,S105)
        deallocate(S105)
 C
        allocate(D1(M1+1:N2,N0+1:M1,N1+1:M2,N2+1:N3))
-       call reorder3421(N2,N3,N1,N3,N0,N2,N0,N1,
-     & M1,N2,N0,M1,N1,M2,N2,N3,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/M1-N0,N0-N0,N1-N1,N2-N2/),'3421',VBHHPP,D1)
        allocate(F2(M1+1:N2,N0+1:M1,N1+1:M2,M2+1:N3,M2+1:N3,N0+1:M1))
-       call reorder563124(M2,N3,M2,N3,N1,M2,N0,N2,M1,N2,N0,N1,
-     & M1,N2,N0,M1,N1,M2,M2,N3,M2,N3,N0,M1,t3C3,F2)
+       call reorder_shift(6,shape(t3C3),size(t3C3),shape(F2),size(F2),
+     & (/M1-M1,N0-N0,N1-N1,M2-M2,M2-M2,N0-N0/),'563124',t3C3,F2)
        allocate(S106(M2+1:N3,M2+1:N3,N0+1:M1,N2+1:N3))
        I1=K4
        I2=K5*K6*K6
@@ -3150,16 +3150,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N2,N3,M2,N3,M2,N3,N0,M1,X4,S106, 1.000)
+       call sum_stripe(4,shape(X4),size(X4),'2341',1.000,X4,
+     & S106)
        deallocate(S106)
 C
        allocate(D1(N0+1:M1,M1+1:N1,N1+1:M2,N2+1:N3))
-       call reorder3421(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,M1,M1,N1,N1,M2,N2,N3,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,M1-N0,N1-N1,N2-N2/),'3421',VBHHPP,D1)
        allocate(F2(N0+1:M1,M1+1:N1,N1+1:M2,M2+1:N3,M2+1:N3,N0+1:M1))
-       call reorder463125(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,
-     & N0,M1,M1,N1,N1,M2,M2,N3,M2,N3,N0,M1,t3C2,F2)
+       call reorder_shift(6,shape(t3C2),size(t3C2),shape(F2),size(F2),
+     & (/N0-N0,M1-M1,N1-N1,M2-M2,M2-M2,N0-N0/),'463125',t3C2,F2)
        allocate(S107(M2+1:N3,M2+1:N3,N0+1:M1,N2+1:N3))
        I1=K4
        I2=K5*K6*K6
@@ -3168,16 +3168,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N2,N3,M2,N3,M2,N3,N0,M1,X4,S107,-1.000)
+       call sum_stripe(4,shape(X4),size(X4),'2341',-1.000,
+     & X4,S107)
        deallocate(S107)
 C
        allocate(D1(M1+1:N2,M1+1:N1,N1+1:M2,N2+1:N3))
-       call reorder3421(N2,N3,N1,N3,N0,N2,N0,N1,
-     & M1,N2,M1,N1,N1,M2,N2,N3,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/M1-N0,M1-N0,N1-N1,N2-N2/),'3421',VBHHPP,D1)
        allocate(F2(M1+1:N2,M1+1:N1,N1+1:M2,M2+1:N3,M2+1:N3,N0+1:M1))
-       call reorder563124(M2,N3,M2,N3,N1,M2,N0,N2,M1,N2,N0,N1,
-     & M1,N2,M1,N1,N1,M2,M2,N3,M2,N3,N0,M1,t3C3,F2)
+       call reorder_shift(6,shape(t3C3),size(t3C3),shape(F2),size(F2),
+     & (/M1-M1,M1-N0,N1-N1,M2-M2,M2-M2,N0-N0/),'563124',t3C3,F2)
        allocate(S108(M2+1:N3,M2+1:N3,N0+1:M1,N2+1:N3))
        I1=K4
        I2=K5*K6*K6
@@ -3186,16 +3186,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N2,N3,M2,N3,M2,N3,N0,M1,X4,S108, 1.000)
+       call sum_stripe(4,shape(X4),size(X4),'2341',1.000,X4,
+     & S108)
        deallocate(S108)
 C
        allocate(D1(N2+1:N3,N1+1:N3,M1+1:N2,N0+1:M1))
-       call reorder1234(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N2,N3,N1,N3,M1,N2,N0,M1,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N2-N2,N1-N1,M1-N0,N0-N0/),'1234',VBHHPP,D1)
        allocate(D2(N2+1:N3,N1+1:N3,N0+1:M1,M1+1:N1))
-       call reorder1234(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N2,N3,N1,N3,N0,M1,M1,N1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N2-N2,N1-N1,N0-N0,M1-N0/),'1234',t2B,D2)
        allocate(S109(N0+1:M1,M1+1:N1,M1+1:N2,N0+1:M1))
        I1=K5*K8
        I2=K7*K5
@@ -3204,16 +3204,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum3412(M1,N2,N0,M1,N0,M1,M1,N1,X18,S109, 1.000)
+       call sum_stripe(4,shape(X18),size(X18),'3412',1.000,
+     & X18,S109)
        deallocate(S109)
 C
        allocate(D1(N2+1:N3,N1+1:N3,N0+1:M1,M1+1:N1))
-       call reorder1234(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N2,N3,N1,N3,N0,M1,M1,N1,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N2-N2,N1-N1,N0-N0,M1-N0/),'1234',VBHHPP,D1)
        allocate(D2(N2+1:N3,N1+1:N3,N0+1:M1,M1+1:N1))
-       call reorder1234(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N2,N3,N1,N3,N0,M1,M1,N1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N2-N2,N1-N1,N0-N0,M1-N0/),'1234',t2B,D2)
        allocate(S110(N0+1:M1,M1+1:N1,N0+1:M1,M1+1:N1))
        I1=K7*K5
        I2=K7*K5
@@ -3222,16 +3222,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum3412(N0,M1,M1,N1,N0,M1,M1,N1,X19,S110, 1.000)
+       call sum_stripe(4,shape(X19),size(X19),'3412',1.000,
+     & X19,S110)
        deallocate(S110)
 C
        allocate(D1(N2+1:N3,N1+1:N3,M1+1:N2,M1+1:N1))
-       call reorder1234(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N2,N3,N1,N3,M1,N2,M1,N1,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N2-N2,N1-N1,M1-N0,M1-N0/),'1234',VBHHPP,D1)
        allocate(D2(N2+1:N3,N1+1:N3,N0+1:M1,M1+1:N1))
-       call reorder1234(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N2,N3,N1,N3,N0,M1,M1,N1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N2-N2,N1-N1,N0-N0,M1-N0/),'1234',t2B,D2)
        allocate(S111(N0+1:M1,M1+1:N1,M1+1:N2,M1+1:N1))
        I1=K7*K8
        I2=K7*K5
@@ -3240,16 +3240,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum3412(M1,N2,M1,N1,N0,M1,M1,N1,X20,S111, 1.000)
+       call sum_stripe(4,shape(X20),size(X20),'3412',1.000,
+     & X20,S111)
        deallocate(S111)
 C
        allocate(D1(M1+1:N1,N2+1:M2,M2+1:N3,N0+1:N2))
-       call reorder4123(N2,N3,N1,N3,N0,N2,N0,N1,
-     & M1,N1,N2,M2,M2,N3,N0,N2,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/M1-N0,N2-N2,M2-N1,N0-N0/),'4123',VBHHPP,D1)
        allocate(F2(M1+1:N1,N2+1:M2,M2+1:N3,M2+1:N3,N0+1:M1,N0+1:M1))
-       call reorder623145(N2,N3,N2,M2,N1,N3,N0,M1,N0,M1,M1,N1,
-     & M1,N1,N2,M2,M2,N3,M2,N3,N0,M1,N0,M1,t3C4,F2)
+       call reorder_shift(6,shape(t3C4),size(t3C4),shape(F2),size(F2),
+     & (/M1-M1,N2-N2,M2-N1,M2-N2,N0-N0,N0-N0/),'623145',t3C4,F2)
        allocate(S112(M2+1:N3,N0+1:M1,N0+1:M1,N0+1:N2))
        I1=K2
        I2=K5*K5*K6
@@ -3258,16 +3258,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N0,N2,M2,N3,N0,M1,N0,M1,X3,S112, 1.000)
+       call sum_stripe(4,shape(X3),size(X3),'2341',1.000,X3,
+     & S112)
        deallocate(S112)
 C
        allocate(D1(M1+1:N1,M2+1:N3,N1+1:M2,N0+1:N2))
-       call reorder4123(N2,N3,N1,N3,N0,N2,N0,N1,
-     & M1,N1,M2,N3,N1,M2,N0,N2,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/M1-N0,M2-N2,N1-N1,N0-N0/),'4123',VBHHPP,D1)
        allocate(F2(M1+1:N1,M2+1:N3,N1+1:M2,M2+1:N3,N0+1:M1,N0+1:M1))
-       call reorder613245(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,
-     & M1,N1,M2,N3,N1,M2,M2,N3,N0,M1,N0,M1,t3C2,F2)
+       call reorder_shift(6,shape(t3C2),size(t3C2),shape(F2),size(F2),
+     & (/M1-M1,M2-M2,N1-N1,M2-M2,N0-N0,N0-N0/),'613245',t3C2,F2)
        allocate(S113(M2+1:N3,N0+1:M1,N0+1:M1,N0+1:N2))
        I1=K2
        I2=K5*K5*K6
@@ -3276,16 +3276,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N0,N2,M2,N3,N0,M1,N0,M1,X3,S113,-1.000)
+       call sum_stripe(4,shape(X3),size(X3),'2341',-1.000,
+     & X3,S113)
        deallocate(S113)
 C
        allocate(D1(M1+1:N1,N2+1:M2,N1+1:M2,N0+1:N2))
-       call reorder4123(N2,N3,N1,N3,N0,N2,N0,N1,
-     & M1,N1,N2,M2,N1,M2,N0,N2,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/M1-N0,N2-N2,N1-N1,N0-N0/),'4123',VBHHPP,D1)
        allocate(F2(M1+1:N1,N2+1:M2,N1+1:M2,M2+1:N3,N0+1:M1,N0+1:M1))
-       call reorder623145(N2,N3,N2,M2,N1,N3,N0,M1,N0,M1,M1,N1,
-     & M1,N1,N2,M2,N1,M2,M2,N3,N0,M1,N0,M1,t3C4,F2)
+       call reorder_shift(6,shape(t3C4),size(t3C4),shape(F2),size(F2),
+     & (/M1-M1,N2-N2,N1-N1,M2-N2,N0-N0,N0-N0/),'623145',t3C4,F2)
        allocate(S114(M2+1:N3,N0+1:M1,N0+1:M1,N0+1:N2))
        I1=K2
        I2=K5*K5*K6
@@ -3294,16 +3294,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N0,N2,M2,N3,N0,M1,N0,M1,X3,S114, 1.000)
+       call sum_stripe(4,shape(X3),size(X3),'2341',1.000,X3,
+     & S114)
        deallocate(S114)
 C
        allocate(D1(N0+1:N2,N1+1:N3,M1+1:N1,M2+1:N3))
-       call reorder3241(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N2,N1,N3,M1,N1,M2,N3,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,N1-N1,M1-N0,M2-N2/),'3241',VBHHPP,D1)
        allocate(D2(N0+1:N2,N1+1:N3,M2+1:N3,M1+1:N1))
-       call reorder3214(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N2,N1,N3,M2,N3,M1,N1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N1-N1,M2-N2,M1-N0/),'3214',t2B,D2)
        allocate(S115(M2+1:N3,M1+1:N1,M1+1:N1,M2+1:N3))
        I1=K6*K7
        I2=K7*K6
@@ -3312,16 +3312,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum3412(M1,N1,M2,N3,M2,N3,M1,N1,X37,S115,-1.000)
+       call sum_stripe(4,shape(X37),size(X37),'3412',-1.000,
+     & X37,S115)
        deallocate(S115)
 C
        allocate(D1(N0+1:N2,N1+1:N3,M1+1:N1,N2+1:M2))
-       call reorder3241(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N2,N1,N3,M1,N1,N2,M2,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,N1-N1,M1-N0,N2-N2/),'3241',VBHHPP,D1)
        allocate(D2(N0+1:N2,N1+1:N3,M2+1:N3,M1+1:N1))
-       call reorder3214(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N2,N1,N3,M2,N3,M1,N1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N1-N1,M2-N2,M1-N0/),'3214',t2B,D2)
        allocate(S116(M2+1:N3,M1+1:N1,M1+1:N1,N2+1:M2))
        I1=K0*K7
        I2=K7*K6
@@ -3330,16 +3330,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum3412(M1,N1,N2,M2,M2,N3,M1,N1,X38,S116,-1.000)
+       call sum_stripe(4,shape(X38),size(X38),'3412',-1.000,
+     & X38,S116)
        deallocate(S116)
 C
        allocate(D1(N0+1:N2,N2+1:N3,M1+1:N1,N1+1:M2))
-       call reorder3142(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N2,N2,N3,M1,N1,N1,M2,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,M1-N0,N1-N1/),'3142',VBHHPP,D1)
        allocate(D2(N0+1:N2,N2+1:N3,N1+1:M2,M1+1:N1))
-       call reorder3124(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N2,N2,N3,N1,M2,M1,N1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N2-N2,N1-N1,M1-N0/),'3124',t2B,D2)
        allocate(S117(N1+1:M2,M1+1:N1,M1+1:N1,N1+1:M2))
        I1=K9*K7
        I2=K7*K9
@@ -3350,16 +3350,16 @@ C
 C
        allocate(X17(M1+1:N1,N1+1:M2,N1+1:M2,M1+1:N1))
        X17=0.0d0
-       call
-     & sum3412(M1,N1,N1,M2,N1,M2,M1,N1,X17,S117,-1.000)
+       call sum_stripe(4,shape(X17),size(X17),'3412',-1.000,
+     & X17,S117)
        deallocate(S117)
 C
        call sumx_sorted2431(N1,N3,N0,N1,N1,N3,N0,N1,
      & M1,N1,N1,M2,N1,M2,M1,N1,X17,VAHPHP, 1.000)
 C
        allocate(F2(M1+1:N1,N1+1:M2,M2+1:N3,M2+1:N3,N0+1:M1,N0+1:M1))
-       call reorder631245(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,
-     & M1,N1,N1,M2,M2,N3,M2,N3,N0,M1,N0,M1,t3C2,F2)
+       call reorder_shift(6,shape(t3C2),size(t3C2),shape(F2),size(F2),
+     & (/M1-M1,N1-N1,M2-M2,M2-M2,N0-N0,N0-N0/),'631245',t3C2,F2)
        allocate(Z17(M2+1:N3,M2+1:N3,N0+1:M1,N0+1:M1,N1+1:M2,M1+1:N1))
        I1=K7*K9
        I2=K5*K5*K6*K6
@@ -3367,17 +3367,17 @@ C
        call EGEMM(I1,I2,I3,X17,F2,Z17)
        deallocate(F2)
 C
-       call
-     & sum124536(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z17,-1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'124536',
+     & -1.000,V3C,Z17)
        deallocate(Z17)
        deallocate(X17)
 C
        allocate(D1(N0+1:N2,N2+1:N3,N1+1:N3,M1+1:N1))
-       call reorder3124(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N2,N2,N3,N1,N3,M1,N1,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,N1-N1,M1-N0/),'3124',VBHHPP,D1)
        allocate(D2(N0+1:N2,N2+1:N3,N1+1:N3,M1+1:N1))
-       call reorder3124(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N2,N2,N3,N1,N3,M1,N1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N2-N2,N1-N1,M1-N0/),'3124',t2B,D2)
        allocate(Q21(M1+1:N1,M1+1:N1))
        I1=K7
        I2=K7
@@ -3386,16 +3386,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum21(M1,N1,M1,N1,X11,Q21, 1.000)
+       call sum_stripe(2,shape(X11),size(X11),'21',1.000,
+     & X11,Q21)
        deallocate(Q21)
 C
        allocate(D1(N0+1:M1,N2+1:M2,M2+1:N3,N0+1:N1))
-       call reorder3124(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,M1,N2,M2,M2,N3,N0,N1,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,M2-N1,N0-N0/),'3124',VBHHPP,D1)
        allocate(F2(N0+1:M1,N2+1:M2,M2+1:N3,M2+1:N3,N0+1:M1,M1+1:N1))
-       call reorder423156(N2,N3,N2,M2,N1,N3,N0,M1,N0,M1,M1,N1,
-     & N0,M1,N2,M2,M2,N3,M2,N3,N0,M1,M1,N1,t3C4,F2)
+       call reorder_shift(6,shape(t3C4),size(t3C4),shape(F2),size(F2),
+     & (/N0-N0,N2-N2,M2-N1,M2-N2,N0-N0,M1-M1/),'423156',t3C4,F2)
        allocate(S118(M2+1:N3,N0+1:M1,M1+1:N1,N0+1:N1))
        I1=K1
        I2=K7*K5*K6
@@ -3404,16 +3404,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N0,N1,M2,N3,N0,M1,M1,N1,X1,S118,-1.000)
+       call sum_stripe(4,shape(X1),size(X1),'2341',-1.000,
+     & X1,S118)
        deallocate(S118)
 C
        allocate(D1(M1+1:N2,N2+1:M2,M2+1:N3,N0+1:N1))
-       call reorder3124(N2,N3,N1,N3,N0,N2,N0,N1,
-     & M1,N2,N2,M2,M2,N3,N0,N1,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/M1-N0,N2-N2,M2-N1,N0-N0/),'3124',VBHHPP,D1)
        allocate(F2(M1+1:N2,N2+1:M2,M2+1:N3,M2+1:N3,N0+1:M1,M1+1:N1))
-       call reorder523146(N2,N3,N2,M2,N1,N3,N0,N2,M1,N2,N0,N1,
-     & M1,N2,N2,M2,M2,N3,M2,N3,N0,M1,M1,N1,t3C1,F2)
+       call reorder_shift(6,shape(t3C1),size(t3C1),shape(F2),size(F2),
+     & (/M1-M1,N2-N2,M2-N1,M2-N2,N0-N0,M1-N0/),'523146',t3C1,F2)
        allocate(S119(M2+1:N3,N0+1:M1,M1+1:N1,N0+1:N1))
        I1=K1
        I2=K7*K5*K6
@@ -3422,16 +3422,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N0,N1,M2,N3,N0,M1,M1,N1,X1,S119, 1.000)
+       call sum_stripe(4,shape(X1),size(X1),'2341',1.000,X1,
+     & S119)
        deallocate(S119)
 C
        allocate(D1(N0+1:M1,M2+1:N3,N1+1:M2,N0+1:N1))
-       call reorder3124(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,M1,M2,N3,N1,M2,N0,N1,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,M2-N2,N1-N1,N0-N0/),'3124',VBHHPP,D1)
        allocate(F2(N0+1:M1,M2+1:N3,N1+1:M2,M2+1:N3,N0+1:M1,M1+1:N1))
-       call reorder413256(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,
-     & N0,M1,M2,N3,N1,M2,M2,N3,N0,M1,M1,N1,t3C2,F2)
+       call reorder_shift(6,shape(t3C2),size(t3C2),shape(F2),size(F2),
+     & (/N0-N0,M2-M2,N1-N1,M2-M2,N0-N0,M1-M1/),'413256',t3C2,F2)
        allocate(S120(M2+1:N3,N0+1:M1,M1+1:N1,N0+1:N1))
        I1=K1
        I2=K7*K5*K6
@@ -3440,16 +3440,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N0,N1,M2,N3,N0,M1,M1,N1,X1,S120, 1.000)
+       call sum_stripe(4,shape(X1),size(X1),'2341',1.000,X1,
+     & S120)
        deallocate(S120)
 C
        allocate(D1(M1+1:N2,M2+1:N3,N1+1:M2,N0+1:N1))
-       call reorder3124(N2,N3,N1,N3,N0,N2,N0,N1,
-     & M1,N2,M2,N3,N1,M2,N0,N1,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/M1-N0,M2-N2,N1-N1,N0-N0/),'3124',VBHHPP,D1)
        allocate(F2(M1+1:N2,M2+1:N3,N1+1:M2,M2+1:N3,N0+1:M1,M1+1:N1))
-       call reorder513246(M2,N3,M2,N3,N1,M2,N0,N2,M1,N2,N0,N1,
-     & M1,N2,M2,N3,N1,M2,M2,N3,N0,M1,M1,N1,t3C3,F2)
+       call reorder_shift(6,shape(t3C3),size(t3C3),shape(F2),size(F2),
+     & (/M1-M1,M2-M2,N1-N1,M2-M2,N0-N0,M1-N0/),'513246',t3C3,F2)
        allocate(S121(M2+1:N3,N0+1:M1,M1+1:N1,N0+1:N1))
        I1=K1
        I2=K7*K5*K6
@@ -3458,16 +3458,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N0,N1,M2,N3,N0,M1,M1,N1,X1,S121,-1.000)
+       call sum_stripe(4,shape(X1),size(X1),'2341',-1.000,
+     & X1,S121)
        deallocate(S121)
 C
        allocate(D1(N0+1:M1,N2+1:M2,N1+1:M2,N0+1:N1))
-       call reorder3124(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,M1,N2,M2,N1,M2,N0,N1,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,N1-N1,N0-N0/),'3124',VBHHPP,D1)
        allocate(F2(N0+1:M1,N2+1:M2,N1+1:M2,M2+1:N3,N0+1:M1,M1+1:N1))
-       call reorder423156(N2,N3,N2,M2,N1,N3,N0,M1,N0,M1,M1,N1,
-     & N0,M1,N2,M2,N1,M2,M2,N3,N0,M1,M1,N1,t3C4,F2)
+       call reorder_shift(6,shape(t3C4),size(t3C4),shape(F2),size(F2),
+     & (/N0-N0,N2-N2,N1-N1,M2-N2,N0-N0,M1-M1/),'423156',t3C4,F2)
        allocate(S122(M2+1:N3,N0+1:M1,M1+1:N1,N0+1:N1))
        I1=K1
        I2=K7*K5*K6
@@ -3476,16 +3476,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N0,N1,M2,N3,N0,M1,M1,N1,X1,S122,-1.000)
+       call sum_stripe(4,shape(X1),size(X1),'2341',-1.000,
+     & X1,S122)
        deallocate(S122)
 C
        allocate(D1(M1+1:N2,N2+1:M2,N1+1:M2,N0+1:N1))
-       call reorder3124(N2,N3,N1,N3,N0,N2,N0,N1,
-     & M1,N2,N2,M2,N1,M2,N0,N1,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/M1-N0,N2-N2,N1-N1,N0-N0/),'3124',VBHHPP,D1)
        allocate(F2(M1+1:N2,N2+1:M2,N1+1:M2,M2+1:N3,N0+1:M1,M1+1:N1))
-       call reorder523146(N2,N3,N2,M2,N1,N3,N0,N2,M1,N2,N0,N1,
-     & M1,N2,N2,M2,N1,M2,M2,N3,N0,M1,M1,N1,t3C1,F2)
+       call reorder_shift(6,shape(t3C1),size(t3C1),shape(F2),size(F2),
+     & (/M1-M1,N2-N2,N1-N1,M2-N2,N0-N0,M1-N0/),'523146',t3C1,F2)
        allocate(S123(M2+1:N3,N0+1:M1,M1+1:N1,N0+1:N1))
        I1=K1
        I2=K7*K5*K6
@@ -3494,16 +3494,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N0,N1,M2,N3,N0,M1,M1,N1,X1,S123, 1.000)
+       call sum_stripe(4,shape(X1),size(X1),'2341',1.000,X1,
+     & S123)
        deallocate(S123)
 C
        allocate(D1(N0+1:N1,N1+1:N3,N0+1:M1,M2+1:N3))
-       call reorder4231(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N1,N3,N0,M1,M2,N3,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,N1-N1,N0-N0,M2-N2/),'4231',VBHHPP,D1)
        allocate(D2(N0+1:N1,N1+1:N3,M2+1:N3,N0+1:M1))
-       call reorder4213(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N1,N3,M2,N3,N0,M1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N1-N1,M2-N2,N0-N0/),'4213',t2B,D2)
        allocate(S124(M2+1:N3,N0+1:M1,N0+1:M1,M2+1:N3))
        I1=K6*K5
        I2=K5*K6
@@ -3513,11 +3513,11 @@ C
        deallocate(D2)
 C
        allocate(D1(N0+1:M1,M2+1:N3,M2+1:N3,N0+1:M1))
-       call reorder3412(M2,N3,N0,M1,N0,M1,M2,N3,
-     & N0,M1,M2,N3,M2,N3,N0,M1,S124,D1)
+       call reorder_shift(4,shape(S124),size(S124),shape(D1),size(D1),
+     & (/N0-N0,M2-M2,M2-M2,N0-N0/),'3412',S124,D1)
        allocate(F2(N0+1:M1,M2+1:N3,M2+1:N3,N1+1:M2,N0+1:M1,M1+1:N1))
-       call reorder412356(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,
-     & N0,M1,M2,N3,M2,N3,N1,M2,N0,M1,M1,N1,t3C2,F2)
+       call reorder_shift(6,shape(t3C2),size(t3C2),shape(F2),size(F2),
+     & (/N0-N0,M2-M2,M2-M2,N1-N1,N0-N0,M1-M1/),'412356',t3C2,F2)
        allocate(Z184(M2+1:N3,N1+1:M2,N0+1:M1,M1+1:N1,M2+1:N3,N0+1:M1))
        I1=K5*K6
        I2=K7*K5*K9*K6
@@ -3526,23 +3526,23 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum234615(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z184,-1.000)
-       call
-     & sum134625(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z184, 1.000)
-       call
-     & sum235614(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z184, 1.000)
-       call
-     & sum135624(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z184,-1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'234615',
+     & -1.000,V3C,Z184)
+       call sum_stripe(6,shape(V3C),size(V3C),'134625',
+     & 1.000,V3C,Z184)
+       call sum_stripe(6,shape(V3C),size(V3C),'235614',
+     & 1.000,V3C,Z184)
+       call sum_stripe(6,shape(V3C),size(V3C),'135624',
+     & -1.000,V3C,Z184)
        deallocate(Z184)
        deallocate(S124)
 C
        allocate(D1(N0+1:N1,N1+1:N3,M1+1:N2,M2+1:N3))
-       call reorder4231(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N1,N3,M1,N2,M2,N3,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,N1-N1,M1-N0,M2-N2/),'4231',VBHHPP,D1)
        allocate(D2(N0+1:N1,N1+1:N3,M2+1:N3,N0+1:M1))
-       call reorder4213(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N1,N3,M2,N3,N0,M1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N1-N1,M2-N2,N0-N0/),'4213',t2B,D2)
        allocate(S125(M2+1:N3,N0+1:M1,M1+1:N2,M2+1:N3))
        I1=K6*K8
        I2=K5*K6
@@ -3552,11 +3552,11 @@ C
        deallocate(D2)
 C
        allocate(D1(M1+1:N2,M2+1:N3,M2+1:N3,N0+1:M1))
-       call reorder3412(M2,N3,N0,M1,M1,N2,M2,N3,
-     & M1,N2,M2,N3,M2,N3,N0,M1,S125,D1)
+       call reorder_shift(4,shape(S125),size(S125),shape(D1),size(D1),
+     & (/M1-M1,M2-M2,M2-M2,N0-N0/),'3412',S125,D1)
        allocate(F2(M1+1:N2,M2+1:N3,M2+1:N3,N1+1:M2,N0+1:M1,M1+1:N1))
-       call reorder512346(M2,N3,M2,N3,N1,M2,N0,N2,M1,N2,N0,N1,
-     & M1,N2,M2,N3,M2,N3,N1,M2,N0,M1,M1,N1,t3C3,F2)
+       call reorder_shift(6,shape(t3C3),size(t3C3),shape(F2),size(F2),
+     & (/M1-M1,M2-M2,M2-M2,N1-N1,N0-N0,M1-N0/),'512346',t3C3,F2)
        allocate(Z185(M2+1:N3,N1+1:M2,N0+1:M1,M1+1:N1,M2+1:N3,N0+1:M1))
        I1=K5*K6
        I2=K7*K5*K9*K6
@@ -3565,23 +3565,23 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum234615(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z185, 1.000)
-       call
-     & sum134625(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z185,-1.000)
-       call
-     & sum235614(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z185,-1.000)
-       call
-     & sum135624(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z185, 1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'234615',
+     & 1.000,V3C,Z185)
+       call sum_stripe(6,shape(V3C),size(V3C),'134625',
+     & -1.000,V3C,Z185)
+       call sum_stripe(6,shape(V3C),size(V3C),'235614',
+     & -1.000,V3C,Z185)
+       call sum_stripe(6,shape(V3C),size(V3C),'135624',
+     & 1.000,V3C,Z185)
        deallocate(Z185)
        deallocate(S125)
 C
        allocate(D1(N0+1:N1,N1+1:N3,N0+1:M1,N2+1:M2))
-       call reorder4231(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N1,N3,N0,M1,N2,M2,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,N1-N1,N0-N0,N2-N2/),'4231',VBHHPP,D1)
        allocate(D2(N0+1:N1,N1+1:N3,M2+1:N3,N0+1:M1))
-       call reorder4213(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N1,N3,M2,N3,N0,M1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N1-N1,M2-N2,N0-N0/),'4213',t2B,D2)
        allocate(S126(M2+1:N3,N0+1:M1,N0+1:M1,N2+1:M2))
        I1=K0*K5
        I2=K5*K6
@@ -3591,11 +3591,11 @@ C
        deallocate(D2)
 C
        allocate(D1(N0+1:M1,N2+1:M2,M2+1:N3,N0+1:M1))
-       call reorder3412(M2,N3,N0,M1,N0,M1,N2,M2,
-     & N0,M1,N2,M2,M2,N3,N0,M1,S126,D1)
+       call reorder_shift(4,shape(S126),size(S126),shape(D1),size(D1),
+     & (/N0-N0,N2-N2,M2-M2,N0-N0/),'3412',S126,D1)
        allocate(F2(N0+1:M1,N2+1:M2,M2+1:N3,N1+1:M2,N0+1:M1,M1+1:N1))
-       call reorder421356(N2,N3,N2,M2,N1,N3,N0,M1,N0,M1,M1,N1,
-     & N0,M1,N2,M2,M2,N3,N1,M2,N0,M1,M1,N1,t3C4,F2)
+       call reorder_shift(6,shape(t3C4),size(t3C4),shape(F2),size(F2),
+     & (/N0-N0,N2-N2,M2-N2,N1-N1,N0-N0,M1-M1/),'421356',t3C4,F2)
        allocate(Z186(M2+1:N3,N1+1:M2,N0+1:M1,M1+1:N1,M2+1:N3,N0+1:M1))
        I1=K5*K6
        I2=K7*K5*K9*K6
@@ -3604,23 +3604,23 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum234615(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z186, 1.000)
-       call
-     & sum134625(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z186,-1.000)
-       call
-     & sum235614(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z186,-1.000)
-       call
-     & sum135624(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z186, 1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'234615',
+     & 1.000,V3C,Z186)
+       call sum_stripe(6,shape(V3C),size(V3C),'134625',
+     & -1.000,V3C,Z186)
+       call sum_stripe(6,shape(V3C),size(V3C),'235614',
+     & -1.000,V3C,Z186)
+       call sum_stripe(6,shape(V3C),size(V3C),'135624',
+     & 1.000,V3C,Z186)
        deallocate(Z186)
        deallocate(S126)
 C
        allocate(D1(N0+1:N1,N1+1:N3,M1+1:N2,N2+1:M2))
-       call reorder4231(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N1,N3,M1,N2,N2,M2,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,N1-N1,M1-N0,N2-N2/),'4231',VBHHPP,D1)
        allocate(D2(N0+1:N1,N1+1:N3,M2+1:N3,N0+1:M1))
-       call reorder4213(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N1,N3,M2,N3,N0,M1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N1-N1,M2-N2,N0-N0/),'4213',t2B,D2)
        allocate(S127(M2+1:N3,N0+1:M1,M1+1:N2,N2+1:M2))
        I1=K0*K8
        I2=K5*K6
@@ -3630,11 +3630,11 @@ C
        deallocate(D2)
 C
        allocate(D1(M1+1:N2,N2+1:M2,M2+1:N3,N0+1:M1))
-       call reorder3412(M2,N3,N0,M1,M1,N2,N2,M2,
-     & M1,N2,N2,M2,M2,N3,N0,M1,S127,D1)
+       call reorder_shift(4,shape(S127),size(S127),shape(D1),size(D1),
+     & (/M1-M1,N2-N2,M2-M2,N0-N0/),'3412',S127,D1)
        allocate(F2(M1+1:N2,N2+1:M2,M2+1:N3,N1+1:M2,N0+1:M1,M1+1:N1))
-       call reorder521346(N2,N3,N2,M2,N1,N3,N0,N2,M1,N2,N0,N1,
-     & M1,N2,N2,M2,M2,N3,N1,M2,N0,M1,M1,N1,t3C1,F2)
+       call reorder_shift(6,shape(t3C1),size(t3C1),shape(F2),size(F2),
+     & (/M1-M1,N2-N2,M2-N2,N1-N1,N0-N0,M1-N0/),'521346',t3C1,F2)
        allocate(Z187(M2+1:N3,N1+1:M2,N0+1:M1,M1+1:N1,M2+1:N3,N0+1:M1))
        I1=K5*K6
        I2=K7*K5*K9*K6
@@ -3643,23 +3643,23 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum234615(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z187,-1.000)
-       call
-     & sum134625(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z187, 1.000)
-       call
-     & sum235614(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z187, 1.000)
-       call
-     & sum135624(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z187,-1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'234615',
+     & -1.000,V3C,Z187)
+       call sum_stripe(6,shape(V3C),size(V3C),'134625',
+     & 1.000,V3C,Z187)
+       call sum_stripe(6,shape(V3C),size(V3C),'235614',
+     & 1.000,V3C,Z187)
+       call sum_stripe(6,shape(V3C),size(V3C),'135624',
+     & -1.000,V3C,Z187)
        deallocate(Z187)
        deallocate(S127)
 C
        allocate(D1(N0+1:N1,N2+1:N3,N0+1:M1,N1+1:M2))
-       call reorder4132(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N2,N3,N0,M1,N1,M2,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,N0-N0,N1-N1/),'4132',VBHHPP,D1)
        allocate(D2(N0+1:N1,N2+1:N3,N1+1:M2,N0+1:M1))
-       call reorder4123(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N2,N3,N1,M2,N0,M1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N2-N2,N1-N1,N0-N0/),'4123',t2B,D2)
        allocate(S128(N1+1:M2,N0+1:M1,N0+1:M1,N1+1:M2))
        I1=K9*K5
        I2=K5*K9
@@ -3668,16 +3668,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum3412(N0,M1,N1,M2,N1,M2,N0,M1,X39,S128, 1.000)
+       call sum_stripe(4,shape(X39),size(X39),'3412',1.000,
+     & X39,S128)
        deallocate(S128)
 C
        allocate(D1(N0+1:N1,N2+1:N3,M1+1:N2,N1+1:M2))
-       call reorder4132(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N2,N3,M1,N2,N1,M2,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,M1-N0,N1-N1/),'4132',VBHHPP,D1)
        allocate(D2(N0+1:N1,N2+1:N3,N1+1:M2,N0+1:M1))
-       call reorder4123(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N2,N3,N1,M2,N0,M1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N2-N2,N1-N1,N0-N0/),'4123',t2B,D2)
        allocate(S129(N1+1:M2,N0+1:M1,M1+1:N2,N1+1:M2))
        I1=K9*K8
        I2=K5*K9
@@ -3686,16 +3686,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum3412(M1,N2,N1,M2,N1,M2,N0,M1,X40,S129, 1.000)
+       call sum_stripe(4,shape(X40),size(X40),'3412',1.000,
+     & X40,S129)
        deallocate(S129)
 C
        allocate(D1(N0+1:N1,N2+1:N3,N1+1:N3,N0+1:M1))
-       call reorder4123(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N2,N3,N1,N3,N0,M1,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,N1-N1,N0-N0/),'4123',VBHHPP,D1)
        allocate(D2(N0+1:N1,N2+1:N3,N1+1:N3,N0+1:M1))
-       call reorder4123(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N2,N3,N1,N3,N0,M1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N2-N2,N1-N1,N0-N0/),'4123',t2B,D2)
        allocate(Q22(N0+1:M1,N0+1:M1))
        I1=K5
        I2=K5
@@ -3704,16 +3704,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum21(N0,M1,N0,M1,X41,Q22, 1.000)
+       call sum_stripe(2,shape(X41),size(X41),'21',1.000,
+     & X41,Q22)
        deallocate(Q22)
 C
        allocate(D1(N0+1:N1,N2+1:N3,N1+1:N3,M1+1:N2))
-       call reorder4123(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N2,N3,N1,N3,M1,N2,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,N1-N1,M1-N0/),'4123',VBHHPP,D1)
        allocate(D2(N0+1:N1,N2+1:N3,N1+1:N3,N0+1:M1))
-       call reorder4123(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N2,N3,N1,N3,N0,M1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N2-N2,N1-N1,N0-N0/),'4123',t2B,D2)
        allocate(Q23(N0+1:M1,M1+1:N2))
        I1=K8
        I2=K5
@@ -3722,16 +3722,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum21(M1,N2,N0,M1,X42,Q23, 1.000)
+       call sum_stripe(2,shape(X42),size(X42),'21',1.000,
+     & X42,Q23)
        deallocate(Q23)
 C
        allocate(D1(N0+1:N2,N0+1:N1,N2+1:M2,M2+1:N3))
-       call reorder3412(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N2,N0,N1,N2,M2,M2,N3,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,N0-N0,N2-N2,M2-N1/),'3412',VBHHPP,D1)
        allocate(D2(N0+1:N2,N0+1:N1,M2+1:N3,N1+1:M2))
-       call reorder3412(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N2,N0,N1,M2,N3,N1,M2,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N0-N0,M2-N2,N1-N1/),'3412',t2B,D2)
        allocate(S130(M2+1:N3,N1+1:M2,N2+1:M2,M2+1:N3))
        I1=K6*K0
        I2=K9*K6
@@ -3740,16 +3740,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum3412(N2,M2,M2,N3,M2,N3,N1,M2,X25,S130, 1.000)
+       call sum_stripe(4,shape(X25),size(X25),'3412',1.000,
+     & X25,S130)
        deallocate(S130)
 C
        allocate(D1(N0+1:N2,N0+1:N1,M2+1:N3,N1+1:M2))
-       call reorder3412(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N2,N0,N1,M2,N3,N1,M2,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,N0-N0,M2-N2,N1-N1/),'3412',VBHHPP,D1)
        allocate(D2(N0+1:N2,N0+1:N1,M2+1:N3,N1+1:M2))
-       call reorder3412(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N2,N0,N1,M2,N3,N1,M2,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N0-N0,M2-N2,N1-N1/),'3412',t2B,D2)
        allocate(S131(M2+1:N3,N1+1:M2,M2+1:N3,N1+1:M2))
        I1=K9*K6
        I2=K9*K6
@@ -3758,16 +3758,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum3412(M2,N3,N1,M2,M2,N3,N1,M2,X26,S131, 1.000)
+       call sum_stripe(4,shape(X26),size(X26),'3412',1.000,
+     & X26,S131)
        deallocate(S131)
 C
        allocate(D1(N0+1:N2,N0+1:N1,N2+1:M2,N1+1:M2))
-       call reorder3412(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N2,N0,N1,N2,M2,N1,M2,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,N0-N0,N2-N2,N1-N1/),'3412',VBHHPP,D1)
        allocate(D2(N0+1:N2,N0+1:N1,M2+1:N3,N1+1:M2))
-       call reorder3412(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N2,N0,N1,M2,N3,N1,M2,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N0-N0,M2-N2,N1-N1/),'3412',t2B,D2)
        allocate(S132(M2+1:N3,N1+1:M2,N2+1:M2,N1+1:M2))
        I1=K9*K0
        I2=K9*K6
@@ -3776,16 +3776,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum3412(N2,M2,N1,M2,M2,N3,N1,M2,X27,S132, 1.000)
+       call sum_stripe(4,shape(X27),size(X27),'3412',1.000,
+     & X27,S132)
        deallocate(S132)
 C
        allocate(D1(N0+1:N2,N0+1:N1,N1+1:N3,M2+1:N3))
-       call reorder3421(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N2,N0,N1,N1,N3,M2,N3,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,N0-N0,N1-N1,M2-N2/),'3421',VBHHPP,D1)
        allocate(D2(N0+1:N2,N0+1:N1,N1+1:N3,M2+1:N3))
-       call reorder3421(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N2,N0,N1,N1,N3,M2,N3,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N0-N0,N1-N1,M2-N2/),'3421',t2B,D2)
        allocate(Q24(M2+1:N3,M2+1:N3))
        I1=K6
        I2=K6
@@ -3794,16 +3794,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum21(M2,N3,M2,N3,X43,Q24,-1.000)
+       call sum_stripe(2,shape(X43),size(X43),'21',-1.000,
+     & X43,Q24)
        deallocate(Q24)
 C
        allocate(D1(N0+1:N2,N0+1:N1,N1+1:N3,N2+1:M2))
-       call reorder3421(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N2,N0,N1,N1,N3,N2,M2,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,N0-N0,N1-N1,N2-N2/),'3421',VBHHPP,D1)
        allocate(D2(N0+1:N2,N0+1:N1,N1+1:N3,M2+1:N3))
-       call reorder3421(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N2,N0,N1,N1,N3,M2,N3,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N0-N0,N1-N1,M2-N2/),'3421',t2B,D2)
        allocate(Q25(M2+1:N3,N2+1:M2))
        I1=K0
        I2=K6
@@ -3812,16 +3812,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum21(N2,M2,M2,N3,X44,Q25,-1.000)
+       call sum_stripe(2,shape(X44),size(X44),'21',-1.000,
+     & X44,Q25)
        deallocate(Q25)
 C
        allocate(D1(N0+1:N2,N0+1:N1,N2+1:N3,N1+1:M2))
-       call reorder3412(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N2,N0,N1,N2,N3,N1,M2,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,N0-N0,N2-N2,N1-N1/),'3412',VBHHPP,D1)
        allocate(D2(N0+1:N2,N0+1:N1,N2+1:N3,N1+1:M2))
-       call reorder3412(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N2,N0,N1,N2,N3,N1,M2,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N0-N0,N2-N2,N1-N1/),'3412',t2B,D2)
        allocate(Q26(N1+1:M2,N1+1:M2))
        I1=K9
        I2=K9
@@ -3830,16 +3830,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum21(N1,M2,N1,M2,X12,Q26,-1.000)
+       call sum_stripe(2,shape(X12),size(X12),'21',-1.000,
+     & X12,Q26)
        deallocate(Q26)
 C
        allocate(D1(N0+1:M1,M1+1:N2,N2+1:M2,N2+1:N3))
-       call reorder3412(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,M1,M1,N2,N2,M2,N2,N3,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/N0-N0,M1-N0,N2-N2,N2-N2/),'3412',VCHHPP,D1)
        allocate(F2(N0+1:M1,M1+1:N2,N2+1:M2,M2+1:N3,M2+1:N3,N0+1:M1))
-       call reorder463125(N2,N3,N2,N3,N2,M2,N0,N2,N0,N2,M1,N2,
-     & N0,M1,M1,N2,N2,M2,M2,N3,M2,N3,N0,M1,t3D,F2)
+       call reorder_shift(6,shape(t3D),size(t3D),shape(F2),size(F2),
+     & (/N0-N0,M1-M1,N2-N2,M2-N2,M2-N2,N0-N0/),'463125',t3D,F2)
        allocate(S133(M2+1:N3,M2+1:N3,N0+1:M1,N2+1:N3))
        I1=K4
        I2=K5*K6*K6
@@ -3848,16 +3848,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N2,N3,M2,N3,M2,N3,N0,M1,X4,S133, 1.000)
+       call sum_stripe(4,shape(X4),size(X4),'2341',1.000,X4,
+     & S133)
        deallocate(S133)
 C
        allocate(D1(M1+1:N2,M1+1:N2,N2+1:M2,N2+1:N3))
-       call reorder3412(N2,N3,N2,N3,N0,N2,N0,N2,
-     & M1,N2,M1,N2,N2,M2,N2,N3,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/M1-N0,M1-N0,N2-N2,N2-N2/),'3412',VCHHPP,D1)
        allocate(F2(M1+1:N2,M1+1:N2,N2+1:M2,M2+1:N3,M2+1:N3,N0+1:M1))
-       call reorder563124(N2,N3,N2,N3,N2,M2,N0,N2,N0,N2,M1,N2,
-     & M1,N2,M1,N2,N2,M2,M2,N3,M2,N3,N0,M1,t3D,F2)
+       call reorder_shift(6,shape(t3D),size(t3D),shape(F2),size(F2),
+     & (/M1-N0,M1-M1,N2-N2,M2-N2,M2-N2,N0-N0/),'563124',t3D,F2)
        allocate(S134(M2+1:N3,M2+1:N3,N0+1:M1,N2+1:N3))
        I1=K4
        I2=K5*K6*K6
@@ -3866,16 +3866,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N2,N3,M2,N3,M2,N3,N0,M1,X4,S134,-0.500)
+       call sum_stripe(4,shape(X4),size(X4),'2341',-0.500,
+     & X4,S134)
        deallocate(S134)
 C
        allocate(D1(M1+1:N2,M2+1:N3,N2+1:M2,N0+1:N2))
-       call reorder3124(N2,N3,N2,N3,N0,N2,N0,N2,
-     & M1,N2,M2,N3,N2,M2,N0,N2,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/M1-N0,M2-N2,N2-N2,N0-N0/),'3124',VCHHPP,D1)
        allocate(F2(M1+1:N2,M2+1:N3,N2+1:M2,M2+1:N3,N0+1:M1,N0+1:M1))
-       call reorder613245(N2,N3,N2,N3,N2,M2,N0,N2,N0,N2,M1,N2,
-     & M1,N2,M2,N3,N2,M2,M2,N3,N0,M1,N0,M1,t3D,F2)
+       call reorder_shift(6,shape(t3D),size(t3D),shape(F2),size(F2),
+     & (/M1-M1,M2-N2,N2-N2,M2-N2,N0-N0,N0-N0/),'613245',t3D,F2)
        allocate(S135(M2+1:N3,N0+1:M1,N0+1:M1,N0+1:N2))
        I1=K2
        I2=K5*K5*K6
@@ -3884,16 +3884,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N0,N2,M2,N3,N0,M1,N0,M1,X3,S135, 1.000)
+       call sum_stripe(4,shape(X3),size(X3),'2341',1.000,X3,
+     & S135)
        deallocate(S135)
 C
        allocate(D1(M1+1:N2,N2+1:M2,N2+1:M2,N0+1:N2))
-       call reorder3124(N2,N3,N2,N3,N0,N2,N0,N2,
-     & M1,N2,N2,M2,N2,M2,N0,N2,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/M1-N0,N2-N2,N2-N2,N0-N0/),'3124',VCHHPP,D1)
        allocate(F2(M1+1:N2,N2+1:M2,N2+1:M2,M2+1:N3,N0+1:M1,N0+1:M1))
-       call reorder623145(N2,N3,N2,N3,N2,M2,N0,N2,N0,N2,M1,N2,
-     & M1,N2,N2,M2,N2,M2,M2,N3,N0,M1,N0,M1,t3D,F2)
+       call reorder_shift(6,shape(t3D),size(t3D),shape(F2),size(F2),
+     & (/M1-M1,N2-N2,N2-N2,M2-N2,N0-N0,N0-N0/),'623145',t3D,F2)
        allocate(S136(M2+1:N3,N0+1:M1,N0+1:M1,N0+1:N2))
        I1=K2
        I2=K5*K5*K6
@@ -3902,16 +3902,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N0,N2,M2,N3,N0,M1,N0,M1,X3,S136,-0.500)
+       call sum_stripe(4,shape(X3),size(X3),'2341',-0.500,
+     & X3,S136)
        deallocate(S136)
 C
        allocate(D1(N0+1:N2,N2+1:N3,M1+1:N2,N2+1:M2))
-       call reorder4231(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N2,N3,M1,N2,N2,M2,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,M1-N0,N2-N2/),'4231',VCHHPP,D1)
        allocate(D2(N0+1:N2,N2+1:N3,N1+1:M2,M1+1:N1))
-       call reorder3124(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N2,N2,N3,N1,M2,M1,N1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N2-N2,N1-N1,M1-N0/),'3124',t2B,D2)
        allocate(S137(N1+1:M2,M1+1:N1,M1+1:N2,N2+1:M2))
        I1=K0*K8
        I2=K7*K9
@@ -3920,16 +3920,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum3412(M1,N2,N2,M2,N1,M2,M1,N1,X48,S137, 1.000)
+       call sum_stripe(4,shape(X48),size(X48),'3412',1.000,
+     & X48,S137)
        deallocate(S137)
 C
        allocate(D1(N0+1:M1,N0+1:M1,M2+1:N3,N2+1:N3))
-       call reorder3421(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,M1,N0,M1,M2,N3,N2,N3,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,N0-N0,M2-N1,N2-N2/),'3421',VBHHPP,D1)
        allocate(F2(N0+1:M1,N0+1:M1,M2+1:N3,M2+1:N3,N1+1:M2,M1+1:N1))
-       call reorder452136(N2,N3,N1,N3,N1,M2,N0,N2,N0,N1,M1,N1,
-     & N0,M1,N0,M1,M2,N3,M2,N3,N1,M2,M1,N1,t3B1,F2)
+       call reorder_shift(6,shape(t3B1),size(t3B1),shape(F2),size(F2),
+     & (/N0-N0,N0-N0,M2-N1,M2-N2,N1-N1,M1-M1/),'452136',t3B1,F2)
        allocate(S138(M2+1:N3,N1+1:M2,M1+1:N1,N2+1:N3))
        I1=K4
        I2=K7*K9*K6
@@ -3938,16 +3938,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N2,N3,M2,N3,N1,M2,M1,N1,X6,S138,-1.000)
+       call sum_stripe(4,shape(X6),size(X6),'2341',-1.000,
+     & X6,S138)
        deallocate(S138)
 C
        allocate(D1(M1+1:N2,N0+1:M1,M2+1:N3,N2+1:N3))
-       call reorder3421(N2,N3,N1,N3,N0,N2,N0,N1,
-     & M1,N2,N0,M1,M2,N3,N2,N3,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/M1-N0,N0-N0,M2-N1,N2-N2/),'3421',VBHHPP,D1)
        allocate(F2(M1+1:N2,N0+1:M1,M2+1:N3,M2+1:N3,N1+1:M2,M1+1:N1))
-       call reorder452136(N2,N3,N1,N3,N1,M2,N0,N2,N0,N1,M1,N1,
-     & M1,N2,N0,M1,M2,N3,M2,N3,N1,M2,M1,N1,t3B1,F2)
+       call reorder_shift(6,shape(t3B1),size(t3B1),shape(F2),size(F2),
+     & (/M1-N0,N0-N0,M2-N1,M2-N2,N1-N1,M1-M1/),'452136',t3B1,F2)
        allocate(S139(M2+1:N3,N1+1:M2,M1+1:N1,N2+1:N3))
        I1=K4
        I2=K7*K9*K6
@@ -3956,16 +3956,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N2,N3,M2,N3,N1,M2,M1,N1,X6,S139,-1.000)
+       call sum_stripe(4,shape(X6),size(X6),'2341',-1.000,
+     & X6,S139)
        deallocate(S139)
 C
        allocate(D1(N0+1:M1,M1+1:N1,M2+1:N3,N2+1:N3))
-       call reorder3421(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,M1,M1,N1,M2,N3,N2,N3,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,M1-N0,M2-N1,N2-N2/),'3421',VBHHPP,D1)
        allocate(F2(N0+1:M1,M1+1:N1,M2+1:N3,M2+1:N3,N1+1:M2,M1+1:N1))
-       call reorder452136(N2,N3,N1,N3,N1,M2,N0,N2,N0,N1,M1,N1,
-     & N0,M1,M1,N1,M2,N3,M2,N3,N1,M2,M1,N1,t3B1,F2)
+       call reorder_shift(6,shape(t3B1),size(t3B1),shape(F2),size(F2),
+     & (/N0-N0,M1-N0,M2-N1,M2-N2,N1-N1,M1-M1/),'452136',t3B1,F2)
        allocate(S140(M2+1:N3,N1+1:M2,M1+1:N1,N2+1:N3))
        I1=K4
        I2=K7*K9*K6
@@ -3974,16 +3974,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N2,N3,M2,N3,N1,M2,M1,N1,X6,S140,-1.000)
+       call sum_stripe(4,shape(X6),size(X6),'2341',-1.000,
+     & X6,S140)
        deallocate(S140)
 C
        allocate(D1(M1+1:N2,M1+1:N1,M2+1:N3,N2+1:N3))
-       call reorder3421(N2,N3,N1,N3,N0,N2,N0,N1,
-     & M1,N2,M1,N1,M2,N3,N2,N3,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/M1-N0,M1-N0,M2-N1,N2-N2/),'3421',VBHHPP,D1)
        allocate(F2(M1+1:N2,M1+1:N1,M2+1:N3,M2+1:N3,N1+1:M2,M1+1:N1))
-       call reorder452136(N2,N3,N1,N3,N1,M2,N0,N2,N0,N1,M1,N1,
-     & M1,N2,M1,N1,M2,N3,M2,N3,N1,M2,M1,N1,t3B1,F2)
+       call reorder_shift(6,shape(t3B1),size(t3B1),shape(F2),size(F2),
+     & (/M1-N0,M1-N0,M2-N1,M2-N2,N1-N1,M1-M1/),'452136',t3B1,F2)
        allocate(S141(M2+1:N3,N1+1:M2,M1+1:N1,N2+1:N3))
        I1=K4
        I2=K7*K9*K6
@@ -3992,16 +3992,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N2,N3,M2,N3,N1,M2,M1,N1,X6,S141,-1.000)
+       call sum_stripe(4,shape(X6),size(X6),'2341',-1.000,
+     & X6,S141)
        deallocate(S141)
 C
        allocate(D1(N0+1:M1,N0+1:M1,N1+1:M2,N2+1:N3))
-       call reorder3421(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,M1,N0,M1,N1,M2,N2,N3,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,N0-N0,N1-N1,N2-N2/),'3421',VBHHPP,D1)
        allocate(F2(N0+1:M1,N0+1:M1,N1+1:M2,M2+1:N3,N1+1:M2,M1+1:N1))
-       call reorder452136(N2,N3,N1,N3,N1,M2,N0,N2,N0,N1,M1,N1,
-     & N0,M1,N0,M1,N1,M2,M2,N3,N1,M2,M1,N1,t3B1,F2)
+       call reorder_shift(6,shape(t3B1),size(t3B1),shape(F2),size(F2),
+     & (/N0-N0,N0-N0,N1-N1,M2-N2,N1-N1,M1-M1/),'452136',t3B1,F2)
        allocate(S142(M2+1:N3,N1+1:M2,M1+1:N1,N2+1:N3))
        I1=K4
        I2=K7*K9*K6
@@ -4010,16 +4010,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N2,N3,M2,N3,N1,M2,M1,N1,X6,S142,-1.000)
+       call sum_stripe(4,shape(X6),size(X6),'2341',-1.000,
+     & X6,S142)
        deallocate(S142)
 C
        allocate(D1(M1+1:N2,N0+1:M1,N1+1:M2,N2+1:N3))
-       call reorder3421(N2,N3,N1,N3,N0,N2,N0,N1,
-     & M1,N2,N0,M1,N1,M2,N2,N3,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/M1-N0,N0-N0,N1-N1,N2-N2/),'3421',VBHHPP,D1)
        allocate(F2(M1+1:N2,N0+1:M1,N1+1:M2,M2+1:N3,N1+1:M2,M1+1:N1))
-       call reorder452136(N2,N3,N1,N3,N1,M2,N0,N2,N0,N1,M1,N1,
-     & M1,N2,N0,M1,N1,M2,M2,N3,N1,M2,M1,N1,t3B1,F2)
+       call reorder_shift(6,shape(t3B1),size(t3B1),shape(F2),size(F2),
+     & (/M1-N0,N0-N0,N1-N1,M2-N2,N1-N1,M1-M1/),'452136',t3B1,F2)
        allocate(S143(M2+1:N3,N1+1:M2,M1+1:N1,N2+1:N3))
        I1=K4
        I2=K7*K9*K6
@@ -4028,16 +4028,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N2,N3,M2,N3,N1,M2,M1,N1,X6,S143,-1.000)
+       call sum_stripe(4,shape(X6),size(X6),'2341',-1.000,
+     & X6,S143)
        deallocate(S143)
 C
        allocate(D1(N0+1:M1,M1+1:N1,N1+1:M2,N2+1:N3))
-       call reorder3421(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,M1,M1,N1,N1,M2,N2,N3,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,M1-N0,N1-N1,N2-N2/),'3421',VBHHPP,D1)
        allocate(F2(N0+1:M1,M1+1:N1,N1+1:M2,M2+1:N3,N1+1:M2,M1+1:N1))
-       call reorder452136(N2,N3,N1,N3,N1,M2,N0,N2,N0,N1,M1,N1,
-     & N0,M1,M1,N1,N1,M2,M2,N3,N1,M2,M1,N1,t3B1,F2)
+       call reorder_shift(6,shape(t3B1),size(t3B1),shape(F2),size(F2),
+     & (/N0-N0,M1-N0,N1-N1,M2-N2,N1-N1,M1-M1/),'452136',t3B1,F2)
        allocate(S144(M2+1:N3,N1+1:M2,M1+1:N1,N2+1:N3))
        I1=K4
        I2=K7*K9*K6
@@ -4046,16 +4046,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N2,N3,M2,N3,N1,M2,M1,N1,X6,S144,-1.000)
+       call sum_stripe(4,shape(X6),size(X6),'2341',-1.000,
+     & X6,S144)
        deallocate(S144)
 C
        allocate(D1(M1+1:N2,M1+1:N1,N1+1:M2,N2+1:N3))
-       call reorder3421(N2,N3,N1,N3,N0,N2,N0,N1,
-     & M1,N2,M1,N1,N1,M2,N2,N3,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/M1-N0,M1-N0,N1-N1,N2-N2/),'3421',VBHHPP,D1)
        allocate(F2(M1+1:N2,M1+1:N1,N1+1:M2,M2+1:N3,N1+1:M2,M1+1:N1))
-       call reorder452136(N2,N3,N1,N3,N1,M2,N0,N2,N0,N1,M1,N1,
-     & M1,N2,M1,N1,N1,M2,M2,N3,N1,M2,M1,N1,t3B1,F2)
+       call reorder_shift(6,shape(t3B1),size(t3B1),shape(F2),size(F2),
+     & (/M1-N0,M1-N0,N1-N1,M2-N2,N1-N1,M1-M1/),'452136',t3B1,F2)
        allocate(S145(M2+1:N3,N1+1:M2,M1+1:N1,N2+1:N3))
        I1=K4
        I2=K7*K9*K6
@@ -4064,16 +4064,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N2,N3,M2,N3,N1,M2,M1,N1,X6,S145,-1.000)
+       call sum_stripe(4,shape(X6),size(X6),'2341',-1.000,
+     & X6,S145)
        deallocate(S145)
 C
        allocate(D1(N0+1:M1,M2+1:N3,M2+1:N3,N0+1:N2))
-       call reorder4123(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,M1,M2,N3,M2,N3,N0,N2,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,M2-N2,M2-N1,N0-N0/),'4123',VBHHPP,D1)
        allocate(F2(N0+1:M1,M2+1:N3,M2+1:N3,N1+1:M2,N0+1:M1,M1+1:N1))
-       call reorder512346(N2,N3,N1,N3,N1,M2,N0,N2,N0,N1,M1,N1,
-     & N0,M1,M2,N3,M2,N3,N1,M2,N0,M1,M1,N1,t3B1,F2)
+       call reorder_shift(6,shape(t3B1),size(t3B1),shape(F2),size(F2),
+     & (/N0-N0,M2-N2,M2-N1,N1-N1,N0-N0,M1-M1/),'512346',t3B1,F2)
        allocate(S146(N1+1:M2,N0+1:M1,M1+1:N1,N0+1:N2))
        I1=K2
        I2=K7*K5*K9
@@ -4082,16 +4082,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N0,N2,N1,M2,N0,M1,M1,N1,X5,S146, 1.000)
+       call sum_stripe(4,shape(X5),size(X5),'2341',1.000,X5,
+     & S146)
        deallocate(S146)
 C
        allocate(D1(M1+1:N1,M2+1:N3,M2+1:N3,N0+1:N2))
-       call reorder4123(N2,N3,N1,N3,N0,N2,N0,N1,
-     & M1,N1,M2,N3,M2,N3,N0,N2,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/M1-N0,M2-N2,M2-N1,N0-N0/),'4123',VBHHPP,D1)
        allocate(F2(M1+1:N1,M2+1:N3,M2+1:N3,N1+1:M2,N0+1:M1,M1+1:N1))
-       call reorder512346(N2,N3,N1,N3,N1,M2,N0,N2,N0,N1,M1,N1,
-     & M1,N1,M2,N3,M2,N3,N1,M2,N0,M1,M1,N1,t3B1,F2)
+       call reorder_shift(6,shape(t3B1),size(t3B1),shape(F2),size(F2),
+     & (/M1-N0,M2-N2,M2-N1,N1-N1,N0-N0,M1-M1/),'512346',t3B1,F2)
        allocate(S147(N1+1:M2,N0+1:M1,M1+1:N1,N0+1:N2))
        I1=K2
        I2=K7*K5*K9
@@ -4100,16 +4100,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N0,N2,N1,M2,N0,M1,M1,N1,X5,S147, 1.000)
+       call sum_stripe(4,shape(X5),size(X5),'2341',1.000,X5,
+     & S147)
        deallocate(S147)
 C
        allocate(D1(N0+1:M1,N2+1:M2,M2+1:N3,N0+1:N2))
-       call reorder4123(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,M1,N2,M2,M2,N3,N0,N2,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,M2-N1,N0-N0/),'4123',VBHHPP,D1)
        allocate(F2(N0+1:M1,N2+1:M2,M2+1:N3,N1+1:M2,N0+1:M1,M1+1:N1))
-       call reorder512346(N2,N3,N1,N3,N1,M2,N0,N2,N0,N1,M1,N1,
-     & N0,M1,N2,M2,M2,N3,N1,M2,N0,M1,M1,N1,t3B1,F2)
+       call reorder_shift(6,shape(t3B1),size(t3B1),shape(F2),size(F2),
+     & (/N0-N0,N2-N2,M2-N1,N1-N1,N0-N0,M1-M1/),'512346',t3B1,F2)
        allocate(S148(N1+1:M2,N0+1:M1,M1+1:N1,N0+1:N2))
        I1=K2
        I2=K7*K5*K9
@@ -4118,16 +4118,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N0,N2,N1,M2,N0,M1,M1,N1,X5,S148, 1.000)
+       call sum_stripe(4,shape(X5),size(X5),'2341',1.000,X5,
+     & S148)
        deallocate(S148)
 C
        allocate(D1(M1+1:N1,N2+1:M2,M2+1:N3,N0+1:N2))
-       call reorder4123(N2,N3,N1,N3,N0,N2,N0,N1,
-     & M1,N1,N2,M2,M2,N3,N0,N2,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/M1-N0,N2-N2,M2-N1,N0-N0/),'4123',VBHHPP,D1)
        allocate(F2(M1+1:N1,N2+1:M2,M2+1:N3,N1+1:M2,N0+1:M1,M1+1:N1))
-       call reorder512346(N2,N3,N1,N3,N1,M2,N0,N2,N0,N1,M1,N1,
-     & M1,N1,N2,M2,M2,N3,N1,M2,N0,M1,M1,N1,t3B1,F2)
+       call reorder_shift(6,shape(t3B1),size(t3B1),shape(F2),size(F2),
+     & (/M1-N0,N2-N2,M2-N1,N1-N1,N0-N0,M1-M1/),'512346',t3B1,F2)
        allocate(S149(N1+1:M2,N0+1:M1,M1+1:N1,N0+1:N2))
        I1=K2
        I2=K7*K5*K9
@@ -4136,16 +4136,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N0,N2,N1,M2,N0,M1,M1,N1,X5,S149, 1.000)
+       call sum_stripe(4,shape(X5),size(X5),'2341',1.000,X5,
+     & S149)
        deallocate(S149)
 C
        allocate(D1(N0+1:M1,M2+1:N3,N1+1:M2,N0+1:N2))
-       call reorder4123(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,M1,M2,N3,N1,M2,N0,N2,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,M2-N2,N1-N1,N0-N0/),'4123',VBHHPP,D1)
        allocate(F2(N0+1:M1,M2+1:N3,N1+1:M2,N1+1:M2,N0+1:M1,M1+1:N1))
-       call reorder512346(N2,N3,N1,N3,N1,M2,N0,N2,N0,N1,M1,N1,
-     & N0,M1,M2,N3,N1,M2,N1,M2,N0,M1,M1,N1,t3B1,F2)
+       call reorder_shift(6,shape(t3B1),size(t3B1),shape(F2),size(F2),
+     & (/N0-N0,M2-N2,N1-N1,N1-N1,N0-N0,M1-M1/),'512346',t3B1,F2)
        allocate(S150(N1+1:M2,N0+1:M1,M1+1:N1,N0+1:N2))
        I1=K2
        I2=K7*K5*K9
@@ -4154,16 +4154,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N0,N2,N1,M2,N0,M1,M1,N1,X5,S150, 1.000)
+       call sum_stripe(4,shape(X5),size(X5),'2341',1.000,X5,
+     & S150)
        deallocate(S150)
 C
        allocate(D1(M1+1:N1,M2+1:N3,N1+1:M2,N0+1:N2))
-       call reorder4123(N2,N3,N1,N3,N0,N2,N0,N1,
-     & M1,N1,M2,N3,N1,M2,N0,N2,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/M1-N0,M2-N2,N1-N1,N0-N0/),'4123',VBHHPP,D1)
        allocate(F2(M1+1:N1,M2+1:N3,N1+1:M2,N1+1:M2,N0+1:M1,M1+1:N1))
-       call reorder512346(N2,N3,N1,N3,N1,M2,N0,N2,N0,N1,M1,N1,
-     & M1,N1,M2,N3,N1,M2,N1,M2,N0,M1,M1,N1,t3B1,F2)
+       call reorder_shift(6,shape(t3B1),size(t3B1),shape(F2),size(F2),
+     & (/M1-N0,M2-N2,N1-N1,N1-N1,N0-N0,M1-M1/),'512346',t3B1,F2)
        allocate(S151(N1+1:M2,N0+1:M1,M1+1:N1,N0+1:N2))
        I1=K2
        I2=K7*K5*K9
@@ -4172,16 +4172,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N0,N2,N1,M2,N0,M1,M1,N1,X5,S151, 1.000)
+       call sum_stripe(4,shape(X5),size(X5),'2341',1.000,X5,
+     & S151)
        deallocate(S151)
 C
        allocate(D1(N0+1:M1,N2+1:M2,N1+1:M2,N0+1:N2))
-       call reorder4123(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,M1,N2,M2,N1,M2,N0,N2,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,N1-N1,N0-N0/),'4123',VBHHPP,D1)
        allocate(F2(N0+1:M1,N2+1:M2,N1+1:M2,N1+1:M2,N0+1:M1,M1+1:N1))
-       call reorder512346(N2,N3,N1,N3,N1,M2,N0,N2,N0,N1,M1,N1,
-     & N0,M1,N2,M2,N1,M2,N1,M2,N0,M1,M1,N1,t3B1,F2)
+       call reorder_shift(6,shape(t3B1),size(t3B1),shape(F2),size(F2),
+     & (/N0-N0,N2-N2,N1-N1,N1-N1,N0-N0,M1-M1/),'512346',t3B1,F2)
        allocate(S152(N1+1:M2,N0+1:M1,M1+1:N1,N0+1:N2))
        I1=K2
        I2=K7*K5*K9
@@ -4190,16 +4190,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N0,N2,N1,M2,N0,M1,M1,N1,X5,S152, 1.000)
+       call sum_stripe(4,shape(X5),size(X5),'2341',1.000,X5,
+     & S152)
        deallocate(S152)
 C
        allocate(D1(M1+1:N1,N2+1:M2,N1+1:M2,N0+1:N2))
-       call reorder4123(N2,N3,N1,N3,N0,N2,N0,N1,
-     & M1,N1,N2,M2,N1,M2,N0,N2,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/M1-N0,N2-N2,N1-N1,N0-N0/),'4123',VBHHPP,D1)
        allocate(F2(M1+1:N1,N2+1:M2,N1+1:M2,N1+1:M2,N0+1:M1,M1+1:N1))
-       call reorder512346(N2,N3,N1,N3,N1,M2,N0,N2,N0,N1,M1,N1,
-     & M1,N1,N2,M2,N1,M2,N1,M2,N0,M1,M1,N1,t3B1,F2)
+       call reorder_shift(6,shape(t3B1),size(t3B1),shape(F2),size(F2),
+     & (/M1-N0,N2-N2,N1-N1,N1-N1,N0-N0,M1-M1/),'512346',t3B1,F2)
        allocate(S153(N1+1:M2,N0+1:M1,M1+1:N1,N0+1:N2))
        I1=K2
        I2=K7*K5*K9
@@ -4208,16 +4208,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N0,N2,N1,M2,N0,M1,M1,N1,X5,S153, 1.000)
+       call sum_stripe(4,shape(X5),size(X5),'2341',1.000,X5,
+     & S153)
        deallocate(S153)
 C
        allocate(D1(N0+1:N2,N2+1:N3,N0+1:M1,M2+1:N3))
-       call reorder3142(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N2,N2,N3,N0,M1,M2,N3,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,N0-N0,M2-N1/),'3142',VBHHPP,D1)
        allocate(D2(N0+1:N2,N2+1:N3,M2+1:N3,N0+1:M1))
-       call reorder3124(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N2,N3,M2,N3,N0,M1,t2C,D2)
+       call reorder_shift(4,shape(t2C),size(t2C),shape(D2),size(D2),
+     & (/N0-N0,N2-N2,M2-N2,N0-N0/),'3124',t2C,D2)
        allocate(S154(M2+1:N3,N0+1:M1,N0+1:M1,M2+1:N3))
        I1=K6*K5
        I2=K5*K6
@@ -4226,16 +4226,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum3412(N0,M1,M2,N3,M2,N3,N0,M1,X7,S154, 1.000)
+       call sum_stripe(4,shape(X7),size(X7),'3412',1.000,X7,
+     & S154)
        deallocate(S154)
 C
        allocate(D1(N0+1:N2,N2+1:N3,M1+1:N1,M2+1:N3))
-       call reorder3142(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N2,N2,N3,M1,N1,M2,N3,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,M1-N0,M2-N1/),'3142',VBHHPP,D1)
        allocate(D2(N0+1:N2,N2+1:N3,M2+1:N3,N0+1:M1))
-       call reorder3124(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N2,N3,M2,N3,N0,M1,t2C,D2)
+       call reorder_shift(4,shape(t2C),size(t2C),shape(D2),size(D2),
+     & (/N0-N0,N2-N2,M2-N2,N0-N0/),'3124',t2C,D2)
        allocate(S155(M2+1:N3,N0+1:M1,M1+1:N1,M2+1:N3))
        I1=K6*K7
        I2=K5*K6
@@ -4244,16 +4244,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum3412(M1,N1,M2,N3,M2,N3,N0,M1,X8,S155, 1.000)
+       call sum_stripe(4,shape(X8),size(X8),'3412',1.000,X8,
+     & S155)
        deallocate(S155)
 C
        allocate(D1(N0+1:N2,N2+1:N3,N0+1:M1,N1+1:M2))
-       call reorder3142(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N2,N2,N3,N0,M1,N1,M2,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,N0-N0,N1-N1/),'3142',VBHHPP,D1)
        allocate(D2(N0+1:N2,N2+1:N3,M2+1:N3,N0+1:M1))
-       call reorder3124(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N2,N3,M2,N3,N0,M1,t2C,D2)
+       call reorder_shift(4,shape(t2C),size(t2C),shape(D2),size(D2),
+     & (/N0-N0,N2-N2,M2-N2,N0-N0/),'3124',t2C,D2)
        allocate(S156(M2+1:N3,N0+1:M1,N0+1:M1,N1+1:M2))
        I1=K9*K5
        I2=K5*K6
@@ -4262,16 +4262,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum3412(N0,M1,N1,M2,M2,N3,N0,M1,X9,S156, 1.000)
+       call sum_stripe(4,shape(X9),size(X9),'3412',1.000,X9,
+     & S156)
        deallocate(S156)
 C
        allocate(D1(N0+1:N2,N2+1:N3,M1+1:N1,N1+1:M2))
-       call reorder3142(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N2,N2,N3,M1,N1,N1,M2,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,M1-N0,N1-N1/),'3142',VBHHPP,D1)
        allocate(D2(N0+1:N2,N2+1:N3,M2+1:N3,N0+1:M1))
-       call reorder3124(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N2,N3,M2,N3,N0,M1,t2C,D2)
+       call reorder_shift(4,shape(t2C),size(t2C),shape(D2),size(D2),
+     & (/N0-N0,N2-N2,M2-N2,N0-N0/),'3124',t2C,D2)
        allocate(S157(M2+1:N3,N0+1:M1,M1+1:N1,N1+1:M2))
        I1=K9*K7
        I2=K5*K6
@@ -4280,16 +4280,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum3412(M1,N1,N1,M2,M2,N3,N0,M1,X10,S157, 1.000)
+       call sum_stripe(4,shape(X10),size(X10),'3412',1.000,
+     & X10,S157)
        deallocate(S157)
 C
        allocate(D1(N0+1:M1,N0+1:M1,M2+1:N3,N2+1:N3))
-       call reorder3421(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,M1,N0,M1,M2,N3,N2,N3,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/N0-N0,N0-N0,M2-N2,N2-N2/),'3421',VCHHPP,D1)
        allocate(F2(N0+1:M1,N0+1:M1,M2+1:N3,M2+1:N3,N1+1:M2,M1+1:N1))
-       call reorder451236(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,
-     & N0,M1,N0,M1,M2,N3,M2,N3,N1,M2,M1,N1,t3C2,F2)
+       call reorder_shift(6,shape(t3C2),size(t3C2),shape(F2),size(F2),
+     & (/N0-N0,N0-N0,M2-M2,M2-M2,N1-N1,M1-M1/),'451236',t3C2,F2)
        allocate(S158(M2+1:N3,N1+1:M2,M1+1:N1,N2+1:N3))
        I1=K4
        I2=K7*K9*K6
@@ -4298,16 +4298,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N2,N3,M2,N3,N1,M2,M1,N1,X6,S158, 0.500)
+       call sum_stripe(4,shape(X6),size(X6),'2341',0.500,X6,
+     & S158)
        deallocate(S158)
 C
        allocate(D1(N0+1:M1,M1+1:N2,M2+1:N3,N2+1:N3))
-       call reorder3421(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,M1,M1,N2,M2,N3,N2,N3,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/N0-N0,M1-N0,M2-N2,N2-N2/),'3421',VCHHPP,D1)
        allocate(F2(N0+1:M1,M1+1:N2,M2+1:N3,M2+1:N3,N1+1:M2,M1+1:N1))
-       call reorder451236(M2,N3,M2,N3,N1,M2,N0,N2,M1,N2,N0,N1,
-     & N0,M1,M1,N2,M2,N3,M2,N3,N1,M2,M1,N1,t3C3,F2)
+       call reorder_shift(6,shape(t3C3),size(t3C3),shape(F2),size(F2),
+     & (/N0-N0,M1-M1,M2-M2,M2-M2,N1-N1,M1-N0/),'451236',t3C3,F2)
        allocate(S159(M2+1:N3,N1+1:M2,M1+1:N1,N2+1:N3))
        I1=K4
        I2=K7*K9*K6
@@ -4316,16 +4316,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N2,N3,M2,N3,N1,M2,M1,N1,X6,S159, 1.000)
+       call sum_stripe(4,shape(X6),size(X6),'2341',1.000,X6,
+     & S159)
        deallocate(S159)
 C
        allocate(D1(M1+1:N2,M1+1:N2,M2+1:N3,N2+1:N3))
-       call reorder3421(N2,N3,N2,N3,N0,N2,N0,N2,
-     & M1,N2,M1,N2,M2,N3,N2,N3,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/M1-N0,M1-N0,M2-N2,N2-N2/),'3421',VCHHPP,D1)
        allocate(F2(M1+1:N2,M1+1:N2,M2+1:N3,M2+1:N3,N1+1:M2,M1+1:N1))
-       call reorder451236(M2,N3,M2,N3,N1,M2,N0,N2,M1,N2,N0,N1,
-     & M1,N2,M1,N2,M2,N3,M2,N3,N1,M2,M1,N1,t3C3,F2)
+       call reorder_shift(6,shape(t3C3),size(t3C3),shape(F2),size(F2),
+     & (/M1-N0,M1-M1,M2-M2,M2-M2,N1-N1,M1-N0/),'451236',t3C3,F2)
        allocate(S160(M2+1:N3,N1+1:M2,M1+1:N1,N2+1:N3))
        I1=K4
        I2=K7*K9*K6
@@ -4334,16 +4334,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N2,N3,M2,N3,N1,M2,M1,N1,X6,S160, 0.500)
+       call sum_stripe(4,shape(X6),size(X6),'2341',0.500,X6,
+     & S160)
        deallocate(S160)
 C
        allocate(D1(N0+1:M1,N0+1:M1,N2+1:M2,N2+1:N3))
-       call reorder3421(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,M1,N0,M1,N2,M2,N2,N3,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/N0-N0,N0-N0,N2-N2,N2-N2/),'3421',VCHHPP,D1)
        allocate(F2(N0+1:M1,N0+1:M1,N2+1:M2,M2+1:N3,N1+1:M2,M1+1:N1))
-       call reorder452136(N2,N3,N2,M2,N1,N3,N0,M1,N0,M1,M1,N1,
-     & N0,M1,N0,M1,N2,M2,M2,N3,N1,M2,M1,N1,t3C4,F2)
+       call reorder_shift(6,shape(t3C4),size(t3C4),shape(F2),size(F2),
+     & (/N0-N0,N0-N0,N2-N2,M2-N2,N1-N1,M1-M1/),'452136',t3C4,F2)
        allocate(S161(M2+1:N3,N1+1:M2,M1+1:N1,N2+1:N3))
        I1=K4
        I2=K7*K9*K6
@@ -4352,16 +4352,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N2,N3,M2,N3,N1,M2,M1,N1,X6,S161,-0.500)
+       call sum_stripe(4,shape(X6),size(X6),'2341',-0.500,
+     & X6,S161)
        deallocate(S161)
 C
        allocate(D1(N0+1:M1,M1+1:N2,N2+1:M2,N2+1:N3))
-       call reorder3421(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,M1,M1,N2,N2,M2,N2,N3,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/N0-N0,M1-N0,N2-N2,N2-N2/),'3421',VCHHPP,D1)
        allocate(F2(N0+1:M1,M1+1:N2,N2+1:M2,M2+1:N3,N1+1:M2,M1+1:N1))
-       call reorder452136(N2,N3,N2,M2,N1,N3,N0,N2,M1,N2,N0,N1,
-     & N0,M1,M1,N2,N2,M2,M2,N3,N1,M2,M1,N1,t3C1,F2)
+       call reorder_shift(6,shape(t3C1),size(t3C1),shape(F2),size(F2),
+     & (/N0-N0,M1-M1,N2-N2,M2-N2,N1-N1,M1-N0/),'452136',t3C1,F2)
        allocate(S162(M2+1:N3,N1+1:M2,M1+1:N1,N2+1:N3))
        I1=K4
        I2=K7*K9*K6
@@ -4370,16 +4370,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N2,N3,M2,N3,N1,M2,M1,N1,X6,S162,-1.000)
+       call sum_stripe(4,shape(X6),size(X6),'2341',-1.000,
+     & X6,S162)
        deallocate(S162)
 C
        allocate(D1(M1+1:N2,M1+1:N2,N2+1:M2,N2+1:N3))
-       call reorder3421(N2,N3,N2,N3,N0,N2,N0,N2,
-     & M1,N2,M1,N2,N2,M2,N2,N3,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/M1-N0,M1-N0,N2-N2,N2-N2/),'3421',VCHHPP,D1)
        allocate(F2(M1+1:N2,M1+1:N2,N2+1:M2,M2+1:N3,N1+1:M2,M1+1:N1))
-       call reorder452136(N2,N3,N2,M2,N1,N3,N0,N2,M1,N2,N0,N1,
-     & M1,N2,M1,N2,N2,M2,M2,N3,N1,M2,M1,N1,t3C1,F2)
+       call reorder_shift(6,shape(t3C1),size(t3C1),shape(F2),size(F2),
+     & (/M1-N0,M1-M1,N2-N2,M2-N2,N1-N1,M1-N0/),'452136',t3C1,F2)
        allocate(S163(M2+1:N3,N1+1:M2,M1+1:N1,N2+1:N3))
        I1=K4
        I2=K7*K9*K6
@@ -4388,16 +4388,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N2,N3,M2,N3,N1,M2,M1,N1,X6,S163,-0.500)
+       call sum_stripe(4,shape(X6),size(X6),'2341',-0.500,
+     & X6,S163)
        deallocate(S163)
 C
        allocate(D1(N2+1:N3,N2+1:N3,N0+1:M1,N0+1:M1))
-       call reorder1234(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N2,N3,N2,N3,N0,M1,N0,M1,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/N2-N2,N2-N2,N0-N0,N0-N0/),'1234',VCHHPP,D1)
        allocate(D2(N2+1:N3,N2+1:N3,N0+1:M1,N0+1:M1))
-       call reorder1234(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N2,N3,N2,N3,N0,M1,N0,M1,t2C,D2)
+       call reorder_shift(4,shape(t2C),size(t2C),shape(D2),size(D2),
+     & (/N2-N2,N2-N2,N0-N0,N0-N0/),'1234',t2C,D2)
        allocate(S164(N0+1:M1,N0+1:M1,N0+1:M1,N0+1:M1))
        I1=K5*K5
        I2=K5*K5
@@ -4408,16 +4408,16 @@ C
 C
        allocate(X28(N0+1:M1,N0+1:M1,N0+1:M1,N0+1:M1))
        X28=0.0d0
-       call
-     & sum3412(N0,M1,N0,M1,N0,M1,N0,M1,X28,S164, 0.500)
+       call sum_stripe(4,shape(X28),size(X28),'3412',0.500,
+     & X28,S164)
        deallocate(S164)
 C
        allocate(D1(N2+1:N3,N2+1:N3,N0+1:M1,M1+1:N2))
-       call reorder1234(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N2,N3,N2,N3,N0,M1,M1,N2,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/N2-N2,N2-N2,N0-N0,M1-N0/),'1234',VCHHPP,D1)
        allocate(D2(N2+1:N3,N2+1:N3,N0+1:M1,N0+1:M1))
-       call reorder1234(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N2,N3,N2,N3,N0,M1,N0,M1,t2C,D2)
+       call reorder_shift(4,shape(t2C),size(t2C),shape(D2),size(D2),
+     & (/N2-N2,N2-N2,N0-N0,N0-N0/),'1234',t2C,D2)
        allocate(S165(N0+1:M1,N0+1:M1,N0+1:M1,M1+1:N2))
        I1=K8*K5
        I2=K5*K5
@@ -4428,16 +4428,16 @@ C
 C
        allocate(X29(N0+1:M1,M1+1:N2,N0+1:M1,N0+1:M1))
        X29=0.0d0
-       call
-     & sum3412(N0,M1,M1,N2,N0,M1,N0,M1,X29,S165, 0.500)
+       call sum_stripe(4,shape(X29),size(X29),'3412',0.500,
+     & X29,S165)
        deallocate(S165)
 C
        allocate(D1(N2+1:N3,N2+1:N3,M1+1:N2,M1+1:N2))
-       call reorder1234(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N2,N3,N2,N3,M1,N2,M1,N2,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/N2-N2,N2-N2,M1-N0,M1-N0/),'1234',VCHHPP,D1)
        allocate(D2(N2+1:N3,N2+1:N3,N0+1:M1,N0+1:M1))
-       call reorder1234(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N2,N3,N2,N3,N0,M1,N0,M1,t2C,D2)
+       call reorder_shift(4,shape(t2C),size(t2C),shape(D2),size(D2),
+     & (/N2-N2,N2-N2,N0-N0,N0-N0/),'1234',t2C,D2)
        allocate(S166(N0+1:M1,N0+1:M1,M1+1:N2,M1+1:N2))
        I1=K8*K8
        I2=K5*K5
@@ -4448,16 +4448,16 @@ C
 C
        allocate(X30(M1+1:N2,M1+1:N2,N0+1:M1,N0+1:M1))
        X30=0.0d0
-       call
-     & sum3412(M1,N2,M1,N2,N0,M1,N0,M1,X30,S166, 0.500)
+       call sum_stripe(4,shape(X30),size(X30),'3412',0.500,
+     & X30,S166)
        deallocate(S166)
 C
        allocate(D1(N0+1:M1,M2+1:N3,M2+1:N3,N0+1:N2))
-       call reorder4123(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,M1,M2,N3,M2,N3,N0,N2,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/N0-N0,M2-N2,M2-N2,N0-N0/),'4123',VCHHPP,D1)
        allocate(F2(N0+1:M1,M2+1:N3,M2+1:N3,N1+1:M2,N0+1:M1,M1+1:N1))
-       call reorder412356(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,
-     & N0,M1,M2,N3,M2,N3,N1,M2,N0,M1,M1,N1,t3C2,F2)
+       call reorder_shift(6,shape(t3C2),size(t3C2),shape(F2),size(F2),
+     & (/N0-N0,M2-M2,M2-M2,N1-N1,N0-N0,M1-M1/),'412356',t3C2,F2)
        allocate(S167(N1+1:M2,N0+1:M1,M1+1:N1,N0+1:N2))
        I1=K2
        I2=K7*K5*K9
@@ -4466,16 +4466,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N0,N2,N1,M2,N0,M1,M1,N1,X5,S167,-0.500)
+       call sum_stripe(4,shape(X5),size(X5),'2341',-0.500,
+     & X5,S167)
        deallocate(S167)
 C
        allocate(D1(M1+1:N2,M2+1:N3,M2+1:N3,N0+1:N2))
-       call reorder4123(N2,N3,N2,N3,N0,N2,N0,N2,
-     & M1,N2,M2,N3,M2,N3,N0,N2,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/M1-N0,M2-N2,M2-N2,N0-N0/),'4123',VCHHPP,D1)
        allocate(F2(M1+1:N2,M2+1:N3,M2+1:N3,N1+1:M2,N0+1:M1,M1+1:N1))
-       call reorder512346(M2,N3,M2,N3,N1,M2,N0,N2,M1,N2,N0,N1,
-     & M1,N2,M2,N3,M2,N3,N1,M2,N0,M1,M1,N1,t3C3,F2)
+       call reorder_shift(6,shape(t3C3),size(t3C3),shape(F2),size(F2),
+     & (/M1-M1,M2-M2,M2-M2,N1-N1,N0-N0,M1-N0/),'512346',t3C3,F2)
        allocate(S168(N1+1:M2,N0+1:M1,M1+1:N1,N0+1:N2))
        I1=K2
        I2=K7*K5*K9
@@ -4484,16 +4484,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N0,N2,N1,M2,N0,M1,M1,N1,X5,S168, 0.500)
+       call sum_stripe(4,shape(X5),size(X5),'2341',0.500,X5,
+     & S168)
        deallocate(S168)
 C
        allocate(D1(N0+1:M1,M2+1:N3,N2+1:M2,N0+1:N2))
-       call reorder4123(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,M1,M2,N3,N2,M2,N0,N2,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/N0-N0,M2-N2,N2-N2,N0-N0/),'4123',VCHHPP,D1)
        allocate(F2(N0+1:M1,M2+1:N3,N2+1:M2,N1+1:M2,N0+1:M1,M1+1:N1))
-       call reorder412356(N2,N3,N2,M2,N1,N3,N0,M1,N0,M1,M1,N1,
-     & N0,M1,M2,N3,N2,M2,N1,M2,N0,M1,M1,N1,t3C4,F2)
+       call reorder_shift(6,shape(t3C4),size(t3C4),shape(F2),size(F2),
+     & (/N0-N0,M2-N2,N2-N2,N1-N1,N0-N0,M1-M1/),'412356',t3C4,F2)
        allocate(S169(N1+1:M2,N0+1:M1,M1+1:N1,N0+1:N2))
        I1=K2
        I2=K7*K5*K9
@@ -4502,16 +4502,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N0,N2,N1,M2,N0,M1,M1,N1,X5,S169,-1.000)
+       call sum_stripe(4,shape(X5),size(X5),'2341',-1.000,
+     & X5,S169)
        deallocate(S169)
 C
        allocate(D1(M1+1:N2,M2+1:N3,N2+1:M2,N0+1:N2))
-       call reorder4123(N2,N3,N2,N3,N0,N2,N0,N2,
-     & M1,N2,M2,N3,N2,M2,N0,N2,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/M1-N0,M2-N2,N2-N2,N0-N0/),'4123',VCHHPP,D1)
        allocate(F2(M1+1:N2,M2+1:N3,N2+1:M2,N1+1:M2,N0+1:M1,M1+1:N1))
-       call reorder512346(N2,N3,N2,M2,N1,N3,N0,N2,M1,N2,N0,N1,
-     & M1,N2,M2,N3,N2,M2,N1,M2,N0,M1,M1,N1,t3C1,F2)
+       call reorder_shift(6,shape(t3C1),size(t3C1),shape(F2),size(F2),
+     & (/M1-M1,M2-N2,N2-N2,N1-N1,N0-N0,M1-N0/),'512346',t3C1,F2)
        allocate(S170(N1+1:M2,N0+1:M1,M1+1:N1,N0+1:N2))
        I1=K2
        I2=K7*K5*K9
@@ -4520,16 +4520,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N0,N2,N1,M2,N0,M1,M1,N1,X5,S170, 1.000)
+       call sum_stripe(4,shape(X5),size(X5),'2341',1.000,X5,
+     & S170)
        deallocate(S170)
 C
        allocate(D1(N0+1:M1,N2+1:M2,N2+1:M2,N0+1:N2))
-       call reorder4123(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,M1,N2,M2,N2,M2,N0,N2,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,N2-N2,N0-N0/),'4123',VCHHPP,D1)
        allocate(F2(N0+1:M1,N2+1:M2,N2+1:M2,N1+1:M2,N0+1:M1,M1+1:N1))
-       call reorder412356(N2,N3,N2,M2,N1,N3,N0,M1,N0,M1,M1,N1,
-     & N0,M1,N2,M2,N2,M2,N1,M2,N0,M1,M1,N1,t3C4,F2)
+       call reorder_shift(6,shape(t3C4),size(t3C4),shape(F2),size(F2),
+     & (/N0-N0,N2-N2,N2-N2,N1-N1,N0-N0,M1-M1/),'412356',t3C4,F2)
        allocate(S171(N1+1:M2,N0+1:M1,M1+1:N1,N0+1:N2))
        I1=K2
        I2=K7*K5*K9
@@ -4538,16 +4538,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N0,N2,N1,M2,N0,M1,M1,N1,X5,S171,-0.500)
+       call sum_stripe(4,shape(X5),size(X5),'2341',-0.500,
+     & X5,S171)
        deallocate(S171)
 C
        allocate(D1(M1+1:N2,N2+1:M2,N2+1:M2,N0+1:N2))
-       call reorder4123(N2,N3,N2,N3,N0,N2,N0,N2,
-     & M1,N2,N2,M2,N2,M2,N0,N2,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/M1-N0,N2-N2,N2-N2,N0-N0/),'4123',VCHHPP,D1)
        allocate(F2(M1+1:N2,N2+1:M2,N2+1:M2,N1+1:M2,N0+1:M1,M1+1:N1))
-       call reorder512346(N2,N3,N2,M2,N1,N3,N0,N2,M1,N2,N0,N1,
-     & M1,N2,N2,M2,N2,M2,N1,M2,N0,M1,M1,N1,t3C1,F2)
+       call reorder_shift(6,shape(t3C1),size(t3C1),shape(F2),size(F2),
+     & (/M1-M1,N2-N2,N2-N2,N1-N1,N0-N0,M1-N0/),'512346',t3C1,F2)
        allocate(S172(N1+1:M2,N0+1:M1,M1+1:N1,N0+1:N2))
        I1=K2
        I2=K7*K5*K9
@@ -4556,16 +4556,16 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum2341(N0,N2,N1,M2,N0,M1,M1,N1,X5,S172, 0.500)
+       call sum_stripe(4,shape(X5),size(X5),'2341',0.500,X5,
+     & S172)
        deallocate(S172)
 C
        allocate(D1(N0+1:N2,N2+1:N3,N0+1:M1,M2+1:N3))
-       call reorder3142(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N2,N3,N0,M1,M2,N3,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,N0-N0,M2-N2/),'3142',VCHHPP,D1)
        allocate(D2(N0+1:N2,N2+1:N3,M2+1:N3,N0+1:M1))
-       call reorder3124(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N2,N3,M2,N3,N0,M1,t2C,D2)
+       call reorder_shift(4,shape(t2C),size(t2C),shape(D2),size(D2),
+     & (/N0-N0,N2-N2,M2-N2,N0-N0/),'3124',t2C,D2)
        allocate(S173(M2+1:N3,N0+1:M1,N0+1:M1,M2+1:N3))
        I1=K6*K5
        I2=K5*K6
@@ -4574,16 +4574,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum3412(N0,M1,M2,N3,M2,N3,N0,M1,X31,S173,-1.000)
+       call sum_stripe(4,shape(X31),size(X31),'3412',-1.000,
+     & X31,S173)
        deallocate(S173)
 C
        allocate(D1(N0+1:N2,N2+1:N3,M1+1:N2,M2+1:N3))
-       call reorder3142(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N2,N3,M1,N2,M2,N3,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,M1-N0,M2-N2/),'3142',VCHHPP,D1)
        allocate(D2(N0+1:N2,N2+1:N3,M2+1:N3,N0+1:M1))
-       call reorder3124(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N2,N3,M2,N3,N0,M1,t2C,D2)
+       call reorder_shift(4,shape(t2C),size(t2C),shape(D2),size(D2),
+     & (/N0-N0,N2-N2,M2-N2,N0-N0/),'3124',t2C,D2)
        allocate(S174(M2+1:N3,N0+1:M1,M1+1:N2,M2+1:N3))
        I1=K6*K8
        I2=K5*K6
@@ -4592,16 +4592,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum3412(M1,N2,M2,N3,M2,N3,N0,M1,X32,S174,-1.000)
+       call sum_stripe(4,shape(X32),size(X32),'3412',-1.000,
+     & X32,S174)
        deallocate(S174)
 C
        allocate(D1(N0+1:N2,N2+1:N3,N0+1:M1,N2+1:M2))
-       call reorder3142(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N2,N3,N0,M1,N2,M2,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,N0-N0,N2-N2/),'3142',VCHHPP,D1)
        allocate(D2(N0+1:N2,N2+1:N3,M2+1:N3,N0+1:M1))
-       call reorder3124(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N2,N3,M2,N3,N0,M1,t2C,D2)
+       call reorder_shift(4,shape(t2C),size(t2C),shape(D2),size(D2),
+     & (/N0-N0,N2-N2,M2-N2,N0-N0/),'3124',t2C,D2)
        allocate(S175(M2+1:N3,N0+1:M1,N0+1:M1,N2+1:M2))
        I1=K0*K5
        I2=K5*K6
@@ -4610,16 +4610,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum3412(N0,M1,N2,M2,M2,N3,N0,M1,X33,S175,-1.000)
+       call sum_stripe(4,shape(X33),size(X33),'3412',-1.000,
+     & X33,S175)
        deallocate(S175)
 C
        allocate(D1(N0+1:N2,N2+1:N3,M1+1:N2,N2+1:M2))
-       call reorder3142(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N2,N3,M1,N2,N2,M2,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,M1-N0,N2-N2/),'3142',VCHHPP,D1)
        allocate(D2(N0+1:N2,N2+1:N3,M2+1:N3,N0+1:M1))
-       call reorder3124(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N2,N3,M2,N3,N0,M1,t2C,D2)
+       call reorder_shift(4,shape(t2C),size(t2C),shape(D2),size(D2),
+     & (/N0-N0,N2-N2,M2-N2,N0-N0/),'3124',t2C,D2)
        allocate(S176(M2+1:N3,N0+1:M1,M1+1:N2,N2+1:M2))
        I1=K0*K8
        I2=K5*K6
@@ -4628,16 +4628,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum3412(M1,N2,N2,M2,M2,N3,N0,M1,X34,S176,-1.000)
+       call sum_stripe(4,shape(X34),size(X34),'3412',-1.000,
+     & X34,S176)
        deallocate(S176)
 C
        allocate(D1(N0+1:N2,N2+1:N3,N2+1:N3,N0+1:M1))
-       call reorder3124(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N2,N3,N2,N3,N0,M1,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,N2-N2,N0-N0/),'3124',VCHHPP,D1)
        allocate(D2(N0+1:N2,N2+1:N3,N2+1:N3,N0+1:M1))
-       call reorder3124(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N2,N3,N2,N3,N0,M1,t2C,D2)
+       call reorder_shift(4,shape(t2C),size(t2C),shape(D2),size(D2),
+     & (/N0-N0,N2-N2,N2-N2,N0-N0/),'3124',t2C,D2)
        allocate(Q27(N0+1:M1,N0+1:M1))
        I1=K5
        I2=K5
@@ -4646,16 +4646,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum21(N0,M1,N0,M1,X13,Q27, 0.500)
+       call sum_stripe(2,shape(X13),size(X13),'21',0.500,
+     & X13,Q27)
        deallocate(Q27)
 C
        allocate(D1(N0+1:N2,N2+1:N3,N2+1:N3,M1+1:N2))
-       call reorder3124(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N2,N3,N2,N3,M1,N2,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,N2-N2,M1-N0/),'3124',VCHHPP,D1)
        allocate(D2(N0+1:N2,N2+1:N3,N2+1:N3,N0+1:M1))
-       call reorder3124(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N2,N3,N2,N3,N0,M1,t2C,D2)
+       call reorder_shift(4,shape(t2C),size(t2C),shape(D2),size(D2),
+     & (/N0-N0,N2-N2,N2-N2,N0-N0/),'3124',t2C,D2)
        allocate(Q28(N0+1:M1,M1+1:N2))
        I1=K8
        I2=K5
@@ -4664,16 +4664,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum21(M1,N2,N0,M1,X14,Q28, 0.500)
+       call sum_stripe(2,shape(X14),size(X14),'21',0.500,
+     & X14,Q28)
        deallocate(Q28)
 C
        allocate(D1(M2+1:N3,M2+1:N3,N0+1:N2,N0+1:N2))
-       call reorder1234(N2,N3,N2,N3,N0,N2,N0,N2,
-     & M2,N3,M2,N3,N0,N2,N0,N2,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/M2-N2,M2-N2,N0-N0,N0-N0/),'1234',VCHHPP,D1)
        allocate(F2(M2+1:N3,M2+1:N3,N1+1:M2,N0+1:M1,N0+1:M1,M1+1:N1))
-       call reorder123456(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,
-     & M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,t3C2,F2)
+       call reorder_shift(6,shape(t3C2),size(t3C2),shape(F2),size(F2),
+     & (/M2-M2,M2-M2,N1-N1,N0-N0,N0-N0,M1-M1/),'123456',t3C2,F2)
        allocate(U244(N1+1:M2,N0+1:M1,N0+1:M1,M1+1:N1,N0+1:N2,N0+1:N2))
        I1=K2*K2
        I2=K7*K5*K5*K9
@@ -4683,11 +4683,11 @@ C
        deallocate(F2)
 C
        allocate(F1(N0+1:N2,N0+1:N2,N1+1:M2,N0+1:M1,N0+1:M1,M1+1:N1))
-       call reorder561234(N1,M2,N0,M1,N0,M1,M1,N1,N0,N2,N0,N2,
-     & N0,N2,N0,N2,N1,M2,N0,M1,N0,M1,M1,N1,U244,F1)
+       call reorder_shift(6,shape(U244),size(U244),shape(F1),size(F1),
+     & (/N0-N0,N0-N0,N1-N1,N0-N0,N0-N0,M1-M1/),'561234',U244,F1)
        allocate(D2(N0+1:N2,N0+1:N2,M2+1:N3,M2+1:N3))
-       call reorder3412(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N0,N2,M2,N3,M2,N3,t2C,D2)
+       call reorder_shift(4,shape(t2C),size(t2C),shape(D2),size(D2),
+     & (/N0-N0,N0-N0,M2-N2,M2-N2/),'3412',t2C,D2)
        allocate(Z245(M2+1:N3,M2+1:N3,N1+1:M2,N0+1:M1,N0+1:M1,M1+1:N1))
        I1=K7*K5*K5*K9
        I2=K6*K6
@@ -4700,11 +4700,11 @@ C
        deallocate(Z245)
 C
        allocate(F1(N0+1:N2,N0+1:N2,N1+1:M2,N0+1:M1,N0+1:M1,M1+1:N1))
-       call reorder651234(N1,M2,N0,M1,N0,M1,M1,N1,N0,N2,N0,N2,
-     & N0,N2,N0,N2,N1,M2,N0,M1,N0,M1,M1,N1,U244,F1)
+       call reorder_shift(6,shape(U244),size(U244),shape(F1),size(F1),
+     & (/N0-N0,N0-N0,N1-N1,N0-N0,N0-N0,M1-M1/),'651234',U244,F1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(U310(M2+1:N3,N0+1:N2,N1+1:M2,N0+1:M1,N0+1:M1,M1+1:N1))
        I1=K7*K5*K5*K9*K2
        I2=K6
@@ -4714,11 +4714,11 @@ C
        deallocate(B2)
 C
        allocate(F1(N0+1:N2,M2+1:N3,N1+1:M2,N0+1:M1,N0+1:M1,M1+1:N1))
-       call reorder213456(M2,N3,N0,N2,N1,M2,N0,M1,N0,M1,M1,N1,
-     & N0,N2,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,U310,F1)
+       call reorder_shift(6,shape(U310),size(U310),shape(F1),size(F1),
+     & (/N0-N0,M2-M2,N1-N1,N0-N0,N0-N0,M1-M1/),'213456',U310,F1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(Z311(M2+1:N3,M2+1:N3,N1+1:M2,N0+1:M1,N0+1:M1,M1+1:N1))
        I1=K7*K5*K5*K9*K6
        I2=K6
@@ -4732,11 +4732,11 @@ C
        deallocate(U310)
 C
        allocate(D1(N0+1:N2,N0+1:N2,N2+1:M2,N2+1:M2))
-       call reorder3412(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N0,N2,N2,M2,N2,M2,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/N0-N0,N0-N0,N2-N2,N2-N2/),'3412',VCHHPP,D1)
        allocate(D2(N0+1:N2,N0+1:N2,M2+1:N3,M2+1:N3))
-       call reorder3412(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N0,N2,M2,N3,M2,N3,t2C,D2)
+       call reorder_shift(4,shape(t2C),size(t2C),shape(D2),size(D2),
+     & (/N0-N0,N0-N0,M2-N2,M2-N2/),'3412',t2C,D2)
        allocate(S178(M2+1:N3,M2+1:N3,N2+1:M2,N2+1:M2))
        I1=K0*K0
        I2=K6*K6
@@ -4747,16 +4747,16 @@ C
 C
        allocate(X36(N2+1:M2,N2+1:M2,M2+1:N3,M2+1:N3))
        X36=0.0d0
-       call
-     & sum3412(N2,M2,N2,M2,M2,N3,M2,N3,X36,S178, 0.500)
+       call sum_stripe(4,shape(X36),size(X36),'3412',0.500,
+     & X36,S178)
        deallocate(S178)
 C
        allocate(D1(N0+1:N2,N0+1:N2,N2+1:N3,M2+1:N3))
-       call reorder3412(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N0,N2,N2,N3,M2,N3,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/N0-N0,N0-N0,N2-N2,M2-N2/),'3412',VCHHPP,D1)
        allocate(D2(N0+1:N2,N0+1:N2,N2+1:N3,M2+1:N3))
-       call reorder3412(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N0,N2,N2,N3,M2,N3,t2C,D2)
+       call reorder_shift(4,shape(t2C),size(t2C),shape(D2),size(D2),
+     & (/N0-N0,N0-N0,N2-N2,M2-N2/),'3412',t2C,D2)
        allocate(Q29(M2+1:N3,M2+1:N3))
        I1=K6
        I2=K6
@@ -4765,16 +4765,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum21(M2,N3,M2,N3,X15,Q29,-0.500)
+       call sum_stripe(2,shape(X15),size(X15),'21',-0.500,
+     & X15,Q29)
        deallocate(Q29)
 C
        allocate(D1(N0+1:N2,N0+1:N2,N2+1:N3,N2+1:M2))
-       call reorder3412(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N0,N2,N2,N3,N2,M2,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/N0-N0,N0-N0,N2-N2,N2-N2/),'3412',VCHHPP,D1)
        allocate(D2(N0+1:N2,N0+1:N2,N2+1:N3,M2+1:N3))
-       call reorder3412(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N0,N2,N2,N3,M2,N3,t2C,D2)
+       call reorder_shift(4,shape(t2C),size(t2C),shape(D2),size(D2),
+     & (/N0-N0,N0-N0,N2-N2,M2-N2/),'3412',t2C,D2)
        allocate(Q30(M2+1:N3,N2+1:M2))
        I1=K0
        I2=K6
@@ -4783,16 +4783,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum21(N2,M2,M2,N3,X16,Q30,-0.500)
+       call sum_stripe(2,shape(X16),size(X16),'21',-0.500,
+     & X16,Q30)
        deallocate(Q30)
 C
        allocate(D1(N1+1:N3,N0+1:N2,N0+1:N1,N0+1:M1))
-       call reorder2341(N0,N2,N1,N3,N0,N2,N0,N1,
-     & N1,N3,N0,N2,N0,N1,N0,M1,VBHHPH,D1)
+       call reorder_shift(4,shape(VBHHPH),size(VBHHPH),shape(D1),
+     & size(D1),(/N1-N1,N0-N0,N0-N0,N0-N0/),'2341',VBHHPH,D1)
        allocate(B2(N1+1:N3,M1+1:N1))
-       call reorder12(N1,N3,N0,N1,
-     & N1,N3,M1,N1,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N1-N1,M1-N0/),'12',t1A,B2)
        allocate(S179(M1+1:N1,N0+1:N2,N0+1:N1,N0+1:M1))
        I1=K5*K1*K2
        I2=K7
@@ -4802,11 +4802,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N0+1:N2,N0+1:N1,N0+1:M1,M1+1:N1))
-       call reorder2341(M1,N1,N0,N2,N0,N1,N0,M1,
-     & N0,N2,N0,N1,N0,M1,M1,N1,S179,D1)
+       call reorder_shift(4,shape(S179),size(S179),shape(D1),size(D1),
+     & (/N0-N0,N0-N0,N0-N0,M1-M1/),'2341',S179,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S187(M2+1:N3,N0+1:N1,N0+1:M1,M1+1:N1))
        I1=K7*K5*K1
        I2=K6
@@ -4815,16 +4815,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum2134(N0,N1,M2,N3,N0,M1,M1,N1,X1,S187,-1.000)
+       call sum_stripe(4,shape(X1),size(X1),'2134',-1.000,
+     & X1,S187)
        deallocate(S187)
 C
        allocate(D1(N0+1:N1,N0+1:N2,N0+1:M1,M1+1:N1))
-       call reorder3241(M1,N1,N0,N2,N0,N1,N0,M1,
-     & N0,N1,N0,N2,N0,M1,M1,N1,S179,D1)
+       call reorder_shift(4,shape(S179),size(S179),shape(D1),size(D1),
+     & (/N0-N0,N0-N0,N0-N0,M1-M1/),'3241',S179,D1)
        allocate(B2(N0+1:N1,N1+1:M2))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,M2,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N0-N0,N1-N1/),'21',t1A,B2)
        allocate(S180(N1+1:M2,N0+1:N2,N0+1:M1,M1+1:N1))
        I1=K7*K5*K2
        I2=K9
@@ -4833,16 +4833,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum2134(N0,N2,N1,M2,N0,M1,M1,N1,X5,S180,-1.000)
+       call sum_stripe(4,shape(X5),size(X5),'2134',-1.000,
+     & X5,S180)
        deallocate(S180)
 C
        allocate(D1(N1+1:N3,M1+1:N1,N0+1:N1,N1+1:M2))
-       call reorder2341(N1,N3,N1,N3,N0,N1,N0,N1,
-     & N1,N3,M1,N1,N0,N1,N1,M2,VAHHPP,D1)
+       call reorder_shift(4,shape(VAHHPP),size(VAHHPP),shape(D1),
+     & size(D1),(/N1-N1,M1-N0,N0-N0,N1-N1/),'2341',VAHHPP,D1)
        allocate(B2(N1+1:N3,M1+1:N1))
-       call reorder12(N1,N3,N0,N1,
-     & N1,N3,M1,N1,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N1-N1,M1-N0/),'12',t1A,B2)
        allocate(S183(M1+1:N1,M1+1:N1,N0+1:N1,N1+1:M2))
        I1=K9*K1*K7
        I2=K7
@@ -4852,11 +4852,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N0+1:N1,M1+1:N1,N1+1:M2,M1+1:N1))
-       call reorder3241(M1,N1,M1,N1,N0,N1,N1,M2,
-     & N0,N1,M1,N1,N1,M2,M1,N1,S183,D1)
+       call reorder_shift(4,shape(S183),size(S183),shape(D1),size(D1),
+     & (/N0-N0,M1-M1,N1-N1,M1-M1/),'3241',S183,D1)
        allocate(B2(N0+1:N1,N1+1:M2))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,M2,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N0-N0,N1-N1/),'21',t1A,B2)
        allocate(S184(N1+1:M2,M1+1:N1,N1+1:M2,M1+1:N1))
        I1=K7*K9*K7
        I2=K9
@@ -4865,13 +4865,13 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum3124(M1,N1,N1,M2,N1,M2,M1,N1,X47,S184,-1.000)
+       call sum_stripe(4,shape(X47),size(X47),'3124',-1.000,
+     & X47,S184)
        deallocate(S184)
 C
        allocate(F2(M1+1:N1,N1+1:M2,M2+1:N3,M2+1:N3,N0+1:M1,N0+1:M1))
-       call reorder631245(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,
-     & M1,N1,N1,M2,M2,N3,M2,N3,N0,M1,N0,M1,t3C2,F2)
+       call reorder_shift(6,shape(t3C2),size(t3C2),shape(F2),size(F2),
+     & (/M1-M1,N1-N1,M2-M2,M2-M2,N0-N0,N0-N0/),'631245',t3C2,F2)
        allocate(Z120(M2+1:N3,M2+1:N3,N0+1:M1,N0+1:M1,N1+1:M2,M1+1:N1))
        I1=K7*K9
        I2=K5*K5*K6*K6
@@ -4879,17 +4879,17 @@ C
        call EGEMM(I1,I2,I3,X47,F2,Z120)
        deallocate(F2)
 C
-       call
-     & sum124536(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z120, 1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'124536',
+     & 1.000,V3C,Z120)
        deallocate(Z120)
        deallocate(X47)
 C
        allocate(D1(N0+1:N1,N1+1:N3,M1+1:N1,N1+1:N3))
-       call reorder3142(N1,N3,N1,N3,N0,N1,N0,N1,
-     & N0,N1,N1,N3,M1,N1,N1,N3,VAHHPP,D1)
+       call reorder_shift(4,shape(VAHHPP),size(VAHHPP),shape(D1),
+     & size(D1),(/N0-N0,N1-N1,M1-N0,N1-N1/),'3142',VAHHPP,D1)
        allocate(B2(N0+1:N1,N1+1:N3))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,N3,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N0-N0,N1-N1/),'21',t1A,B2)
        allocate(Q31(M1+1:N1,N1+1:N3))
        I1=K3*K7
        I3=K3*K1
@@ -4898,11 +4898,11 @@ C
        deallocate(B2)
 C
        allocate(B1(N1+1:N3,M1+1:N1))
-       call reorder21(M1,N1,N1,N3,
-     & N1,N3,M1,N1,Q31,B1)
+       call reorder_shift(2,shape(Q31),size(Q31),shape(B1),size(B1),
+     & (/N1-N1,M1-M1/),'21',Q31,B1)
        allocate(B2(N1+1:N3,M1+1:N1))
-       call reorder12(N1,N3,N0,N1,
-     & N1,N3,M1,N1,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N1-N1,M1-N0/),'12',t1A,B2)
        allocate(Q32(M1+1:N1,M1+1:N1))
        I1=K7
        I2=K7
@@ -4911,16 +4911,16 @@ C
        deallocate(B1)
        deallocate(B2)
 C
-       call
-     & sum21(M1,N1,M1,N1,X11,Q32, 1.000)
+       call sum_stripe(2,shape(X11),size(X11),'21',1.000,
+     & X11,Q32)
        deallocate(Q32)
 C
        allocate(D1(N0+1:N1,N1+1:N3,N0+1:N1,N1+1:M2))
-       call reorder3142(N1,N3,N1,N3,N0,N1,N0,N1,
-     & N0,N1,N1,N3,N0,N1,N1,M2,VAHHPP,D1)
+       call reorder_shift(4,shape(VAHHPP),size(VAHHPP),shape(D1),
+     & size(D1),(/N0-N0,N1-N1,N0-N0,N1-N1/),'3142',VAHHPP,D1)
        allocate(B2(N0+1:N1,N1+1:N3))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,N3,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N0-N0,N1-N1/),'21',t1A,B2)
        allocate(Q33(N0+1:N1,N1+1:M2))
        I1=K9*K1
        I3=K3*K1
@@ -4929,8 +4929,8 @@ C
        deallocate(B2)
 C
        allocate(B2(N0+1:N1,N1+1:M2))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,M2,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N0-N0,N1-N1/),'21',t1A,B2)
        allocate(Q34(N1+1:M2,N1+1:M2))
        I1=K9
        I2=K9
@@ -4938,16 +4938,16 @@ C
        call EGEMM(I1,I2,I3,Q33,B2,Q34)
        deallocate(B2)
 C
-       call
-     & sum21(N1,M2,N1,M2,X12,Q34,-1.000)
+       call sum_stripe(2,shape(X12),size(X12),'21',-1.000,
+     & X12,Q34)
        deallocate(Q34)
 C
        allocate(D1(N1+1:N3,M1+1:N2,N0+1:N1,N2+1:M2))
-       call reorder2341(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N1,N3,M1,N2,N0,N1,N2,M2,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N1-N1,M1-N0,N0-N0,N2-N2/),'2341',VBHHPP,D1)
        allocate(B2(N1+1:N3,M1+1:N1))
-       call reorder12(N1,N3,N0,N1,
-     & N1,N3,M1,N1,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N1-N1,M1-N0/),'12',t1A,B2)
        allocate(S185(M1+1:N1,M1+1:N2,N0+1:N1,N2+1:M2))
        I1=K0*K1*K8
        I2=K7
@@ -4957,11 +4957,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N0+1:N1,M1+1:N2,N2+1:M2,M1+1:N1))
-       call reorder3241(M1,N1,M1,N2,N0,N1,N2,M2,
-     & N0,N1,M1,N2,N2,M2,M1,N1,S185,D1)
+       call reorder_shift(4,shape(S185),size(S185),shape(D1),size(D1),
+     & (/N0-N0,M1-M1,N2-N2,M1-M1/),'3241',S185,D1)
        allocate(B2(N0+1:N1,N1+1:M2))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,M2,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N0-N0,N1-N1/),'21',t1A,B2)
        allocate(S186(N1+1:M2,M1+1:N2,N2+1:M2,M1+1:N1))
        I1=K7*K0*K8
        I2=K9
@@ -4970,13 +4970,13 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum3124(M1,N2,N2,M2,N1,M2,M1,N1,X48,S186,-1.000)
+       call sum_stripe(4,shape(X48),size(X48),'3124',-1.000,
+     & X48,S186)
        deallocate(S186)
 C
        allocate(F2(M1+1:N2,N2+1:M2,M2+1:N3,M2+1:N3,N0+1:M1,N0+1:M1))
-       call reorder631245(N2,N3,N2,N3,N2,M2,N0,N2,N0,N2,M1,N2,
-     & M1,N2,N2,M2,M2,N3,M2,N3,N0,M1,N0,M1,t3D,F2)
+       call reorder_shift(6,shape(t3D),size(t3D),shape(F2),size(F2),
+     & (/M1-M1,N2-N2,M2-N2,M2-N2,N0-N0,N0-N0/),'631245',t3D,F2)
        allocate(Z123(M2+1:N3,M2+1:N3,N0+1:M1,N0+1:M1,N1+1:M2,M1+1:N1))
        I1=K7*K9
        I2=K5*K5*K6*K6
@@ -4984,17 +4984,17 @@ C
        call EGEMM(I1,I2,I3,X48,F2,Z123)
        deallocate(F2)
 C
-       call
-     & sum124536(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z123, 1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'124536',
+     & 1.000,V3C,Z123)
        deallocate(Z123)
        deallocate(X48)
 C
        allocate(D1(N1+1:N3,N0+1:N1,N2+1:N3,M2+1:N3))
-       call reorder2413(N2,N3,N1,N3,N2,N3,N0,N1,
-     & N1,N3,N0,N1,N2,N3,M2,N3,VBHPPP,D1)
+       call reorder_shift(4,shape(VBHPPP),size(VBHPPP),shape(D1),
+     & size(D1),(/N1-N1,N0-N0,N2-N2,M2-N2/),'2413',VBHPPP,D1)
        allocate(B2(N1+1:N3,M1+1:N1))
-       call reorder12(N1,N3,N0,N1,
-     & N1,N3,M1,N1,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N1-N1,M1-N0/),'12',t1A,B2)
        allocate(S181(M1+1:N1,N0+1:N1,N2+1:N3,M2+1:N3))
        I1=K6*K4*K1
        I2=K7
@@ -5004,11 +5004,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N2+1:N3,N0+1:N1,M2+1:N3,M1+1:N1))
-       call reorder3241(M1,N1,N0,N1,N2,N3,M2,N3,
-     & N2,N3,N0,N1,M2,N3,M1,N1,S181,D1)
+       call reorder_shift(4,shape(S181),size(S181),shape(D1),size(D1),
+     & (/N2-N2,N0-N0,M2-M2,M1-M1/),'3241',S181,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S188(N0+1:M1,N0+1:N1,M2+1:N3,M1+1:N1))
        I1=K7*K6*K1
        I2=K5
@@ -5017,16 +5017,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum3124(N0,N1,M2,N3,N0,M1,M1,N1,X1,S188, 1.000)
+       call sum_stripe(4,shape(X1),size(X1),'3124',1.000,X1,
+     & S188)
        deallocate(S188)
 C
        allocate(D1(N0+1:N1,N2+1:N3,M2+1:N3,M1+1:N1))
-       call reorder2341(M1,N1,N0,N1,N2,N3,M2,N3,
-     & N0,N1,N2,N3,M2,N3,M1,N1,S181,D1)
+       call reorder_shift(4,shape(S181),size(S181),shape(D1),size(D1),
+     & (/N0-N0,N2-N2,M2-M2,M1-M1/),'2341',S181,D1)
        allocate(B2(N0+1:N1,N1+1:M2))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,M2,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N0-N0,N1-N1/),'21',t1A,B2)
        allocate(S182(N1+1:M2,N2+1:N3,M2+1:N3,M1+1:N1))
        I1=K7*K6*K4
        I2=K9
@@ -5035,16 +5035,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum3124(N2,N3,M2,N3,N1,M2,M1,N1,X6,S182,-1.000)
+       call sum_stripe(4,shape(X6),size(X6),'3124',-1.000,
+     & X6,S182)
        deallocate(S182)
 C
        allocate(D1(N0+1:N1,N0+1:N2,N1+1:N3,N0+1:M1))
-       call reorder4321(N0,N2,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N0,N2,N1,N3,N0,M1,VBHHPH,D1)
+       call reorder_shift(4,shape(VBHHPH),size(VBHHPH),shape(D1),
+     & size(D1),(/N0-N0,N0-N0,N1-N1,N0-N0/),'4321',VBHHPH,D1)
        allocate(B2(N0+1:N1,N1+1:M2))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,M2,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N0-N0,N1-N1/),'21',t1A,B2)
        allocate(S189(N1+1:M2,N0+1:N2,N1+1:N3,N0+1:M1))
        I1=K5*K3*K2
        I2=K9
@@ -5054,11 +5054,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N0+1:N2,N1+1:N3,N1+1:M2,N0+1:M1))
-       call reorder2314(N1,M2,N0,N2,N1,N3,N0,M1,
-     & N0,N2,N1,N3,N1,M2,N0,M1,S189,D1)
+       call reorder_shift(4,shape(S189),size(S189),shape(D1),size(D1),
+     & (/N0-N0,N1-N1,N1-N1,N0-N0/),'2314',S189,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S190(M2+1:N3,N1+1:N3,N1+1:M2,N0+1:M1))
        I1=K5*K9*K3
        I2=K6
@@ -5067,16 +5067,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum2134(N1,N3,M2,N3,N1,M2,N0,M1,X2,S190, 1.000)
+       call sum_stripe(4,shape(X2),size(X2),'2134',1.000,X2,
+     & S190)
        deallocate(S190)
 C
        allocate(D1(N2+1:N3,N0+1:N1,N1+1:N3,M2+1:N3))
-       call reorder1423(N2,N3,N1,N3,N2,N3,N0,N1,
-     & N2,N3,N0,N1,N1,N3,M2,N3,VBHPPP,D1)
+       call reorder_shift(4,shape(VBHPPP),size(VBHPPP),shape(D1),
+     & size(D1),(/N2-N2,N0-N0,N1-N1,M2-N2/),'1423',VBHPPP,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S191(N0+1:M1,N0+1:N1,N1+1:N3,M2+1:N3))
        I1=K6*K3*K1
        I2=K5
@@ -5086,11 +5086,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N0+1:N1,N1+1:N3,M2+1:N3,N0+1:M1))
-       call reorder2341(N0,M1,N0,N1,N1,N3,M2,N3,
-     & N0,N1,N1,N3,M2,N3,N0,M1,S191,D1)
+       call reorder_shift(4,shape(S191),size(S191),shape(D1),size(D1),
+     & (/N0-N0,N1-N1,M2-M2,N0-N0/),'2341',S191,D1)
        allocate(B2(N0+1:N1,N1+1:M2))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,M2,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N0-N0,N1-N1/),'21',t1A,B2)
        allocate(S192(N1+1:M2,N1+1:N3,M2+1:N3,N0+1:M1))
        I1=K5*K6*K3
        I2=K9
@@ -5099,16 +5099,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum3124(N1,N3,M2,N3,N1,M2,N0,M1,X2,S192,-1.000)
+       call sum_stripe(4,shape(X2),size(X2),'3124',-1.000,
+     & X2,S192)
        deallocate(S192)
 C
        allocate(D1(N2+1:N3,N0+1:N2,N0+1:N1,M1+1:N1))
-       call reorder1342(N2,N3,N0,N1,N0,N2,N0,N1,
-     & N2,N3,N0,N2,N0,N1,M1,N1,VBHHHP,D1)
+       call reorder_shift(4,shape(VBHHHP),size(VBHHHP),shape(D1),
+     & size(D1),(/N2-N2,N0-N0,N0-N0,M1-N0/),'1342',VBHHHP,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S193(N0+1:M1,N0+1:N2,N0+1:N1,M1+1:N1))
        I1=K7*K1*K2
        I2=K5
@@ -5118,11 +5118,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N0+1:N2,N0+1:N1,N0+1:M1,M1+1:N1))
-       call reorder2314(N0,M1,N0,N2,N0,N1,M1,N1,
-     & N0,N2,N0,N1,N0,M1,M1,N1,S193,D1)
+       call reorder_shift(4,shape(S193),size(S193),shape(D1),size(D1),
+     & (/N0-N0,N0-N0,N0-N0,M1-M1/),'2314',S193,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S235(M2+1:N3,N0+1:N1,N0+1:M1,M1+1:N1))
        I1=K7*K5*K1
        I2=K6
@@ -5131,16 +5131,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum2134(N0,N1,M2,N3,N0,M1,M1,N1,X1,S235,-1.000)
+       call sum_stripe(4,shape(X1),size(X1),'2134',-1.000,
+     & X1,S235)
        deallocate(S235)
 C
        allocate(D1(N0+1:N1,N0+1:N2,N0+1:M1,M1+1:N1))
-       call reorder3214(N0,M1,N0,N2,N0,N1,M1,N1,
-     & N0,N1,N0,N2,N0,M1,M1,N1,S193,D1)
+       call reorder_shift(4,shape(S193),size(S193),shape(D1),size(D1),
+     & (/N0-N0,N0-N0,N0-N0,M1-M1/),'3214',S193,D1)
        allocate(B2(N0+1:N1,N1+1:M2))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,M2,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N0-N0,N1-N1/),'21',t1A,B2)
        allocate(S194(N1+1:M2,N0+1:N2,N0+1:M1,M1+1:N1))
        I1=K7*K5*K2
        I2=K9
@@ -5149,16 +5149,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum2134(N0,N2,N1,M2,N0,M1,M1,N1,X5,S194,-1.000)
+       call sum_stripe(4,shape(X5),size(X5),'2134',-1.000,
+     & X5,S194)
        deallocate(S194)
 C
        allocate(D1(N1+1:N3,N0+1:N2,N2+1:N3,N1+1:M2))
-       call reorder2314(N2,N3,N1,N3,N0,N2,N1,N3,
-     & N1,N3,N0,N2,N2,N3,N1,M2,VBPHPP,D1)
+       call reorder_shift(4,shape(VBPHPP),size(VBPHPP),shape(D1),
+     & size(D1),(/N1-N1,N0-N0,N2-N2,N1-N1/),'2314',VBPHPP,D1)
        allocate(B2(N1+1:N3,M1+1:N1))
-       call reorder12(N1,N3,N0,N1,
-     & N1,N3,M1,N1,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N1-N1,M1-N0/),'12',t1A,B2)
        allocate(S197(M1+1:N1,N0+1:N2,N2+1:N3,N1+1:M2))
        I1=K9*K4*K2
        I2=K7
@@ -5168,11 +5168,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N0+1:N2,N2+1:N3,N1+1:M2,M1+1:N1))
-       call reorder2341(M1,N1,N0,N2,N2,N3,N1,M2,
-     & N0,N2,N2,N3,N1,M2,M1,N1,S197,D1)
+       call reorder_shift(4,shape(S197),size(S197),shape(D1),size(D1),
+     & (/N0-N0,N2-N2,N1-N1,M1-M1/),'2341',S197,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S199(M2+1:N3,N2+1:N3,N1+1:M2,M1+1:N1))
        I1=K7*K9*K4
        I2=K6
@@ -5181,16 +5181,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum2134(N2,N3,M2,N3,N1,M2,M1,N1,X6,S199,-1.000)
+       call sum_stripe(4,shape(X6),size(X6),'2134',-1.000,
+     & X6,S199)
        deallocate(S199)
 C
        allocate(D1(N2+1:N3,N0+1:N2,N1+1:M2,M1+1:N1))
-       call reorder3241(M1,N1,N0,N2,N2,N3,N1,M2,
-     & N2,N3,N0,N2,N1,M2,M1,N1,S197,D1)
+       call reorder_shift(4,shape(S197),size(S197),shape(D1),size(D1),
+     & (/N2-N2,N0-N0,N1-N1,M1-M1/),'3241',S197,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S198(N0+1:M1,N0+1:N2,N1+1:M2,M1+1:N1))
        I1=K7*K9*K2
        I2=K5
@@ -5199,16 +5199,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum3124(N0,N2,N1,M2,N0,M1,M1,N1,X5,S198, 1.000)
+       call sum_stripe(4,shape(X5),size(X5),'3124',1.000,X5,
+     & S198)
        deallocate(S198)
 C
        allocate(D1(N1+1:N3,M1+1:N2,N0+1:M1,N2+1:N3))
-       call reorder2341(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N1,N3,M1,N2,N0,M1,N2,N3,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N1-N1,M1-N0,N0-N0,N2-N2/),'2341',VBHHPP,D1)
        allocate(B2(N1+1:N3,M1+1:N1))
-       call reorder12(N1,N3,N0,N1,
-     & N1,N3,M1,N1,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N1-N1,M1-N0/),'12',t1A,B2)
        allocate(S200(M1+1:N1,M1+1:N2,N0+1:M1,N2+1:N3))
        I1=K4*K5*K8
        I2=K7
@@ -5218,11 +5218,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N2+1:N3,M1+1:N2,N0+1:M1,M1+1:N1))
-       call reorder4231(M1,N1,M1,N2,N0,M1,N2,N3,
-     & N2,N3,M1,N2,N0,M1,M1,N1,S200,D1)
+       call reorder_shift(4,shape(S200),size(S200),shape(D1),size(D1),
+     & (/N2-N2,M1-M1,N0-N0,M1-M1/),'4231',S200,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S201(N0+1:M1,M1+1:N2,N0+1:M1,M1+1:N1))
        I1=K7*K5*K8
        I2=K5
@@ -5231,16 +5231,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum3124(M1,N2,N0,M1,N0,M1,M1,N1,X18,S201, 1.000)
+       call sum_stripe(4,shape(X18),size(X18),'3124',1.000,
+     & X18,S201)
        deallocate(S201)
 C
        call sumx_sorted3412(N0,N2,N0,N1,N0,N2,N0,N1,
      & M1,N2,N0,M1,N0,M1,M1,N1,X18,VBHHHH, 1.000)
 C
        allocate(F2(M1+1:N2,N0+1:M1,M2+1:N3,M2+1:N3,N1+1:M2,N0+1:M1))
-       call reorder561234(M2,N3,M2,N3,N1,M2,N0,N2,M1,N2,N0,N1,
-     & M1,N2,N0,M1,M2,N3,M2,N3,N1,M2,N0,M1,t3C3,F2)
+       call reorder_shift(6,shape(t3C3),size(t3C3),shape(F2),size(F2),
+     & (/M1-M1,N0-N0,M2-M2,M2-M2,N1-N1,N0-N0/),'561234',t3C3,F2)
        allocate(Z18(M2+1:N3,M2+1:N3,N1+1:M2,N0+1:M1,N0+1:M1,M1+1:N1))
        I1=K7*K5
        I2=K5*K9*K6*K6
@@ -5249,17 +5249,17 @@ C
        deallocate(F2)
 C
        V3C=V3C+Z18
-       call
-     & sum123546(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z18,-1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'123546',
+     & -1.000,V3C,Z18)
        deallocate(Z18)
        deallocate(X18)
 C
        allocate(D1(N1+1:N3,N0+1:M1,M1+1:N1,N2+1:N3))
-       call reorder2341(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N1,N3,N0,M1,M1,N1,N2,N3,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N1-N1,N0-N0,M1-N0,N2-N2/),'2341',VBHHPP,D1)
        allocate(B2(N1+1:N3,M1+1:N1))
-       call reorder12(N1,N3,N0,N1,
-     & N1,N3,M1,N1,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N1-N1,M1-N0/),'12',t1A,B2)
        allocate(S202(M1+1:N1,N0+1:M1,M1+1:N1,N2+1:N3))
        I1=K4*K7*K5
        I2=K7
@@ -5269,11 +5269,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N2+1:N3,N0+1:M1,M1+1:N1,M1+1:N1))
-       call reorder4231(M1,N1,N0,M1,M1,N1,N2,N3,
-     & N2,N3,N0,M1,M1,N1,M1,N1,S202,D1)
+       call reorder_shift(4,shape(S202),size(S202),shape(D1),size(D1),
+     & (/N2-N2,N0-N0,M1-M1,M1-M1/),'4231',S202,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S203(N0+1:M1,N0+1:M1,M1+1:N1,M1+1:N1))
        I1=K7*K7*K5
        I2=K5
@@ -5282,16 +5282,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum3124(N0,M1,M1,N1,N0,M1,M1,N1,X19,S203, 1.000)
+       call sum_stripe(4,shape(X19),size(X19),'3124',1.000,
+     & X19,S203)
        deallocate(S203)
 C
        call sumx_sorted3412(N0,N2,N0,N1,N0,N2,N0,N1,
      & N0,M1,M1,N1,N0,M1,M1,N1,X19,VBHHHH, 1.000)
 C
        allocate(F2(N0+1:M1,M1+1:N1,M2+1:N3,M2+1:N3,N1+1:M2,N0+1:M1))
-       call reorder461235(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,
-     & N0,M1,M1,N1,M2,N3,M2,N3,N1,M2,N0,M1,t3C2,F2)
+       call reorder_shift(6,shape(t3C2),size(t3C2),shape(F2),size(F2),
+     & (/N0-N0,M1-M1,M2-M2,M2-M2,N1-N1,N0-N0/),'461235',t3C2,F2)
        allocate(Z19(M2+1:N3,M2+1:N3,N1+1:M2,N0+1:M1,N0+1:M1,M1+1:N1))
        I1=K7*K5
        I2=K5*K9*K6*K6
@@ -5300,17 +5300,17 @@ C
        deallocate(F2)
 C
        V3C=V3C-Z19
-       call
-     & sum123546(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z19, 1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'123546',
+     & 1.000,V3C,Z19)
        deallocate(Z19)
        deallocate(X19)
 C
        allocate(D1(N1+1:N3,M1+1:N2,M1+1:N1,N2+1:N3))
-       call reorder2341(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N1,N3,M1,N2,M1,N1,N2,N3,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N1-N1,M1-N0,M1-N0,N2-N2/),'2341',VBHHPP,D1)
        allocate(B2(N1+1:N3,M1+1:N1))
-       call reorder12(N1,N3,N0,N1,
-     & N1,N3,M1,N1,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N1-N1,M1-N0/),'12',t1A,B2)
        allocate(S204(M1+1:N1,M1+1:N2,M1+1:N1,N2+1:N3))
        I1=K4*K7*K8
        I2=K7
@@ -5320,11 +5320,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N2+1:N3,M1+1:N2,M1+1:N1,M1+1:N1))
-       call reorder4231(M1,N1,M1,N2,M1,N1,N2,N3,
-     & N2,N3,M1,N2,M1,N1,M1,N1,S204,D1)
+       call reorder_shift(4,shape(S204),size(S204),shape(D1),size(D1),
+     & (/N2-N2,M1-M1,M1-M1,M1-M1/),'4231',S204,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S205(N0+1:M1,M1+1:N2,M1+1:N1,M1+1:N1))
        I1=K7*K7*K8
        I2=K5
@@ -5333,16 +5333,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum3124(M1,N2,M1,N1,N0,M1,M1,N1,X20,S205, 1.000)
+       call sum_stripe(4,shape(X20),size(X20),'3124',1.000,
+     & X20,S205)
        deallocate(S205)
 C
        call sumx_sorted3412(N0,N2,N0,N1,N0,N2,N0,N1,
      & M1,N2,M1,N1,N0,M1,M1,N1,X20,VBHHHH, 1.000)
 C
        allocate(F2(M1+1:N2,M1+1:N1,M2+1:N3,M2+1:N3,N1+1:M2,N0+1:M1))
-       call reorder561234(M2,N3,M2,N3,N1,M2,N0,N2,M1,N2,N0,N1,
-     & M1,N2,M1,N1,M2,N3,M2,N3,N1,M2,N0,M1,t3C3,F2)
+       call reorder_shift(6,shape(t3C3),size(t3C3),shape(F2),size(F2),
+     & (/M1-M1,M1-N0,M2-M2,M2-M2,N1-N1,N0-N0/),'561234',t3C3,F2)
        allocate(Z20(M2+1:N3,M2+1:N3,N1+1:M2,N0+1:M1,N0+1:M1,M1+1:N1))
        I1=K7*K5
        I2=K5*K9*K6*K6
@@ -5351,17 +5351,17 @@ C
        deallocate(F2)
 C
        V3C=V3C+Z20
-       call
-     & sum123546(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z20,-1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'123546',
+     & -1.000,V3C,Z20)
        deallocate(Z20)
        deallocate(X20)
 C
        allocate(D1(N1+1:N3,N0+1:N2,M1+1:N1,M2+1:N3))
-       call reorder2341(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N1,N3,N0,N2,M1,N1,M2,N3,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N1-N1,N0-N0,M1-N0,M2-N2/),'2341',VBHHPP,D1)
        allocate(B2(N1+1:N3,M1+1:N1))
-       call reorder12(N1,N3,N0,N1,
-     & N1,N3,M1,N1,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N1-N1,M1-N0/),'12',t1A,B2)
        allocate(S206(M1+1:N1,N0+1:N2,M1+1:N1,M2+1:N3))
        I1=K6*K7*K2
        I2=K7
@@ -5371,11 +5371,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N0+1:N2,M1+1:N1,M2+1:N3,M1+1:N1))
-       call reorder2341(M1,N1,N0,N2,M1,N1,M2,N3,
-     & N0,N2,M1,N1,M2,N3,M1,N1,S206,D1)
+       call reorder_shift(4,shape(S206),size(S206),shape(D1),size(D1),
+     & (/N0-N0,M1-M1,M2-M2,M1-M1/),'2341',S206,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S207(M2+1:N3,M1+1:N1,M2+1:N3,M1+1:N1))
        I1=K7*K6*K7
        I2=K6
@@ -5384,13 +5384,13 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum3124(M1,N1,M2,N3,M2,N3,M1,N1,X37,S207,-1.000)
+       call sum_stripe(4,shape(X37),size(X37),'3124',-1.000,
+     & X37,S207)
        deallocate(S207)
 C
        allocate(F2(M1+1:N1,M2+1:N3,M2+1:N3,N1+1:M2,N0+1:M1,N0+1:M1))
-       call reorder612345(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,
-     & M1,N1,M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,t3C2,F2)
+       call reorder_shift(6,shape(t3C2),size(t3C2),shape(F2),size(F2),
+     & (/M1-M1,M2-M2,M2-M2,N1-N1,N0-N0,N0-N0/),'612345',t3C2,F2)
        allocate(Z53(M2+1:N3,N1+1:M2,N0+1:M1,N0+1:M1,M2+1:N3,M1+1:N1))
        I1=K7*K6
        I2=K5*K5*K9*K6
@@ -5398,19 +5398,19 @@ C
        call EGEMM(I1,I2,I3,X37,F2,Z53)
        deallocate(F2)
 C
-       call
-     & sum234516(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z53,-1.000)
-       call
-     & sum134526(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z53, 1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'234516',
+     & -1.000,V3C,Z53)
+       call sum_stripe(6,shape(V3C),size(V3C),'134526',
+     & 1.000,V3C,Z53)
        deallocate(Z53)
        deallocate(X37)
 C
        allocate(D1(N1+1:N3,N0+1:N2,M1+1:N1,N2+1:M2))
-       call reorder2341(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N1,N3,N0,N2,M1,N1,N2,M2,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N1-N1,N0-N0,M1-N0,N2-N2/),'2341',VBHHPP,D1)
        allocate(B2(N1+1:N3,M1+1:N1))
-       call reorder12(N1,N3,N0,N1,
-     & N1,N3,M1,N1,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N1-N1,M1-N0/),'12',t1A,B2)
        allocate(S208(M1+1:N1,N0+1:N2,M1+1:N1,N2+1:M2))
        I1=K0*K7*K2
        I2=K7
@@ -5420,11 +5420,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N0+1:N2,M1+1:N1,N2+1:M2,M1+1:N1))
-       call reorder2341(M1,N1,N0,N2,M1,N1,N2,M2,
-     & N0,N2,M1,N1,N2,M2,M1,N1,S208,D1)
+       call reorder_shift(4,shape(S208),size(S208),shape(D1),size(D1),
+     & (/N0-N0,M1-M1,N2-N2,M1-M1/),'2341',S208,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S209(M2+1:N3,M1+1:N1,N2+1:M2,M1+1:N1))
        I1=K7*K0*K7
        I2=K6
@@ -5433,13 +5433,13 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum3124(M1,N1,N2,M2,M2,N3,M1,N1,X38,S209,-1.000)
+       call sum_stripe(4,shape(X38),size(X38),'3124',-1.000,
+     & X38,S209)
        deallocate(S209)
 C
        allocate(F2(M1+1:N1,N2+1:M2,M2+1:N3,N1+1:M2,N0+1:M1,N0+1:M1))
-       call reorder621345(N2,N3,N2,M2,N1,N3,N0,M1,N0,M1,M1,N1,
-     & M1,N1,N2,M2,M2,N3,N1,M2,N0,M1,N0,M1,t3C4,F2)
+       call reorder_shift(6,shape(t3C4),size(t3C4),shape(F2),size(F2),
+     & (/M1-M1,N2-N2,M2-N2,N1-N1,N0-N0,N0-N0/),'621345',t3C4,F2)
        allocate(Z54(M2+1:N3,N1+1:M2,N0+1:M1,N0+1:M1,M2+1:N3,M1+1:N1))
        I1=K7*K6
        I2=K5*K5*K9*K6
@@ -5447,19 +5447,19 @@ C
        call EGEMM(I1,I2,I3,X38,F2,Z54)
        deallocate(F2)
 C
-       call
-     & sum234516(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z54, 1.000)
-       call
-     & sum134526(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z54,-1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'234516',
+     & 1.000,V3C,Z54)
+       call sum_stripe(6,shape(V3C),size(V3C),'134526',
+     & -1.000,V3C,Z54)
        deallocate(Z54)
        deallocate(X38)
 C
        allocate(D1(N0+1:N2,N2+1:N3,M1+1:N1,N1+1:N3))
-       call reorder3142(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N2,N2,N3,M1,N1,N1,N3,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,M1-N0,N1-N1/),'3142',VBHHPP,D1)
        allocate(B2(N0+1:N2,N2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,N2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,N2-N2/),'21',t1B,B2)
        allocate(Q35(M1+1:N1,N1+1:N3))
        I1=K3*K7
        I3=K4*K2
@@ -5468,11 +5468,11 @@ C
        deallocate(B2)
 C
        allocate(B1(N1+1:N3,M1+1:N1))
-       call reorder21(M1,N1,N1,N3,
-     & N1,N3,M1,N1,Q35,B1)
+       call reorder_shift(2,shape(Q35),size(Q35),shape(B1),size(B1),
+     & (/N1-N1,M1-M1/),'21',Q35,B1)
        allocate(B2(N1+1:N3,M1+1:N1))
-       call reorder12(N1,N3,N0,N1,
-     & N1,N3,M1,N1,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N1-N1,M1-N0/),'12',t1A,B2)
        allocate(Q36(M1+1:N1,M1+1:N1))
        I1=K7
        I2=K7
@@ -5481,16 +5481,16 @@ C
        deallocate(B1)
        deallocate(B2)
 C
-       call
-     & sum21(M1,N1,M1,N1,X11,Q36, 1.000)
+       call sum_stripe(2,shape(X11),size(X11),'21',1.000,
+     & X11,Q36)
        deallocate(Q36)
 C
        call sumx_sorted21(N0,N1,N0,N1,
      & M1,N1,M1,N1,X11,FAHH, 1.000)
 C
        allocate(F2(M1+1:N1,M2+1:N3,M2+1:N3,N1+1:M2,N0+1:M1,N0+1:M1))
-       call reorder612345(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,
-     & M1,N1,M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,t3C2,F2)
+       call reorder_shift(6,shape(t3C2),size(t3C2),shape(F2),size(F2),
+     & (/M1-M1,M2-M2,M2-M2,N1-N1,N0-N0,N0-N0/),'612345',t3C2,F2)
        allocate(Z11(M2+1:N3,M2+1:N3,N1+1:M2,N0+1:M1,N0+1:M1,M1+1:N1))
        I1=K7
        I2=K5*K5*K9*K6*K6
@@ -5503,11 +5503,11 @@ C
        deallocate(X11)
 C
        allocate(D1(N2+1:N3,N0+1:M1,N0+1:N1,N1+1:M2))
-       call reorder1342(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N2,N3,N0,M1,N0,N1,N1,M2,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N2-N2,N0-N0,N0-N0,N1-N1/),'1342',VBHHPP,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S210(N0+1:M1,N0+1:M1,N0+1:N1,N1+1:M2))
        I1=K9*K1*K5
        I2=K5
@@ -5517,11 +5517,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N0+1:N1,N0+1:M1,N1+1:M2,N0+1:M1))
-       call reorder3241(N0,M1,N0,M1,N0,N1,N1,M2,
-     & N0,N1,N0,M1,N1,M2,N0,M1,S210,D1)
+       call reorder_shift(4,shape(S210),size(S210),shape(D1),size(D1),
+     & (/N0-N0,N0-N0,N1-N1,N0-N0/),'3241',S210,D1)
        allocate(B2(N0+1:N1,N1+1:M2))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,M2,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N0-N0,N1-N1/),'21',t1A,B2)
        allocate(S211(N1+1:M2,N0+1:M1,N1+1:M2,N0+1:M1))
        I1=K5*K9*K5
        I2=K9
@@ -5530,13 +5530,13 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum3124(N0,M1,N1,M2,N1,M2,N0,M1,X39,S211, 1.000)
+       call sum_stripe(4,shape(X39),size(X39),'3124',1.000,
+     & X39,S211)
        deallocate(S211)
 C
        allocate(F2(N0+1:M1,N1+1:M2,M2+1:N3,M2+1:N3,N0+1:M1,M1+1:N1))
-       call reorder431256(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,
-     & N0,M1,N1,M2,M2,N3,M2,N3,N0,M1,M1,N1,t3C2,F2)
+       call reorder_shift(6,shape(t3C2),size(t3C2),shape(F2),size(F2),
+     & (/N0-N0,N1-N1,M2-M2,M2-M2,N0-N0,M1-M1/),'431256',t3C2,F2)
        allocate(Z55(M2+1:N3,M2+1:N3,N0+1:M1,M1+1:N1,N1+1:M2,N0+1:M1))
        I1=K5*K9
        I2=K7*K5*K6*K6
@@ -5544,19 +5544,19 @@ C
        call EGEMM(I1,I2,I3,X39,F2,Z55)
        deallocate(F2)
 C
-       call
-     & sum124635(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z55,-1.000)
-       call
-     & sum125634(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z55, 1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'124635',
+     & -1.000,V3C,Z55)
+       call sum_stripe(6,shape(V3C),size(V3C),'125634',
+     & 1.000,V3C,Z55)
        deallocate(Z55)
        deallocate(X39)
 C
        allocate(D1(N2+1:N3,M1+1:N2,N0+1:N1,N1+1:M2))
-       call reorder1342(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N2,N3,M1,N2,N0,N1,N1,M2,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N2-N2,M1-N0,N0-N0,N1-N1/),'1342',VBHHPP,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S212(N0+1:M1,M1+1:N2,N0+1:N1,N1+1:M2))
        I1=K9*K1*K8
        I2=K5
@@ -5566,11 +5566,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N0+1:N1,M1+1:N2,N1+1:M2,N0+1:M1))
-       call reorder3241(N0,M1,M1,N2,N0,N1,N1,M2,
-     & N0,N1,M1,N2,N1,M2,N0,M1,S212,D1)
+       call reorder_shift(4,shape(S212),size(S212),shape(D1),size(D1),
+     & (/N0-N0,M1-M1,N1-N1,N0-N0/),'3241',S212,D1)
        allocate(B2(N0+1:N1,N1+1:M2))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,M2,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N0-N0,N1-N1/),'21',t1A,B2)
        allocate(S213(N1+1:M2,M1+1:N2,N1+1:M2,N0+1:M1))
        I1=K5*K9*K8
        I2=K9
@@ -5579,13 +5579,13 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum3124(M1,N2,N1,M2,N1,M2,N0,M1,X40,S213, 1.000)
+       call sum_stripe(4,shape(X40),size(X40),'3124',1.000,
+     & X40,S213)
        deallocate(S213)
 C
        allocate(F2(M1+1:N2,N1+1:M2,M2+1:N3,M2+1:N3,N0+1:M1,M1+1:N1))
-       call reorder531246(M2,N3,M2,N3,N1,M2,N0,N2,M1,N2,N0,N1,
-     & M1,N2,N1,M2,M2,N3,M2,N3,N0,M1,M1,N1,t3C3,F2)
+       call reorder_shift(6,shape(t3C3),size(t3C3),shape(F2),size(F2),
+     & (/M1-M1,N1-N1,M2-M2,M2-M2,N0-N0,M1-N0/),'531246',t3C3,F2)
        allocate(Z56(M2+1:N3,M2+1:N3,N0+1:M1,M1+1:N1,N1+1:M2,N0+1:M1))
        I1=K5*K9
        I2=K7*K5*K6*K6
@@ -5593,19 +5593,19 @@ C
        call EGEMM(I1,I2,I3,X40,F2,Z56)
        deallocate(F2)
 C
-       call
-     & sum124635(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z56, 1.000)
-       call
-     & sum125634(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z56,-1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'124635',
+     & 1.000,V3C,Z56)
+       call sum_stripe(6,shape(V3C),size(V3C),'125634',
+     & -1.000,V3C,Z56)
        deallocate(Z56)
        deallocate(X40)
 C
        allocate(D1(N0+1:N1,N1+1:N3,N0+1:M1,N2+1:N3))
-       call reorder4231(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N1,N3,N0,M1,N2,N3,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,N1-N1,N0-N0,N2-N2/),'4231',VBHHPP,D1)
        allocate(B2(N0+1:N1,N1+1:N3))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,N3,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N0-N0,N1-N1/),'21',t1A,B2)
        allocate(Q37(N0+1:M1,N2+1:N3))
        I1=K4*K5
        I3=K3*K1
@@ -5614,11 +5614,11 @@ C
        deallocate(B2)
 C
        allocate(B1(N2+1:N3,N0+1:M1))
-       call reorder21(N0,M1,N2,N3,
-     & N2,N3,N0,M1,Q37,B1)
+       call reorder_shift(2,shape(Q37),size(Q37),shape(B1),size(B1),
+     & (/N2-N2,N0-N0/),'21',Q37,B1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(Q38(N0+1:M1,N0+1:M1))
        I1=K5
        I2=K5
@@ -5627,13 +5627,13 @@ C
        deallocate(B1)
        deallocate(B2)
 C
-       call
-     & sum21(N0,M1,N0,M1,X41,Q38, 1.000)
+       call sum_stripe(2,shape(X41),size(X41),'21',1.000,
+     & X41,Q38)
        deallocate(Q38)
 C
        allocate(F2(N0+1:M1,M2+1:N3,M2+1:N3,N1+1:M2,N0+1:M1,M1+1:N1))
-       call reorder412356(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,
-     & N0,M1,M2,N3,M2,N3,N1,M2,N0,M1,M1,N1,t3C2,F2)
+       call reorder_shift(6,shape(t3C2),size(t3C2),shape(F2),size(F2),
+     & (/N0-N0,M2-M2,M2-M2,N1-N1,N0-N0,M1-M1/),'412356',t3C2,F2)
        allocate(Z57(M2+1:N3,M2+1:N3,N1+1:M2,N0+1:M1,M1+1:N1,N0+1:M1))
        I1=K5
        I2=K7*K5*K9*K6*K6
@@ -5641,19 +5641,19 @@ C
        call EGEMM(I1,I2,I3,X41,F2,Z57)
        deallocate(F2)
 C
-       call
-     & sum123465(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z57, 1.000)
-       call
-     & sum123564(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z57,-1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'123465',
+     & 1.000,V3C,Z57)
+       call sum_stripe(6,shape(V3C),size(V3C),'123564',
+     & -1.000,V3C,Z57)
        deallocate(Z57)
        deallocate(X41)
 C
        allocate(D1(N0+1:N1,N1+1:N3,M1+1:N2,N2+1:N3))
-       call reorder4231(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N1,N3,M1,N2,N2,N3,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,N1-N1,M1-N0,N2-N2/),'4231',VBHHPP,D1)
        allocate(B2(N0+1:N1,N1+1:N3))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,N3,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N0-N0,N1-N1/),'21',t1A,B2)
        allocate(Q39(M1+1:N2,N2+1:N3))
        I1=K4*K8
        I3=K3*K1
@@ -5662,11 +5662,11 @@ C
        deallocate(B2)
 C
        allocate(B1(N2+1:N3,M1+1:N2))
-       call reorder21(M1,N2,N2,N3,
-     & N2,N3,M1,N2,Q39,B1)
+       call reorder_shift(2,shape(Q39),size(Q39),shape(B1),size(B1),
+     & (/N2-N2,M1-M1/),'21',Q39,B1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(Q40(N0+1:M1,M1+1:N2))
        I1=K8
        I2=K5
@@ -5675,13 +5675,13 @@ C
        deallocate(B1)
        deallocate(B2)
 C
-       call
-     & sum21(M1,N2,N0,M1,X42,Q40, 1.000)
+       call sum_stripe(2,shape(X42),size(X42),'21',1.000,
+     & X42,Q40)
        deallocate(Q40)
 C
        allocate(F2(M1+1:N2,M2+1:N3,M2+1:N3,N1+1:M2,N0+1:M1,M1+1:N1))
-       call reorder512346(M2,N3,M2,N3,N1,M2,N0,N2,M1,N2,N0,N1,
-     & M1,N2,M2,N3,M2,N3,N1,M2,N0,M1,M1,N1,t3C3,F2)
+       call reorder_shift(6,shape(t3C3),size(t3C3),shape(F2),size(F2),
+     & (/M1-M1,M2-M2,M2-M2,N1-N1,N0-N0,M1-N0/),'512346',t3C3,F2)
        allocate(Z58(M2+1:N3,M2+1:N3,N1+1:M2,N0+1:M1,M1+1:N1,N0+1:M1))
        I1=K5
        I2=K7*K5*K9*K6*K6
@@ -5689,19 +5689,19 @@ C
        call EGEMM(I1,I2,I3,X42,F2,Z58)
        deallocate(F2)
 C
-       call
-     & sum123465(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z58,-1.000)
-       call
-     & sum123564(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z58, 1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'123465',
+     & -1.000,V3C,Z58)
+       call sum_stripe(6,shape(V3C),size(V3C),'123564',
+     & 1.000,V3C,Z58)
        deallocate(Z58)
        deallocate(X42)
 C
        allocate(D1(N0+1:N1,N0+1:N2,N2+1:M2,M2+1:N3))
-       call reorder4312(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N0,N2,N2,M2,M2,N3,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,N0-N0,N2-N2,M2-N1/),'4312',VBHHPP,D1)
        allocate(B2(N0+1:N1,N1+1:M2))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,M2,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N0-N0,N1-N1/),'21',t1A,B2)
        allocate(S214(N1+1:M2,N0+1:N2,N2+1:M2,M2+1:N3))
        I1=K6*K0*K2
        I2=K9
@@ -5711,11 +5711,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N0+1:N2,N2+1:M2,M2+1:N3,N1+1:M2))
-       call reorder2341(N1,M2,N0,N2,N2,M2,M2,N3,
-     & N0,N2,N2,M2,M2,N3,N1,M2,S214,D1)
+       call reorder_shift(4,shape(S214),size(S214),shape(D1),size(D1),
+     & (/N0-N0,N2-N2,M2-M2,N1-N1/),'2341',S214,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S215(M2+1:N3,N2+1:M2,M2+1:N3,N1+1:M2))
        I1=K9*K6*K0
        I2=K6
@@ -5724,16 +5724,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum3124(N2,M2,M2,N3,M2,N3,N1,M2,X25,S215, 1.000)
+       call sum_stripe(4,shape(X25),size(X25),'3124',1.000,
+     & X25,S215)
        deallocate(S215)
 C
        call sumx_sorted1234(N2,N3,N1,N3,N2,N3,N1,M2,
      & N2,M2,M2,N3,M2,N3,N1,M2,X25,VBAPPP, 1.000)
 C
        allocate(F2(N2+1:M2,M2+1:N3,M2+1:N3,N0+1:M1,N0+1:M1,M1+1:N1))
-       call reorder231456(N2,N3,N2,M2,N1,N3,N0,M1,N0,M1,M1,N1,
-     & N2,M2,M2,N3,M2,N3,N0,M1,N0,M1,M1,N1,t3C4,F2)
+       call reorder_shift(6,shape(t3C4),size(t3C4),shape(F2),size(F2),
+     & (/N2-N2,M2-N1,M2-N2,N0-N0,N0-N0,M1-M1/),'231456',t3C4,F2)
        allocate(Z25(M2+1:N3,N0+1:M1,N0+1:M1,M1+1:N1,M2+1:N3,N1+1:M2))
        I1=K9*K6
        I2=K7*K5*K5*K6
@@ -5741,19 +5741,19 @@ C
        call EGEMM(I1,I2,I3,X25,F2,Z25)
        deallocate(F2)
 C
-       call
-     & sum245613(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z25,-1.000)
-       call
-     & sum145623(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z25, 1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'245613',
+     & -1.000,V3C,Z25)
+       call sum_stripe(6,shape(V3C),size(V3C),'145623',
+     & 1.000,V3C,Z25)
        deallocate(Z25)
        deallocate(X25)
 C
        allocate(D1(N0+1:N1,N0+1:N2,M2+1:N3,N1+1:M2))
-       call reorder4312(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N0,N2,M2,N3,N1,M2,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,N0-N0,M2-N2,N1-N1/),'4312',VBHHPP,D1)
        allocate(B2(N0+1:N1,N1+1:M2))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,M2,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N0-N0,N1-N1/),'21',t1A,B2)
        allocate(S216(N1+1:M2,N0+1:N2,M2+1:N3,N1+1:M2))
        I1=K9*K6*K2
        I2=K9
@@ -5763,11 +5763,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N0+1:N2,M2+1:N3,N1+1:M2,N1+1:M2))
-       call reorder2341(N1,M2,N0,N2,M2,N3,N1,M2,
-     & N0,N2,M2,N3,N1,M2,N1,M2,S216,D1)
+       call reorder_shift(4,shape(S216),size(S216),shape(D1),size(D1),
+     & (/N0-N0,M2-M2,N1-N1,N1-N1/),'2341',S216,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S217(M2+1:N3,M2+1:N3,N1+1:M2,N1+1:M2))
        I1=K9*K9*K6
        I2=K6
@@ -5776,16 +5776,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum3124(M2,N3,N1,M2,M2,N3,N1,M2,X26,S217, 1.000)
+       call sum_stripe(4,shape(X26),size(X26),'3124',1.000,
+     & X26,S217)
        deallocate(S217)
 C
        call sumx_sorted1234(N2,N3,N1,N3,N2,N3,N1,M2,
      & M2,N3,N1,M2,M2,N3,N1,M2,X26,VBAPPP, 1.000)
 C
        allocate(F2(M2+1:N3,N1+1:M2,M2+1:N3,N0+1:M1,N0+1:M1,M1+1:N1))
-       call reorder132456(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,
-     & M2,N3,N1,M2,M2,N3,N0,M1,N0,M1,M1,N1,t3C2,F2)
+       call reorder_shift(6,shape(t3C2),size(t3C2),shape(F2),size(F2),
+     & (/M2-M2,N1-N1,M2-M2,N0-N0,N0-N0,M1-M1/),'132456',t3C2,F2)
        allocate(Z26(M2+1:N3,N0+1:M1,N0+1:M1,M1+1:N1,M2+1:N3,N1+1:M2))
        I1=K9*K6
        I2=K7*K5*K5*K6
@@ -5793,19 +5793,19 @@ C
        call EGEMM(I1,I2,I3,X26,F2,Z26)
        deallocate(F2)
 C
-       call
-     & sum245613(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z26, 1.000)
-       call
-     & sum145623(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z26,-1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'245613',
+     & 1.000,V3C,Z26)
+       call sum_stripe(6,shape(V3C),size(V3C),'145623',
+     & -1.000,V3C,Z26)
        deallocate(Z26)
        deallocate(X26)
 C
        allocate(D1(N0+1:N1,N0+1:N2,N2+1:M2,N1+1:M2))
-       call reorder4312(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N0,N2,N2,M2,N1,M2,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,N0-N0,N2-N2,N1-N1/),'4312',VBHHPP,D1)
        allocate(B2(N0+1:N1,N1+1:M2))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,M2,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N0-N0,N1-N1/),'21',t1A,B2)
        allocate(S218(N1+1:M2,N0+1:N2,N2+1:M2,N1+1:M2))
        I1=K9*K0*K2
        I2=K9
@@ -5815,11 +5815,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N0+1:N2,N2+1:M2,N1+1:M2,N1+1:M2))
-       call reorder2341(N1,M2,N0,N2,N2,M2,N1,M2,
-     & N0,N2,N2,M2,N1,M2,N1,M2,S218,D1)
+       call reorder_shift(4,shape(S218),size(S218),shape(D1),size(D1),
+     & (/N0-N0,N2-N2,N1-N1,N1-N1/),'2341',S218,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S219(M2+1:N3,N2+1:M2,N1+1:M2,N1+1:M2))
        I1=K9*K9*K0
        I2=K6
@@ -5828,16 +5828,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum3124(N2,M2,N1,M2,M2,N3,N1,M2,X27,S219, 1.000)
+       call sum_stripe(4,shape(X27),size(X27),'3124',1.000,
+     & X27,S219)
        deallocate(S219)
 C
        call sumx_sorted1234(N2,N3,N1,N3,N2,N3,N1,M2,
      & N2,M2,N1,M2,M2,N3,N1,M2,X27,VBAPPP, 1.000)
 C
        allocate(F2(N2+1:M2,N1+1:M2,M2+1:N3,N0+1:M1,N0+1:M1,M1+1:N1))
-       call reorder231456(N2,N3,N2,M2,N1,N3,N0,M1,N0,M1,M1,N1,
-     & N2,M2,N1,M2,M2,N3,N0,M1,N0,M1,M1,N1,t3C4,F2)
+       call reorder_shift(6,shape(t3C4),size(t3C4),shape(F2),size(F2),
+     & (/N2-N2,N1-N1,M2-N2,N0-N0,N0-N0,M1-M1/),'231456',t3C4,F2)
        allocate(Z27(M2+1:N3,N0+1:M1,N0+1:M1,M1+1:N1,M2+1:N3,N1+1:M2))
        I1=K9*K6
        I2=K7*K5*K5*K6
@@ -5845,19 +5845,19 @@ C
        call EGEMM(I1,I2,I3,X27,F2,Z27)
        deallocate(F2)
 C
-       call
-     & sum245613(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z27,-1.000)
-       call
-     & sum145623(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z27, 1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'245613',
+     & -1.000,V3C,Z27)
+       call sum_stripe(6,shape(V3C),size(V3C),'145623',
+     & 1.000,V3C,Z27)
        deallocate(Z27)
        deallocate(X27)
 C
        allocate(D1(N0+1:N1,N1+1:N3,N0+1:N2,M2+1:N3))
-       call reorder4231(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N1,N3,N0,N2,M2,N3,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,N1-N1,N0-N0,M2-N2/),'4231',VBHHPP,D1)
        allocate(B2(N0+1:N1,N1+1:N3))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,N3,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N0-N0,N1-N1/),'21',t1A,B2)
        allocate(Q41(N0+1:N2,M2+1:N3))
        I1=K6*K2
        I3=K3*K1
@@ -5866,8 +5866,8 @@ C
        deallocate(B2)
 C
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(Q42(M2+1:N3,M2+1:N3))
        I1=K6
        I2=K6
@@ -5875,13 +5875,13 @@ C
        call EGEMM(I1,I2,I3,Q41,B2,Q42)
        deallocate(B2)
 C
-       call
-     & sum21(M2,N3,M2,N3,X43,Q42,-1.000)
+       call sum_stripe(2,shape(X43),size(X43),'21',-1.000,
+     & X43,Q42)
        deallocate(Q42)
 C
        allocate(F2(M2+1:N3,M2+1:N3,N1+1:M2,N0+1:M1,N0+1:M1,M1+1:N1))
-       call reorder123456(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,
-     & M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,t3C2,F2)
+       call reorder_shift(6,shape(t3C2),size(t3C2),shape(F2),size(F2),
+     & (/M2-M2,M2-M2,N1-N1,N0-N0,N0-N0,M1-M1/),'123456',t3C2,F2)
        allocate(Z62(M2+1:N3,N1+1:M2,N0+1:M1,N0+1:M1,M1+1:N1,M2+1:N3))
        I1=K6
        I2=K7*K5*K5*K9*K6
@@ -5889,19 +5889,19 @@ C
        call EGEMM(I1,I2,I3,X43,F2,Z62)
        deallocate(F2)
 C
-       call
-     & sum234561(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z62, 1.000)
-       call
-     & sum134562(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z62,-1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'234561',
+     & 1.000,V3C,Z62)
+       call sum_stripe(6,shape(V3C),size(V3C),'134562',
+     & -1.000,V3C,Z62)
        deallocate(Z62)
        deallocate(X43)
 C
        allocate(D1(N0+1:N1,N1+1:N3,N0+1:N2,N2+1:M2))
-       call reorder4231(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N1,N3,N0,N2,N2,M2,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,N1-N1,N0-N0,N2-N2/),'4231',VBHHPP,D1)
        allocate(B2(N0+1:N1,N1+1:N3))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,N3,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N0-N0,N1-N1/),'21',t1A,B2)
        allocate(Q43(N0+1:N2,N2+1:M2))
        I1=K0*K2
        I3=K3*K1
@@ -5910,8 +5910,8 @@ C
        deallocate(B2)
 C
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(Q44(M2+1:N3,N2+1:M2))
        I1=K0
        I2=K6
@@ -5919,13 +5919,13 @@ C
        call EGEMM(I1,I2,I3,Q43,B2,Q44)
        deallocate(B2)
 C
-       call
-     & sum21(N2,M2,M2,N3,X44,Q44,-1.000)
+       call sum_stripe(2,shape(X44),size(X44),'21',-1.000,
+     & X44,Q44)
        deallocate(Q44)
 C
        allocate(F2(N2+1:M2,M2+1:N3,N1+1:M2,N0+1:M1,N0+1:M1,M1+1:N1))
-       call reorder213456(N2,N3,N2,M2,N1,N3,N0,M1,N0,M1,M1,N1,
-     & N2,M2,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,t3C4,F2)
+       call reorder_shift(6,shape(t3C4),size(t3C4),shape(F2),size(F2),
+     & (/N2-N2,M2-N2,N1-N1,N0-N0,N0-N0,M1-M1/),'213456',t3C4,F2)
        allocate(Z63(M2+1:N3,N1+1:M2,N0+1:M1,N0+1:M1,M1+1:N1,M2+1:N3))
        I1=K6
        I2=K7*K5*K5*K9*K6
@@ -5933,19 +5933,19 @@ C
        call EGEMM(I1,I2,I3,X44,F2,Z63)
        deallocate(F2)
 C
-       call
-     & sum234561(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z63,-1.000)
-       call
-     & sum134562(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z63, 1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'234561',
+     & -1.000,V3C,Z63)
+       call sum_stripe(6,shape(V3C),size(V3C),'134562',
+     & 1.000,V3C,Z63)
        deallocate(Z63)
        deallocate(X44)
 C
        allocate(D1(N0+1:N2,N2+1:N3,N0+1:N1,N1+1:M2))
-       call reorder3142(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N2,N2,N3,N0,N1,N1,M2,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,N0-N0,N1-N1/),'3142',VBHHPP,D1)
        allocate(B2(N0+1:N2,N2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,N2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,N2-N2/),'21',t1B,B2)
        allocate(Q45(N0+1:N1,N1+1:M2))
        I1=K9*K1
        I3=K4*K2
@@ -5954,8 +5954,8 @@ C
        deallocate(B2)
 C
        allocate(B2(N0+1:N1,N1+1:M2))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,M2,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N0-N0,N1-N1/),'21',t1A,B2)
        allocate(Q46(N1+1:M2,N1+1:M2))
        I1=K9
        I2=K9
@@ -5963,16 +5963,16 @@ C
        call EGEMM(I1,I2,I3,Q45,B2,Q46)
        deallocate(B2)
 C
-       call
-     & sum21(N1,M2,N1,M2,X12,Q46,-1.000)
+       call sum_stripe(2,shape(X12),size(X12),'21',-1.000,
+     & X12,Q46)
        deallocate(Q46)
 C
        call sumx_sorted12(N1,N3,N1,N3,
      & N1,M2,N1,M2,X12,FAPP, 1.000)
 C
        allocate(F2(N1+1:M2,M2+1:N3,M2+1:N3,N0+1:M1,N0+1:M1,M1+1:N1))
-       call reorder312456(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,
-     & N1,M2,M2,N3,M2,N3,N0,M1,N0,M1,M1,N1,t3C2,F2)
+       call reorder_shift(6,shape(t3C2),size(t3C2),shape(F2),size(F2),
+     & (/N1-N1,M2-M2,M2-M2,N0-N0,N0-N0,M1-M1/),'312456',t3C2,F2)
        allocate(Z12(M2+1:N3,M2+1:N3,N0+1:M1,N0+1:M1,M1+1:N1,N1+1:M2))
        I1=K9
        I2=K7*K5*K5*K6*K6
@@ -5980,17 +5980,17 @@ C
        call EGEMM(I1,I2,I3,X12,F2,Z12)
        deallocate(F2)
 C
-       call
-     & sum124563(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z12, 1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'124563',
+     & 1.000,V3C,Z12)
        deallocate(Z12)
        deallocate(X12)
 C
        allocate(D1(N1+1:N3,N0+1:N1,N0+1:N1,N1+1:N3))
-       call reorder2341(N1,N3,N1,N3,N0,N1,N0,N1,
-     & N1,N3,N0,N1,N0,N1,N1,N3,VAHHPP,D1)
+       call reorder_shift(4,shape(VAHHPP),size(VAHHPP),shape(D1),
+     & size(D1),(/N1-N1,N0-N0,N0-N0,N1-N1/),'2341',VAHHPP,D1)
        allocate(B2(N1+1:N3,M1+1:N1))
-       call reorder12(N1,N3,N0,N1,
-     & N1,N3,M1,N1,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N1-N1,M1-N0/),'12',t1A,B2)
        allocate(S220(M1+1:N1,N0+1:N1,N0+1:N1,N1+1:N3))
        I1=K3*K1*K1
        I2=K7
@@ -6000,11 +6000,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N0+1:N1,N1+1:N3,N0+1:N1,M1+1:N1))
-       call reorder2431(M1,N1,N0,N1,N0,N1,N1,N3,
-     & N0,N1,N1,N3,N0,N1,M1,N1,S220,D1)
+       call reorder_shift(4,shape(S220),size(S220),shape(D1),size(D1),
+     & (/N0-N0,N1-N1,N0-N0,M1-M1/),'2431',S220,D1)
        allocate(D2(N0+1:N1,N1+1:N3,M2+1:N3,N0+1:M1))
-       call reorder4213(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N1,N3,M2,N3,N0,M1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N1-N1,M2-N2,N0-N0/),'4213',t2B,D2)
        allocate(S221(M2+1:N3,N0+1:M1,N0+1:N1,M1+1:N1))
        I1=K7*K1
        I2=K5*K6
@@ -6013,16 +6013,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum2314(N0,N1,M2,N3,N0,M1,M1,N1,X1,S221, 1.000)
+       call sum_stripe(4,shape(X1),size(X1),'2314',1.000,X1,
+     & S221)
        deallocate(S221)
 C
        allocate(D1(N0+1:N1,N0+1:N1,N1+1:N3,N1+1:N3))
-       call reorder4312(N1,N3,N1,N3,N0,N1,N0,N1,
-     & N0,N1,N0,N1,N1,N3,N1,N3,VAHHPP,D1)
+       call reorder_shift(4,shape(VAHHPP),size(VAHHPP),shape(D1),
+     & size(D1),(/N0-N0,N0-N0,N1-N1,N1-N1/),'4312',VAHHPP,D1)
        allocate(B2(N0+1:N1,N1+1:M2))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,M2,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N0-N0,N1-N1/),'21',t1A,B2)
        allocate(S222(N1+1:M2,N0+1:N1,N1+1:N3,N1+1:N3))
        I1=K3*K3*K1
        I2=K9
@@ -6032,11 +6032,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N0+1:N1,N1+1:N3,N1+1:N3,N1+1:M2))
-       call reorder2341(N1,M2,N0,N1,N1,N3,N1,N3,
-     & N0,N1,N1,N3,N1,N3,N1,M2,S222,D1)
+       call reorder_shift(4,shape(S222),size(S222),shape(D1),size(D1),
+     & (/N0-N0,N1-N1,N1-N1,N1-N1/),'2341',S222,D1)
        allocate(D2(N0+1:N1,N1+1:N3,M2+1:N3,N0+1:M1))
-       call reorder4213(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N1,N3,M2,N3,N0,M1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N1-N1,M2-N2,N0-N0/),'4213',t2B,D2)
        allocate(S223(M2+1:N3,N0+1:M1,N1+1:N3,N1+1:M2))
        I1=K9*K3
        I2=K5*K6
@@ -6045,16 +6045,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum2413(N1,N3,M2,N3,N1,M2,N0,M1,X2,S223,-1.000)
+       call sum_stripe(4,shape(X2),size(X2),'2413',-1.000,
+     & X2,S223)
        deallocate(S223)
 C
        allocate(D1(N0+1:N1,N1+1:N3,N0+1:N1,N1+1:N3))
-       call reorder3142(N1,N3,N1,N3,N0,N1,N0,N1,
-     & N0,N1,N1,N3,N0,N1,N1,N3,VAHHPP,D1)
+       call reorder_shift(4,shape(VAHHPP),size(VAHHPP),shape(D1),
+     & size(D1),(/N0-N0,N1-N1,N0-N0,N1-N1/),'3142',VAHHPP,D1)
        allocate(B2(N0+1:N1,N1+1:N3))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,N3,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N0-N0,N1-N1/),'21',t1A,B2)
        allocate(Q47(N0+1:N1,N1+1:N3))
        I1=K3*K1
        I3=K3*K1
@@ -6063,11 +6063,11 @@ C
        deallocate(B2)
 C
        allocate(B1(N1+1:N3,N0+1:N1))
-       call reorder21(N0,N1,N1,N3,
-     & N1,N3,N0,N1,Q47,B1)
+       call reorder_shift(2,shape(Q47),size(Q47),shape(B1),size(B1),
+     & (/N1-N1,N0-N0/),'21',Q47,B1)
        allocate(D2(N1+1:N3,M2+1:N3,N0+1:M1,M1+1:N1))
-       call reorder2134(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N1,N3,M2,N3,N0,M1,M1,N1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N1-N1,M2-N2,N0-N0,M1-N0/),'2134',t2B,D2)
        allocate(S224(M2+1:N3,N0+1:M1,M1+1:N1,N0+1:N1))
        I1=K1
        I2=K7*K5*K6
@@ -6076,16 +6076,16 @@ C
        deallocate(B1)
        deallocate(D2)
 C
-       call
-     & sum2341(N0,N1,M2,N3,N0,M1,M1,N1,X1,S224, 1.000)
+       call sum_stripe(4,shape(X1),size(X1),'2341',1.000,X1,
+     & S224)
        deallocate(S224)
 C
        allocate(D1(N1+1:N3,N0+1:N2,N0+1:N1,N2+1:N3))
-       call reorder2341(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N1,N3,N0,N2,N0,N1,N2,N3,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N1-N1,N0-N0,N0-N0,N2-N2/),'2341',VBHHPP,D1)
        allocate(B2(N1+1:N3,M1+1:N1))
-       call reorder12(N1,N3,N0,N1,
-     & N1,N3,M1,N1,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N1-N1,M1-N0/),'12',t1A,B2)
        allocate(S225(M1+1:N1,N0+1:N2,N0+1:N1,N2+1:N3))
        I1=K4*K1*K2
        I2=K7
@@ -6095,11 +6095,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N0+1:N1,N2+1:N3,N0+1:N2,M1+1:N1))
-       call reorder3421(M1,N1,N0,N2,N0,N1,N2,N3,
-     & N0,N1,N2,N3,N0,N2,M1,N1,S225,D1)
+       call reorder_shift(4,shape(S225),size(S225),shape(D1),size(D1),
+     & (/N0-N0,N2-N2,N0-N0,M1-M1/),'3421',S225,D1)
        allocate(D2(N0+1:N1,N2+1:N3,N1+1:M2,N0+1:M1))
-       call reorder4123(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N2,N3,N1,M2,N0,M1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N2-N2,N1-N1,N0-N0/),'4123',t2B,D2)
        allocate(S227(N1+1:M2,N0+1:M1,N0+1:N2,M1+1:N1))
        I1=K7*K2
        I2=K5*K9
@@ -6108,16 +6108,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum2314(N0,N2,N1,M2,N0,M1,M1,N1,X5,S227,-1.000)
+       call sum_stripe(4,shape(X5),size(X5),'2314',-1.000,
+     & X5,S227)
        deallocate(S227)
 C
        allocate(D1(N0+1:N2,N0+1:N1,N2+1:N3,M1+1:N1))
-       call reorder2341(M1,N1,N0,N2,N0,N1,N2,N3,
-     & N0,N2,N0,N1,N2,N3,M1,N1,S225,D1)
+       call reorder_shift(4,shape(S225),size(S225),shape(D1),size(D1),
+     & (/N0-N0,N0-N0,N2-N2,M1-M1/),'2341',S225,D1)
        allocate(D2(N0+1:N2,N0+1:N1,M2+1:N3,N1+1:M2))
-       call reorder3412(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N2,N0,N1,M2,N3,N1,M2,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N0-N0,M2-N2,N1-N1/),'3412',t2B,D2)
        allocate(S228(M2+1:N3,N1+1:M2,N2+1:N3,M1+1:N1))
        I1=K7*K4
        I2=K9*K6
@@ -6126,16 +6126,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum2314(N2,N3,M2,N3,N1,M2,M1,N1,X6,S228, 1.000)
+       call sum_stripe(4,shape(X6),size(X6),'2314',1.000,X6,
+     & S228)
        deallocate(S228)
 C
        allocate(D1(N2+1:N3,N0+1:N2,N0+1:N1,M1+1:N1))
-       call reorder4231(M1,N1,N0,N2,N0,N1,N2,N3,
-     & N2,N3,N0,N2,N0,N1,M1,N1,S225,D1)
+       call reorder_shift(4,shape(S225),size(S225),shape(D1),size(D1),
+     & (/N2-N2,N0-N0,N0-N0,M1-M1/),'4231',S225,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S297(N0+1:M1,N0+1:N2,N0+1:N1,M1+1:N1))
        I1=K7*K1*K2
        I2=K5
@@ -6145,11 +6145,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N0+1:N1,N0+1:N2,N0+1:M1,M1+1:N1))
-       call reorder3214(N0,M1,N0,N2,N0,N1,M1,N1,
-     & N0,N1,N0,N2,N0,M1,M1,N1,S297,D1)
+       call reorder_shift(4,shape(S297),size(S297),shape(D1),size(D1),
+     & (/N0-N0,N0-N0,N0-N0,M1-M1/),'3214',S297,D1)
        allocate(B2(N0+1:N1,N1+1:M2))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,M2,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N0-N0,N1-N1/),'21',t1A,B2)
        allocate(S298(N1+1:M2,N0+1:N2,N0+1:M1,M1+1:N1))
        I1=K7*K5*K2
        I2=K9
@@ -6158,16 +6158,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum2134(N0,N2,N1,M2,N0,M1,M1,N1,X5,S298,-1.000)
+       call sum_stripe(4,shape(X5),size(X5),'2134',-1.000,
+     & X5,S298)
        deallocate(S298)
 C
        allocate(D1(N0+1:N1,N0+1:N2,N2+1:N3,M1+1:N1))
-       call reorder3241(M1,N1,N0,N2,N0,N1,N2,N3,
-     & N0,N1,N0,N2,N2,N3,M1,N1,S225,D1)
+       call reorder_shift(4,shape(S225),size(S225),shape(D1),size(D1),
+     & (/N0-N0,N0-N0,N2-N2,M1-M1/),'3241',S225,D1)
        allocate(B2(N0+1:N1,N1+1:M2))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,M2,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N0-N0,N1-N1/),'21',t1A,B2)
        allocate(S299(N1+1:M2,N0+1:N2,N2+1:N3,M1+1:N1))
        I1=K7*K4*K2
        I2=K9
@@ -6177,11 +6177,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N0+1:N2,N2+1:N3,N1+1:M2,M1+1:N1))
-       call reorder2314(N1,M2,N0,N2,N2,N3,M1,N1,
-     & N0,N2,N2,N3,N1,M2,M1,N1,S299,D1)
+       call reorder_shift(4,shape(S299),size(S299),shape(D1),size(D1),
+     & (/N0-N0,N2-N2,N1-N1,M1-M1/),'2314',S299,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S300(M2+1:N3,N2+1:N3,N1+1:M2,M1+1:N1))
        I1=K7*K9*K4
        I2=K6
@@ -6190,16 +6190,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum2134(N2,N3,M2,N3,N1,M2,M1,N1,X6,S300, 1.000)
+       call sum_stripe(4,shape(X6),size(X6),'2134',1.000,X6,
+     & S300)
        deallocate(S300)
 C
        allocate(D1(N0+1:N2,N2+1:N3,N0+1:N1,M1+1:N1))
-       call reorder2431(M1,N1,N0,N2,N0,N1,N2,N3,
-     & N0,N2,N2,N3,N0,N1,M1,N1,S225,D1)
+       call reorder_shift(4,shape(S225),size(S225),shape(D1),size(D1),
+     & (/N0-N0,N2-N2,N0-N0,M1-M1/),'2431',S225,D1)
        allocate(D2(N0+1:N2,N2+1:N3,M2+1:N3,N0+1:M1))
-       call reorder3124(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N2,N3,M2,N3,N0,M1,t2C,D2)
+       call reorder_shift(4,shape(t2C),size(t2C),shape(D2),size(D2),
+     & (/N0-N0,N2-N2,M2-N2,N0-N0/),'3124',t2C,D2)
        allocate(S226(M2+1:N3,N0+1:M1,N0+1:N1,M1+1:N1))
        I1=K7*K1
        I2=K5*K6
@@ -6208,16 +6208,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum2314(N0,N1,M2,N3,N0,M1,M1,N1,X1,S226, 1.000)
+       call sum_stripe(4,shape(X1),size(X1),'2314',1.000,X1,
+     & S226)
        deallocate(S226)
 C
        allocate(D1(N0+1:N2,N0+1:N1,N0+1:M1,M1+1:N1))
-       call reorder2314(N0,M1,N0,N2,N0,N1,M1,N1,
-     & N0,N2,N0,N1,N0,M1,M1,N1,S297,D1)
+       call reorder_shift(4,shape(S297),size(S297),shape(D1),size(D1),
+     & (/N0-N0,N0-N0,N0-N0,M1-M1/),'2314',S297,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S301(M2+1:N3,N0+1:N1,N0+1:M1,M1+1:N1))
        I1=K7*K5*K1
        I2=K6
@@ -6226,16 +6226,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum2134(N0,N1,M2,N3,N0,M1,M1,N1,X1,S301,-1.000)
+       call sum_stripe(4,shape(X1),size(X1),'2134',-1.000,
+     & X1,S301)
        deallocate(S301)
 C
        allocate(D1(N0+1:N1,N0+1:N2,N2+1:N3,N1+1:N3))
-       call reorder4312(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N0,N2,N2,N3,N1,N3,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,N0-N0,N2-N2,N1-N1/),'4312',VBHHPP,D1)
        allocate(B2(N0+1:N1,N1+1:M2))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,M2,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N0-N0,N1-N1/),'21',t1A,B2)
        allocate(S229(N1+1:M2,N0+1:N2,N2+1:N3,N1+1:N3))
        I1=K3*K4*K2
        I2=K9
@@ -6245,11 +6245,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N0+1:N2,N2+1:N3,N1+1:N3,N1+1:M2))
-       call reorder2341(N1,M2,N0,N2,N2,N3,N1,N3,
-     & N0,N2,N2,N3,N1,N3,N1,M2,S229,D1)
+       call reorder_shift(4,shape(S229),size(S229),shape(D1),size(D1),
+     & (/N0-N0,N2-N2,N1-N1,N1-N1/),'2341',S229,D1)
        allocate(D2(N0+1:N2,N2+1:N3,M2+1:N3,N0+1:M1))
-       call reorder3124(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N2,N3,M2,N3,N0,M1,t2C,D2)
+       call reorder_shift(4,shape(t2C),size(t2C),shape(D2),size(D2),
+     & (/N0-N0,N2-N2,M2-N2,N0-N0/),'3124',t2C,D2)
        allocate(S230(M2+1:N3,N0+1:M1,N1+1:N3,N1+1:M2))
        I1=K9*K3
        I2=K5*K6
@@ -6258,16 +6258,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum2413(N1,N3,M2,N3,N1,M2,N0,M1,X2,S230,-1.000)
+       call sum_stripe(4,shape(X2),size(X2),'2413',-1.000,
+     & X2,S230)
        deallocate(S230)
 C
        allocate(D1(N2+1:N3,N1+1:N3,N0+1:N2,N1+1:M2))
-       call reorder3421(N1,M2,N0,N2,N2,N3,N1,N3,
-     & N2,N3,N1,N3,N0,N2,N1,M2,S229,D1)
+       call reorder_shift(4,shape(S229),size(S229),shape(D1),size(D1),
+     & (/N2-N2,N1-N1,N0-N0,N1-N1/),'3421',S229,D1)
        allocate(D2(N2+1:N3,N1+1:N3,N0+1:M1,M1+1:N1))
-       call reorder1234(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N2,N3,N1,N3,N0,M1,M1,N1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N2-N2,N1-N1,N0-N0,M1-N0/),'1234',t2B,D2)
        allocate(S231(N0+1:M1,M1+1:N1,N0+1:N2,N1+1:M2))
        I1=K9*K2
        I2=K7*K5
@@ -6276,16 +6276,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum3412(N0,N2,N1,M2,N0,M1,M1,N1,X5,S231,-1.000)
+       call sum_stripe(4,shape(X5),size(X5),'3412',-1.000,
+     & X5,S231)
        deallocate(S231)
 C
        allocate(D1(N2+1:N3,N0+1:N2,N1+1:N3,N1+1:M2))
-       call reorder3241(N1,M2,N0,N2,N2,N3,N1,N3,
-     & N2,N3,N0,N2,N1,N3,N1,M2,S229,D1)
+       call reorder_shift(4,shape(S229),size(S229),shape(D1),size(D1),
+     & (/N2-N2,N0-N0,N1-N1,N1-N1/),'3241',S229,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S302(N0+1:M1,N0+1:N2,N1+1:N3,N1+1:M2))
        I1=K9*K3*K2
        I2=K5
@@ -6295,11 +6295,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N0+1:N2,N1+1:N3,N1+1:M2,N0+1:M1))
-       call reorder2341(N0,M1,N0,N2,N1,N3,N1,M2,
-     & N0,N2,N1,N3,N1,M2,N0,M1,S302,D1)
+       call reorder_shift(4,shape(S302),size(S302),shape(D1),size(D1),
+     & (/N0-N0,N1-N1,N1-N1,N0-N0/),'2341',S302,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S303(M2+1:N3,N1+1:N3,N1+1:M2,N0+1:M1))
        I1=K5*K9*K3
        I2=K6
@@ -6308,16 +6308,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum2134(N1,N3,M2,N3,N1,M2,N0,M1,X2,S303, 1.000)
+       call sum_stripe(4,shape(X2),size(X2),'2134',1.000,X2,
+     & S303)
        deallocate(S303)
 C
        allocate(D1(N0+1:N2,N1+1:N3,N2+1:N3,N1+1:M2))
-       call reorder2431(N1,M2,N0,N2,N2,N3,N1,N3,
-     & N0,N2,N1,N3,N2,N3,N1,M2,S229,D1)
+       call reorder_shift(4,shape(S229),size(S229),shape(D1),size(D1),
+     & (/N0-N0,N1-N1,N2-N2,N1-N1/),'2431',S229,D1)
        allocate(D2(N0+1:N2,N1+1:N3,M2+1:N3,M1+1:N1))
-       call reorder3214(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N2,N1,N3,M2,N3,M1,N1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N1-N1,M2-N2,M1-N0/),'3214',t2B,D2)
        allocate(S233(M2+1:N3,M1+1:N1,N2+1:N3,N1+1:M2))
        I1=K9*K4
        I2=K7*K6
@@ -6326,16 +6326,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum2413(N2,N3,M2,N3,N1,M2,M1,N1,X6,S233, 1.000)
+       call sum_stripe(4,shape(X6),size(X6),'2413',1.000,X6,
+     & S233)
        deallocate(S233)
 C
        allocate(D1(N2+1:N3,N0+1:N2,N0+1:N2,N0+1:M1))
-       call reorder1342(N2,N3,N0,N2,N0,N2,N0,N2,
-     & N2,N3,N0,N2,N0,N2,N0,M1,VCHHHP,D1)
+       call reorder_shift(4,shape(VCHHHP),size(VCHHHP),shape(D1),
+     & size(D1),(/N2-N2,N0-N0,N0-N0,N0-N0/),'1342',VCHHHP,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S238(N0+1:M1,N0+1:N2,N0+1:N2,N0+1:M1))
        I1=K5*K2*K2
        I2=K5
@@ -6345,11 +6345,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N0+1:N2,N0+1:N2,N0+1:M1,N0+1:M1))
-       call reorder2314(N0,M1,N0,N2,N0,N2,N0,M1,
-     & N0,N2,N0,N2,N0,M1,N0,M1,S238,D1)
+       call reorder_shift(4,shape(S238),size(S238),shape(D1),size(D1),
+     & (/N0-N0,N0-N0,N0-N0,N0-N0/),'2314',S238,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S239(M2+1:N3,N0+1:N2,N0+1:M1,N0+1:M1))
        I1=K5*K5*K2
        I2=K6
@@ -6358,16 +6358,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum2134(N0,N2,M2,N3,N0,M1,N0,M1,X45,S239,-1.000)
+       call sum_stripe(4,shape(X45),size(X45),'2134',-1.000,
+     & X45,S239)
        deallocate(S239)
 C
        allocate(D1(N0+1:N2,N0+1:N2,N2+1:N3,N0+1:M1))
-       call reorder4312(N2,N3,N0,N2,N0,N2,N0,N2,
-     & N0,N2,N0,N2,N2,N3,N0,M1,VCHHHP,D1)
+       call reorder_shift(4,shape(VCHHHP),size(VCHHHP),shape(D1),
+     & size(D1),(/N0-N0,N0-N0,N2-N2,N0-N0/),'4312',VCHHHP,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S240(M2+1:N3,N0+1:N2,N2+1:N3,N0+1:M1))
        I1=K5*K4*K2
        I2=K6
@@ -6377,11 +6377,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N0+1:N2,N2+1:N3,M2+1:N3,N0+1:M1))
-       call reorder2314(M2,N3,N0,N2,N2,N3,N0,M1,
-     & N0,N2,N2,N3,M2,N3,N0,M1,S240,D1)
+       call reorder_shift(4,shape(S240),size(S240),shape(D1),size(D1),
+     & (/N0-N0,N2-N2,M2-M2,N0-N0/),'2314',S240,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S241(M2+1:N3,N2+1:N3,M2+1:N3,N0+1:M1))
        I1=K5*K6*K4
        I2=K6
@@ -6390,16 +6390,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum2134(N2,N3,M2,N3,M2,N3,N0,M1,X4,S241, 1.000)
+       call sum_stripe(4,shape(X4),size(X4),'2134',1.000,X4,
+     & S241)
        deallocate(S241)
 C
        allocate(D1(N2+1:N3,N0+1:N2,N2+1:N3,M2+1:N3))
-       call reorder2413(N2,N3,N2,N3,N2,N3,N0,N2,
-     & N2,N3,N0,N2,N2,N3,M2,N3,VCHPPP,D1)
+       call reorder_shift(4,shape(VCHPPP),size(VCHPPP),shape(D1),
+     & size(D1),(/N2-N2,N0-N0,N2-N2,M2-N2/),'2413',VCHPPP,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S242(N0+1:M1,N0+1:N2,N2+1:N3,M2+1:N3))
        I1=K6*K4*K2
        I2=K5
@@ -6409,11 +6409,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N0+1:N2,N2+1:N3,M2+1:N3,N0+1:M1))
-       call reorder2341(N0,M1,N0,N2,N2,N3,M2,N3,
-     & N0,N2,N2,N3,M2,N3,N0,M1,S242,D1)
+       call reorder_shift(4,shape(S242),size(S242),shape(D1),size(D1),
+     & (/N0-N0,N2-N2,M2-M2,N0-N0/),'2341',S242,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S244(M2+1:N3,N2+1:N3,M2+1:N3,N0+1:M1))
        I1=K5*K6*K4
        I2=K6
@@ -6422,16 +6422,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum3124(N2,N3,M2,N3,M2,N3,N0,M1,X46,S244, 1.000)
+       call sum_stripe(4,shape(X46),size(X46),'3124',1.000,
+     & X46,S244)
        deallocate(S244)
 C
        allocate(D1(N2+1:N3,N0+1:N2,M2+1:N3,N0+1:M1))
-       call reorder3241(N0,M1,N0,N2,N2,N3,M2,N3,
-     & N2,N3,N0,N2,M2,N3,N0,M1,S242,D1)
+       call reorder_shift(4,shape(S242),size(S242),shape(D1),size(D1),
+     & (/N2-N2,N0-N0,M2-M2,N0-N0/),'3241',S242,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S243(N0+1:M1,N0+1:N2,M2+1:N3,N0+1:M1))
        I1=K5*K6*K2
        I2=K5
@@ -6440,16 +6440,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum3124(N0,N2,M2,N3,N0,M1,N0,M1,X3,S243, 1.000)
+       call sum_stripe(4,shape(X3),size(X3),'3124',1.000,X3,
+     & S243)
        deallocate(S243)
 C
        allocate(D1(N2+1:N3,N0+1:N2,N0+1:M1,M2+1:N3))
-       call reorder1342(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N2,N3,N0,N2,N0,M1,M2,N3,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N2-N2,N0-N0,N0-N0,M2-N1/),'1342',VBHHPP,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S245(N0+1:M1,N0+1:N2,N0+1:M1,M2+1:N3))
        I1=K6*K5*K2
        I2=K5
@@ -6459,11 +6459,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N0+1:N2,N0+1:M1,M2+1:N3,N0+1:M1))
-       call reorder2341(N0,M1,N0,N2,N0,M1,M2,N3,
-     & N0,N2,N0,M1,M2,N3,N0,M1,S245,D1)
+       call reorder_shift(4,shape(S245),size(S245),shape(D1),size(D1),
+     & (/N0-N0,N0-N0,M2-M2,N0-N0/),'2341',S245,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S246(M2+1:N3,N0+1:M1,M2+1:N3,N0+1:M1))
        I1=K5*K6*K5
        I2=K6
@@ -6472,16 +6472,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum3124(N0,M1,M2,N3,M2,N3,N0,M1,X7,S246,-1.000)
+       call sum_stripe(4,shape(X7),size(X7),'3124',-1.000,
+     & X7,S246)
        deallocate(S246)
 C
        call sumx_sorted4231(N0,N2,N1,N3,N2,N3,N0,N1,
      & N0,M1,M2,N3,M2,N3,N0,M1,X7,VBHPPH, 1.000)
 C
        allocate(F2(N0+1:M1,M2+1:N3,M2+1:N3,N1+1:M2,N0+1:M1,M1+1:N1))
-       call reorder521346(N2,N3,N1,N3,N1,M2,N0,N2,N0,N1,M1,N1,
-     & N0,M1,M2,N3,M2,N3,N1,M2,N0,M1,M1,N1,t3B1,F2)
+       call reorder_shift(6,shape(t3B1),size(t3B1),shape(F2),size(F2),
+     & (/N0-N0,M2-N1,M2-N2,N1-N1,N0-N0,M1-M1/),'521346',t3B1,F2)
        allocate(Z7(M2+1:N3,N1+1:M2,N0+1:M1,M1+1:N1,M2+1:N3,N0+1:M1))
        I1=K5*K6
        I2=K7*K5*K9*K6
@@ -6489,23 +6489,23 @@ C
        call EGEMM(I1,I2,I3,X7,F2,Z7)
        deallocate(F2)
 C
-       call
-     & sum234615(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z7,-1.000)
-       call
-     & sum134625(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z7, 1.000)
-       call
-     & sum235614(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z7, 1.000)
-       call
-     & sum135624(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z7,-1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'234615',
+     & -1.000,V3C,Z7)
+       call sum_stripe(6,shape(V3C),size(V3C),'134625',
+     & 1.000,V3C,Z7)
+       call sum_stripe(6,shape(V3C),size(V3C),'235614',
+     & 1.000,V3C,Z7)
+       call sum_stripe(6,shape(V3C),size(V3C),'135624',
+     & -1.000,V3C,Z7)
        deallocate(Z7)
        deallocate(X7)
 C
        allocate(D1(N2+1:N3,N0+1:N2,M1+1:N1,M2+1:N3))
-       call reorder1342(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N2,N3,N0,N2,M1,N1,M2,N3,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N2-N2,N0-N0,M1-N0,M2-N1/),'1342',VBHHPP,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S247(N0+1:M1,N0+1:N2,M1+1:N1,M2+1:N3))
        I1=K6*K7*K2
        I2=K5
@@ -6515,11 +6515,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N0+1:N2,M1+1:N1,M2+1:N3,N0+1:M1))
-       call reorder2341(N0,M1,N0,N2,M1,N1,M2,N3,
-     & N0,N2,M1,N1,M2,N3,N0,M1,S247,D1)
+       call reorder_shift(4,shape(S247),size(S247),shape(D1),size(D1),
+     & (/N0-N0,M1-M1,M2-M2,N0-N0/),'2341',S247,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S248(M2+1:N3,M1+1:N1,M2+1:N3,N0+1:M1))
        I1=K5*K6*K7
        I2=K6
@@ -6528,16 +6528,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum3124(M1,N1,M2,N3,M2,N3,N0,M1,X8,S248,-1.000)
+       call sum_stripe(4,shape(X8),size(X8),'3124',-1.000,
+     & X8,S248)
        deallocate(S248)
 C
        call sumx_sorted4231(N0,N2,N1,N3,N2,N3,N0,N1,
      & M1,N1,M2,N3,M2,N3,N0,M1,X8,VBHPPH, 1.000)
 C
        allocate(F2(M1+1:N1,M2+1:N3,M2+1:N3,N1+1:M2,N0+1:M1,M1+1:N1))
-       call reorder521346(N2,N3,N1,N3,N1,M2,N0,N2,N0,N1,M1,N1,
-     & M1,N1,M2,N3,M2,N3,N1,M2,N0,M1,M1,N1,t3B1,F2)
+       call reorder_shift(6,shape(t3B1),size(t3B1),shape(F2),size(F2),
+     & (/M1-N0,M2-N1,M2-N2,N1-N1,N0-N0,M1-M1/),'521346',t3B1,F2)
        allocate(Z8(M2+1:N3,N1+1:M2,N0+1:M1,M1+1:N1,M2+1:N3,N0+1:M1))
        I1=K5*K6
        I2=K7*K5*K9*K6
@@ -6545,23 +6545,23 @@ C
        call EGEMM(I1,I2,I3,X8,F2,Z8)
        deallocate(F2)
 C
-       call
-     & sum234615(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z8,-1.000)
-       call
-     & sum134625(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z8, 1.000)
-       call
-     & sum235614(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z8, 1.000)
-       call
-     & sum135624(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z8,-1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'234615',
+     & -1.000,V3C,Z8)
+       call sum_stripe(6,shape(V3C),size(V3C),'134625',
+     & 1.000,V3C,Z8)
+       call sum_stripe(6,shape(V3C),size(V3C),'235614',
+     & 1.000,V3C,Z8)
+       call sum_stripe(6,shape(V3C),size(V3C),'135624',
+     & -1.000,V3C,Z8)
        deallocate(Z8)
        deallocate(X8)
 C
        allocate(D1(N2+1:N3,N0+1:N2,N0+1:M1,N1+1:M2))
-       call reorder1342(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N2,N3,N0,N2,N0,M1,N1,M2,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N2-N2,N0-N0,N0-N0,N1-N1/),'1342',VBHHPP,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S249(N0+1:M1,N0+1:N2,N0+1:M1,N1+1:M2))
        I1=K9*K5*K2
        I2=K5
@@ -6571,11 +6571,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N0+1:N2,N0+1:M1,N1+1:M2,N0+1:M1))
-       call reorder2341(N0,M1,N0,N2,N0,M1,N1,M2,
-     & N0,N2,N0,M1,N1,M2,N0,M1,S249,D1)
+       call reorder_shift(4,shape(S249),size(S249),shape(D1),size(D1),
+     & (/N0-N0,N0-N0,N1-N1,N0-N0/),'2341',S249,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S250(M2+1:N3,N0+1:M1,N1+1:M2,N0+1:M1))
        I1=K5*K9*K5
        I2=K6
@@ -6584,16 +6584,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum3124(N0,M1,N1,M2,M2,N3,N0,M1,X9,S250,-1.000)
+       call sum_stripe(4,shape(X9),size(X9),'3124',-1.000,
+     & X9,S250)
        deallocate(S250)
 C
        call sumx_sorted4231(N0,N2,N1,N3,N2,N3,N0,N1,
      & N0,M1,N1,M2,M2,N3,N0,M1,X9,VBHPPH, 1.000)
 C
        allocate(F2(N0+1:M1,N1+1:M2,M2+1:N3,N1+1:M2,N0+1:M1,M1+1:N1))
-       call reorder521346(N2,N3,N1,N3,N1,M2,N0,N2,N0,N1,M1,N1,
-     & N0,M1,N1,M2,M2,N3,N1,M2,N0,M1,M1,N1,t3B1,F2)
+       call reorder_shift(6,shape(t3B1),size(t3B1),shape(F2),size(F2),
+     & (/N0-N0,N1-N1,M2-N2,N1-N1,N0-N0,M1-M1/),'521346',t3B1,F2)
        allocate(Z9(M2+1:N3,N1+1:M2,N0+1:M1,M1+1:N1,M2+1:N3,N0+1:M1))
        I1=K5*K6
        I2=K7*K5*K9*K6
@@ -6601,23 +6601,23 @@ C
        call EGEMM(I1,I2,I3,X9,F2,Z9)
        deallocate(F2)
 C
-       call
-     & sum234615(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z9,-1.000)
-       call
-     & sum134625(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z9, 1.000)
-       call
-     & sum235614(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z9, 1.000)
-       call
-     & sum135624(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z9,-1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'234615',
+     & -1.000,V3C,Z9)
+       call sum_stripe(6,shape(V3C),size(V3C),'134625',
+     & 1.000,V3C,Z9)
+       call sum_stripe(6,shape(V3C),size(V3C),'235614',
+     & 1.000,V3C,Z9)
+       call sum_stripe(6,shape(V3C),size(V3C),'135624',
+     & -1.000,V3C,Z9)
        deallocate(Z9)
        deallocate(X9)
 C
        allocate(D1(N2+1:N3,N0+1:N2,M1+1:N1,N1+1:M2))
-       call reorder1342(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N2,N3,N0,N2,M1,N1,N1,M2,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N2-N2,N0-N0,M1-N0,N1-N1/),'1342',VBHHPP,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S251(N0+1:M1,N0+1:N2,M1+1:N1,N1+1:M2))
        I1=K9*K7*K2
        I2=K5
@@ -6627,11 +6627,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N0+1:N2,M1+1:N1,N1+1:M2,N0+1:M1))
-       call reorder2341(N0,M1,N0,N2,M1,N1,N1,M2,
-     & N0,N2,M1,N1,N1,M2,N0,M1,S251,D1)
+       call reorder_shift(4,shape(S251),size(S251),shape(D1),size(D1),
+     & (/N0-N0,M1-M1,N1-N1,N0-N0/),'2341',S251,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S252(M2+1:N3,M1+1:N1,N1+1:M2,N0+1:M1))
        I1=K5*K9*K7
        I2=K6
@@ -6640,16 +6640,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum3124(M1,N1,N1,M2,M2,N3,N0,M1,X10,S252,-1.000)
+       call sum_stripe(4,shape(X10),size(X10),'3124',-1.000,
+     & X10,S252)
        deallocate(S252)
 C
        call sumx_sorted4231(N0,N2,N1,N3,N2,N3,N0,N1,
      & M1,N1,N1,M2,M2,N3,N0,M1,X10,VBHPPH, 1.000)
 C
        allocate(F2(M1+1:N1,N1+1:M2,M2+1:N3,N1+1:M2,N0+1:M1,M1+1:N1))
-       call reorder521346(N2,N3,N1,N3,N1,M2,N0,N2,N0,N1,M1,N1,
-     & M1,N1,N1,M2,M2,N3,N1,M2,N0,M1,M1,N1,t3B1,F2)
+       call reorder_shift(6,shape(t3B1),size(t3B1),shape(F2),size(F2),
+     & (/M1-N0,N1-N1,M2-N2,N1-N1,N0-N0,M1-M1/),'521346',t3B1,F2)
        allocate(Z10(M2+1:N3,N1+1:M2,N0+1:M1,M1+1:N1,M2+1:N3,N0+1:M1))
        I1=K5*K6
        I2=K7*K5*K9*K6
@@ -6657,23 +6657,23 @@ C
        call EGEMM(I1,I2,I3,X10,F2,Z10)
        deallocate(F2)
 C
-       call
-     & sum234615(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z10,-1.000)
-       call
-     & sum134625(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z10, 1.000)
-       call
-     & sum235614(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z10, 1.000)
-       call
-     & sum135624(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z10,-1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'234615',
+     & -1.000,V3C,Z10)
+       call sum_stripe(6,shape(V3C),size(V3C),'134625',
+     & 1.000,V3C,Z10)
+       call sum_stripe(6,shape(V3C),size(V3C),'235614',
+     & 1.000,V3C,Z10)
+       call sum_stripe(6,shape(V3C),size(V3C),'135624',
+     & -1.000,V3C,Z10)
        deallocate(Z10)
        deallocate(X10)
 C
        allocate(D1(N2+1:N3,N0+1:M1,N0+1:M1,N2+1:N3))
-       call reorder2341(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N2,N3,N0,M1,N0,M1,N2,N3,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/N2-N2,N0-N0,N0-N0,N2-N2/),'2341',VCHHPP,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S253(N0+1:M1,N0+1:M1,N0+1:M1,N2+1:N3))
        I1=K4*K5*K5
        I2=K5
@@ -6683,11 +6683,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N2+1:N3,N0+1:M1,N0+1:M1,N0+1:M1))
-       call reorder4231(N0,M1,N0,M1,N0,M1,N2,N3,
-     & N2,N3,N0,M1,N0,M1,N0,M1,S253,D1)
+       call reorder_shift(4,shape(S253),size(S253),shape(D1),size(D1),
+     & (/N2-N2,N0-N0,N0-N0,N0-N0/),'4231',S253,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S254(N0+1:M1,N0+1:M1,N0+1:M1,N0+1:M1))
        I1=K5*K5*K5
        I2=K5
@@ -6696,16 +6696,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum3124(N0,M1,N0,M1,N0,M1,N0,M1,X28,S254, 1.000)
+       call sum_stripe(4,shape(X28),size(X28),'3124',1.000,
+     & X28,S254)
        deallocate(S254)
 C
        call sumx_sorted3412(N0,N2,N0,N2,N0,N2,N0,N2,
      & N0,M1,N0,M1,N0,M1,N0,M1,X28,VCHHHH, 1.000)
 C
        allocate(F2(N0+1:M1,N0+1:M1,M2+1:N3,M2+1:N3,N1+1:M2,M1+1:N1))
-       call reorder451236(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,
-     & N0,M1,N0,M1,M2,N3,M2,N3,N1,M2,M1,N1,t3C2,F2)
+       call reorder_shift(6,shape(t3C2),size(t3C2),shape(F2),size(F2),
+     & (/N0-N0,N0-N0,M2-M2,M2-M2,N1-N1,M1-M1/),'451236',t3C2,F2)
        allocate(Z28(M2+1:N3,M2+1:N3,N1+1:M2,M1+1:N1,N0+1:M1,N0+1:M1))
        I1=K5*K5
        I2=K7*K9*K6*K6
@@ -6713,17 +6713,17 @@ C
        call EGEMM(I1,I2,I3,X28,F2,Z28)
        deallocate(F2)
 C
-       call
-     & sum123645(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z28, 0.500)
+       call sum_stripe(6,shape(V3C),size(V3C),'123645',
+     & 0.500,V3C,Z28)
        deallocate(Z28)
        deallocate(X28)
 C
        allocate(D1(N2+1:N3,N0+1:M1,M1+1:N2,N2+1:N3))
-       call reorder2341(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N2,N3,N0,M1,M1,N2,N2,N3,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/N2-N2,N0-N0,M1-N0,N2-N2/),'2341',VCHHPP,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S255(N0+1:M1,N0+1:M1,M1+1:N2,N2+1:N3))
        I1=K4*K8*K5
        I2=K5
@@ -6733,11 +6733,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N2+1:N3,N0+1:M1,M1+1:N2,N0+1:M1))
-       call reorder4231(N0,M1,N0,M1,M1,N2,N2,N3,
-     & N2,N3,N0,M1,M1,N2,N0,M1,S255,D1)
+       call reorder_shift(4,shape(S255),size(S255),shape(D1),size(D1),
+     & (/N2-N2,N0-N0,M1-M1,N0-N0/),'4231',S255,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S256(N0+1:M1,N0+1:M1,M1+1:N2,N0+1:M1))
        I1=K5*K8*K5
        I2=K5
@@ -6746,16 +6746,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum3124(N0,M1,M1,N2,N0,M1,N0,M1,X29,S256, 1.000)
+       call sum_stripe(4,shape(X29),size(X29),'3124',1.000,
+     & X29,S256)
        deallocate(S256)
 C
        call sumx_sorted3412(N0,N2,N0,N2,N0,N2,N0,N2,
      & N0,M1,M1,N2,N0,M1,N0,M1,X29,VCHHHH, 1.000)
 C
        allocate(F2(N0+1:M1,M1+1:N2,M2+1:N3,M2+1:N3,N1+1:M2,M1+1:N1))
-       call reorder451236(M2,N3,M2,N3,N1,M2,N0,N2,M1,N2,N0,N1,
-     & N0,M1,M1,N2,M2,N3,M2,N3,N1,M2,M1,N1,t3C3,F2)
+       call reorder_shift(6,shape(t3C3),size(t3C3),shape(F2),size(F2),
+     & (/N0-N0,M1-M1,M2-M2,M2-M2,N1-N1,M1-N0/),'451236',t3C3,F2)
        allocate(Z29(M2+1:N3,M2+1:N3,N1+1:M2,M1+1:N1,N0+1:M1,N0+1:M1))
        I1=K5*K5
        I2=K7*K9*K6*K6
@@ -6763,17 +6763,17 @@ C
        call EGEMM(I1,I2,I3,X29,F2,Z29)
        deallocate(F2)
 C
-       call
-     & sum123645(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z29, 1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'123645',
+     & 1.000,V3C,Z29)
        deallocate(Z29)
        deallocate(X29)
 C
        allocate(D1(N2+1:N3,M1+1:N2,M1+1:N2,N2+1:N3))
-       call reorder2341(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N2,N3,M1,N2,M1,N2,N2,N3,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/N2-N2,M1-N0,M1-N0,N2-N2/),'2341',VCHHPP,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S257(N0+1:M1,M1+1:N2,M1+1:N2,N2+1:N3))
        I1=K4*K8*K8
        I2=K5
@@ -6783,11 +6783,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N2+1:N3,M1+1:N2,M1+1:N2,N0+1:M1))
-       call reorder4231(N0,M1,M1,N2,M1,N2,N2,N3,
-     & N2,N3,M1,N2,M1,N2,N0,M1,S257,D1)
+       call reorder_shift(4,shape(S257),size(S257),shape(D1),size(D1),
+     & (/N2-N2,M1-M1,M1-M1,N0-N0/),'4231',S257,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S258(N0+1:M1,M1+1:N2,M1+1:N2,N0+1:M1))
        I1=K5*K8*K8
        I2=K5
@@ -6796,16 +6796,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum3124(M1,N2,M1,N2,N0,M1,N0,M1,X30,S258, 1.000)
+       call sum_stripe(4,shape(X30),size(X30),'3124',1.000,
+     & X30,S258)
        deallocate(S258)
 C
        call sumx_sorted3412(N0,N2,N0,N2,N0,N2,N0,N2,
      & M1,N2,M1,N2,N0,M1,N0,M1,X30,VCHHHH, 1.000)
 C
        allocate(F2(M1+1:N2,M1+1:N2,M2+1:N3,M2+1:N3,N1+1:M2,M1+1:N1))
-       call reorder451236(M2,N3,M2,N3,N1,M2,N0,N2,M1,N2,N0,N1,
-     & M1,N2,M1,N2,M2,N3,M2,N3,N1,M2,M1,N1,t3C3,F2)
+       call reorder_shift(6,shape(t3C3),size(t3C3),shape(F2),size(F2),
+     & (/M1-N0,M1-M1,M2-M2,M2-M2,N1-N1,M1-N0/),'451236',t3C3,F2)
        allocate(Z30(M2+1:N3,M2+1:N3,N1+1:M2,M1+1:N1,N0+1:M1,N0+1:M1))
        I1=K5*K5
        I2=K7*K9*K6*K6
@@ -6813,17 +6813,17 @@ C
        call EGEMM(I1,I2,I3,X30,F2,Z30)
        deallocate(F2)
 C
-       call
-     & sum123645(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z30, 0.500)
+       call sum_stripe(6,shape(V3C),size(V3C),'123645',
+     & 0.500,V3C,Z30)
        deallocate(Z30)
        deallocate(X30)
 C
        allocate(D1(N2+1:N3,N0+1:N2,N0+1:M1,M2+1:N3))
-       call reorder1342(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N2,N3,N0,N2,N0,M1,M2,N3,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/N2-N2,N0-N0,N0-N0,M2-N2/),'1342',VCHHPP,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S259(N0+1:M1,N0+1:N2,N0+1:M1,M2+1:N3))
        I1=K6*K5*K2
        I2=K5
@@ -6833,11 +6833,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N0+1:N2,N0+1:M1,M2+1:N3,N0+1:M1))
-       call reorder2341(N0,M1,N0,N2,N0,M1,M2,N3,
-     & N0,N2,N0,M1,M2,N3,N0,M1,S259,D1)
+       call reorder_shift(4,shape(S259),size(S259),shape(D1),size(D1),
+     & (/N0-N0,N0-N0,M2-M2,N0-N0/),'2341',S259,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S260(M2+1:N3,N0+1:M1,M2+1:N3,N0+1:M1))
        I1=K5*K6*K5
        I2=K6
@@ -6846,16 +6846,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum3124(N0,M1,M2,N3,M2,N3,N0,M1,X31,S260, 1.000)
+       call sum_stripe(4,shape(X31),size(X31),'3124',1.000,
+     & X31,S260)
        deallocate(S260)
 C
        call sumx_sorted2431(N2,N3,N0,N2,N2,N3,N0,N2,
      & N0,M1,M2,N3,M2,N3,N0,M1,X31,VCHPHP, 1.000)
 C
        allocate(F2(N0+1:M1,M2+1:N3,M2+1:N3,N1+1:M2,N0+1:M1,M1+1:N1))
-       call reorder412356(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,
-     & N0,M1,M2,N3,M2,N3,N1,M2,N0,M1,M1,N1,t3C2,F2)
+       call reorder_shift(6,shape(t3C2),size(t3C2),shape(F2),size(F2),
+     & (/N0-N0,M2-M2,M2-M2,N1-N1,N0-N0,M1-M1/),'412356',t3C2,F2)
        allocate(Z31(M2+1:N3,N1+1:M2,N0+1:M1,M1+1:N1,M2+1:N3,N0+1:M1))
        I1=K5*K6
        I2=K7*K5*K9*K6
@@ -6863,23 +6863,23 @@ C
        call EGEMM(I1,I2,I3,X31,F2,Z31)
        deallocate(F2)
 C
-       call
-     & sum234615(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z31, 1.000)
-       call
-     & sum134625(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z31,-1.000)
-       call
-     & sum235614(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z31,-1.000)
-       call
-     & sum135624(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z31, 1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'234615',
+     & 1.000,V3C,Z31)
+       call sum_stripe(6,shape(V3C),size(V3C),'134625',
+     & -1.000,V3C,Z31)
+       call sum_stripe(6,shape(V3C),size(V3C),'235614',
+     & -1.000,V3C,Z31)
+       call sum_stripe(6,shape(V3C),size(V3C),'135624',
+     & 1.000,V3C,Z31)
        deallocate(Z31)
        deallocate(X31)
 C
        allocate(D1(N2+1:N3,N0+1:N2,M1+1:N2,M2+1:N3))
-       call reorder1342(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N2,N3,N0,N2,M1,N2,M2,N3,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/N2-N2,N0-N0,M1-N0,M2-N2/),'1342',VCHHPP,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S261(N0+1:M1,N0+1:N2,M1+1:N2,M2+1:N3))
        I1=K6*K8*K2
        I2=K5
@@ -6889,11 +6889,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N0+1:N2,M1+1:N2,M2+1:N3,N0+1:M1))
-       call reorder2341(N0,M1,N0,N2,M1,N2,M2,N3,
-     & N0,N2,M1,N2,M2,N3,N0,M1,S261,D1)
+       call reorder_shift(4,shape(S261),size(S261),shape(D1),size(D1),
+     & (/N0-N0,M1-M1,M2-M2,N0-N0/),'2341',S261,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S262(M2+1:N3,M1+1:N2,M2+1:N3,N0+1:M1))
        I1=K5*K6*K8
        I2=K6
@@ -6902,16 +6902,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum3124(M1,N2,M2,N3,M2,N3,N0,M1,X32,S262, 1.000)
+       call sum_stripe(4,shape(X32),size(X32),'3124',1.000,
+     & X32,S262)
        deallocate(S262)
 C
        call sumx_sorted2431(N2,N3,N0,N2,N2,N3,N0,N2,
      & M1,N2,M2,N3,M2,N3,N0,M1,X32,VCHPHP, 1.000)
 C
        allocate(F2(M1+1:N2,M2+1:N3,M2+1:N3,N1+1:M2,N0+1:M1,M1+1:N1))
-       call reorder512346(M2,N3,M2,N3,N1,M2,N0,N2,M1,N2,N0,N1,
-     & M1,N2,M2,N3,M2,N3,N1,M2,N0,M1,M1,N1,t3C3,F2)
+       call reorder_shift(6,shape(t3C3),size(t3C3),shape(F2),size(F2),
+     & (/M1-M1,M2-M2,M2-M2,N1-N1,N0-N0,M1-N0/),'512346',t3C3,F2)
        allocate(Z32(M2+1:N3,N1+1:M2,N0+1:M1,M1+1:N1,M2+1:N3,N0+1:M1))
        I1=K5*K6
        I2=K7*K5*K9*K6
@@ -6919,23 +6919,23 @@ C
        call EGEMM(I1,I2,I3,X32,F2,Z32)
        deallocate(F2)
 C
-       call
-     & sum234615(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z32,-1.000)
-       call
-     & sum134625(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z32, 1.000)
-       call
-     & sum235614(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z32, 1.000)
-       call
-     & sum135624(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z32,-1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'234615',
+     & -1.000,V3C,Z32)
+       call sum_stripe(6,shape(V3C),size(V3C),'134625',
+     & 1.000,V3C,Z32)
+       call sum_stripe(6,shape(V3C),size(V3C),'235614',
+     & 1.000,V3C,Z32)
+       call sum_stripe(6,shape(V3C),size(V3C),'135624',
+     & -1.000,V3C,Z32)
        deallocate(Z32)
        deallocate(X32)
 C
        allocate(D1(N2+1:N3,N0+1:N2,N0+1:M1,N2+1:M2))
-       call reorder1342(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N2,N3,N0,N2,N0,M1,N2,M2,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/N2-N2,N0-N0,N0-N0,N2-N2/),'1342',VCHHPP,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S263(N0+1:M1,N0+1:N2,N0+1:M1,N2+1:M2))
        I1=K0*K5*K2
        I2=K5
@@ -6945,11 +6945,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N0+1:N2,N0+1:M1,N2+1:M2,N0+1:M1))
-       call reorder2341(N0,M1,N0,N2,N0,M1,N2,M2,
-     & N0,N2,N0,M1,N2,M2,N0,M1,S263,D1)
+       call reorder_shift(4,shape(S263),size(S263),shape(D1),size(D1),
+     & (/N0-N0,N0-N0,N2-N2,N0-N0/),'2341',S263,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S264(M2+1:N3,N0+1:M1,N2+1:M2,N0+1:M1))
        I1=K5*K0*K5
        I2=K6
@@ -6958,16 +6958,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum3124(N0,M1,N2,M2,M2,N3,N0,M1,X33,S264, 1.000)
+       call sum_stripe(4,shape(X33),size(X33),'3124',1.000,
+     & X33,S264)
        deallocate(S264)
 C
        call sumx_sorted2431(N2,N3,N0,N2,N2,N3,N0,N2,
      & N0,M1,N2,M2,M2,N3,N0,M1,X33,VCHPHP, 1.000)
 C
        allocate(F2(N0+1:M1,N2+1:M2,M2+1:N3,N1+1:M2,N0+1:M1,M1+1:N1))
-       call reorder421356(N2,N3,N2,M2,N1,N3,N0,M1,N0,M1,M1,N1,
-     & N0,M1,N2,M2,M2,N3,N1,M2,N0,M1,M1,N1,t3C4,F2)
+       call reorder_shift(6,shape(t3C4),size(t3C4),shape(F2),size(F2),
+     & (/N0-N0,N2-N2,M2-N2,N1-N1,N0-N0,M1-M1/),'421356',t3C4,F2)
        allocate(Z33(M2+1:N3,N1+1:M2,N0+1:M1,M1+1:N1,M2+1:N3,N0+1:M1))
        I1=K5*K6
        I2=K7*K5*K9*K6
@@ -6975,23 +6975,23 @@ C
        call EGEMM(I1,I2,I3,X33,F2,Z33)
        deallocate(F2)
 C
-       call
-     & sum234615(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z33,-1.000)
-       call
-     & sum134625(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z33, 1.000)
-       call
-     & sum235614(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z33, 1.000)
-       call
-     & sum135624(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z33,-1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'234615',
+     & -1.000,V3C,Z33)
+       call sum_stripe(6,shape(V3C),size(V3C),'134625',
+     & 1.000,V3C,Z33)
+       call sum_stripe(6,shape(V3C),size(V3C),'235614',
+     & 1.000,V3C,Z33)
+       call sum_stripe(6,shape(V3C),size(V3C),'135624',
+     & -1.000,V3C,Z33)
        deallocate(Z33)
        deallocate(X33)
 C
        allocate(D1(N2+1:N3,N0+1:N2,M1+1:N2,N2+1:M2))
-       call reorder1342(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N2,N3,N0,N2,M1,N2,N2,M2,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/N2-N2,N0-N0,M1-N0,N2-N2/),'1342',VCHHPP,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S265(N0+1:M1,N0+1:N2,M1+1:N2,N2+1:M2))
        I1=K0*K8*K2
        I2=K5
@@ -7001,11 +7001,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N0+1:N2,M1+1:N2,N2+1:M2,N0+1:M1))
-       call reorder2341(N0,M1,N0,N2,M1,N2,N2,M2,
-     & N0,N2,M1,N2,N2,M2,N0,M1,S265,D1)
+       call reorder_shift(4,shape(S265),size(S265),shape(D1),size(D1),
+     & (/N0-N0,M1-M1,N2-N2,N0-N0/),'2341',S265,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S266(M2+1:N3,M1+1:N2,N2+1:M2,N0+1:M1))
        I1=K5*K0*K8
        I2=K6
@@ -7014,16 +7014,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum3124(M1,N2,N2,M2,M2,N3,N0,M1,X34,S266, 1.000)
+       call sum_stripe(4,shape(X34),size(X34),'3124',1.000,
+     & X34,S266)
        deallocate(S266)
 C
        call sumx_sorted2431(N2,N3,N0,N2,N2,N3,N0,N2,
      & M1,N2,N2,M2,M2,N3,N0,M1,X34,VCHPHP, 1.000)
 C
        allocate(F2(M1+1:N2,N2+1:M2,M2+1:N3,N1+1:M2,N0+1:M1,M1+1:N1))
-       call reorder521346(N2,N3,N2,M2,N1,N3,N0,N2,M1,N2,N0,N1,
-     & M1,N2,N2,M2,M2,N3,N1,M2,N0,M1,M1,N1,t3C1,F2)
+       call reorder_shift(6,shape(t3C1),size(t3C1),shape(F2),size(F2),
+     & (/M1-M1,N2-N2,M2-N2,N1-N1,N0-N0,M1-N0/),'521346',t3C1,F2)
        allocate(Z34(M2+1:N3,N1+1:M2,N0+1:M1,M1+1:N1,M2+1:N3,N0+1:M1))
        I1=K5*K6
        I2=K7*K5*K9*K6
@@ -7031,23 +7031,23 @@ C
        call EGEMM(I1,I2,I3,X34,F2,Z34)
        deallocate(F2)
 C
-       call
-     & sum234615(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z34, 1.000)
-       call
-     & sum134625(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z34,-1.000)
-       call
-     & sum235614(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z34,-1.000)
-       call
-     & sum135624(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z34, 1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'234615',
+     & 1.000,V3C,Z34)
+       call sum_stripe(6,shape(V3C),size(V3C),'134625',
+     & -1.000,V3C,Z34)
+       call sum_stripe(6,shape(V3C),size(V3C),'235614',
+     & -1.000,V3C,Z34)
+       call sum_stripe(6,shape(V3C),size(V3C),'135624',
+     & 1.000,V3C,Z34)
        deallocate(Z34)
        deallocate(X34)
 C
        allocate(D1(N0+1:N2,N2+1:N3,N0+1:M1,N2+1:N3))
-       call reorder3142(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N2,N3,N0,M1,N2,N3,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,N0-N0,N2-N2/),'3142',VCHHPP,D1)
        allocate(B2(N0+1:N2,N2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,N2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,N2-N2/),'21',t1B,B2)
        allocate(Q49(N0+1:M1,N2+1:N3))
        I1=K4*K5
        I3=K4*K2
@@ -7056,11 +7056,11 @@ C
        deallocate(B2)
 C
        allocate(B1(N2+1:N3,N0+1:M1))
-       call reorder21(N0,M1,N2,N3,
-     & N2,N3,N0,M1,Q49,B1)
+       call reorder_shift(2,shape(Q49),size(Q49),shape(B1),size(B1),
+     & (/N2-N2,N0-N0/),'21',Q49,B1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(Q50(N0+1:M1,N0+1:M1))
        I1=K5
        I2=K5
@@ -7069,16 +7069,16 @@ C
        deallocate(B1)
        deallocate(B2)
 C
-       call
-     & sum21(N0,M1,N0,M1,X13,Q50, 1.000)
+       call sum_stripe(2,shape(X13),size(X13),'21',1.000,
+     & X13,Q50)
        deallocate(Q50)
 C
        call sumx_sorted21(N0,N2,N0,N2,
      & N0,M1,N0,M1,X13,FBHH, 1.000)
 C
        allocate(F2(N0+1:M1,M2+1:N3,M2+1:N3,N1+1:M2,N0+1:M1,M1+1:N1))
-       call reorder412356(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,
-     & N0,M1,M2,N3,M2,N3,N1,M2,N0,M1,M1,N1,t3C2,F2)
+       call reorder_shift(6,shape(t3C2),size(t3C2),shape(F2),size(F2),
+     & (/N0-N0,M2-M2,M2-M2,N1-N1,N0-N0,M1-M1/),'412356',t3C2,F2)
        allocate(Z13(M2+1:N3,M2+1:N3,N1+1:M2,N0+1:M1,M1+1:N1,N0+1:M1))
        I1=K5
        I2=K7*K5*K9*K6*K6
@@ -7086,19 +7086,19 @@ C
        call EGEMM(I1,I2,I3,X13,F2,Z13)
        deallocate(F2)
 C
-       call
-     & sum123465(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z13, 1.000)
-       call
-     & sum123564(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z13,-1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'123465',
+     & 1.000,V3C,Z13)
+       call sum_stripe(6,shape(V3C),size(V3C),'123564',
+     & -1.000,V3C,Z13)
        deallocate(Z13)
        deallocate(X13)
 C
        allocate(D1(N0+1:N2,N2+1:N3,M1+1:N2,N2+1:N3))
-       call reorder3142(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N2,N3,M1,N2,N2,N3,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,M1-N0,N2-N2/),'3142',VCHHPP,D1)
        allocate(B2(N0+1:N2,N2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,N2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,N2-N2/),'21',t1B,B2)
        allocate(Q51(M1+1:N2,N2+1:N3))
        I1=K4*K8
        I3=K4*K2
@@ -7107,11 +7107,11 @@ C
        deallocate(B2)
 C
        allocate(B1(N2+1:N3,M1+1:N2))
-       call reorder21(M1,N2,N2,N3,
-     & N2,N3,M1,N2,Q51,B1)
+       call reorder_shift(2,shape(Q51),size(Q51),shape(B1),size(B1),
+     & (/N2-N2,M1-M1/),'21',Q51,B1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(Q52(N0+1:M1,M1+1:N2))
        I1=K8
        I2=K5
@@ -7120,16 +7120,16 @@ C
        deallocate(B1)
        deallocate(B2)
 C
-       call
-     & sum21(M1,N2,N0,M1,X14,Q52, 1.000)
+       call sum_stripe(2,shape(X14),size(X14),'21',1.000,
+     & X14,Q52)
        deallocate(Q52)
 C
        call sumx_sorted21(N0,N2,N0,N2,
      & M1,N2,N0,M1,X14,FBHH, 1.000)
 C
        allocate(F2(M1+1:N2,M2+1:N3,M2+1:N3,N1+1:M2,N0+1:M1,M1+1:N1))
-       call reorder512346(M2,N3,M2,N3,N1,M2,N0,N2,M1,N2,N0,N1,
-     & M1,N2,M2,N3,M2,N3,N1,M2,N0,M1,M1,N1,t3C3,F2)
+       call reorder_shift(6,shape(t3C3),size(t3C3),shape(F2),size(F2),
+     & (/M1-M1,M2-M2,M2-M2,N1-N1,N0-N0,M1-N0/),'512346',t3C3,F2)
        allocate(Z14(M2+1:N3,M2+1:N3,N1+1:M2,N0+1:M1,M1+1:N1,N0+1:M1))
        I1=K5
        I2=K7*K5*K9*K6*K6
@@ -7137,19 +7137,19 @@ C
        call EGEMM(I1,I2,I3,X14,F2,Z14)
        deallocate(F2)
 C
-       call
-     & sum123465(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z14,-1.000)
-       call
-     & sum123564(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z14, 1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'123465',
+     & -1.000,V3C,Z14)
+       call sum_stripe(6,shape(V3C),size(V3C),'123564',
+     & 1.000,V3C,Z14)
        deallocate(Z14)
        deallocate(X14)
 C
        allocate(D1(N0+1:N2,N0+1:N2,M2+1:N3,N2+1:M2))
-       call reorder3412(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N0,N2,M2,N3,N2,M2,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/N0-N0,N0-N0,M2-N2,N2-N2/),'3412',VCHHPP,D1)
        allocate(D2(N0+1:N2,N0+1:N2,M2+1:N3,M2+1:N3))
-       call reorder3412(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N0,N2,M2,N3,M2,N3,t2C,D2)
+       call reorder_shift(4,shape(t2C),size(t2C),shape(D2),size(D2),
+     & (/N0-N0,N0-N0,M2-N2,M2-N2/),'3412',t2C,D2)
        allocate(S177(M2+1:N3,M2+1:N3,M2+1:N3,N2+1:M2))
        I1=K0*K6
        I2=K6*K6
@@ -7160,16 +7160,16 @@ C
 C
        allocate(X35(M2+1:N3,N2+1:M2,M2+1:N3,M2+1:N3))
        X35=0.0d0
-       call
-     & sum3412(M2,N3,N2,M2,M2,N3,M2,N3,X35,S177, 0.500)
+       call sum_stripe(4,shape(X35),size(X35),'3412',0.500,
+     & X35,S177)
        deallocate(S177)
 C
        allocate(D1(N0+1:N2,N0+1:N2,M2+1:N3,N2+1:M2))
-       call reorder4312(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N0,N2,M2,N3,N2,M2,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/N0-N0,N0-N0,M2-N2,N2-N2/),'4312',VCHHPP,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S267(M2+1:N3,N0+1:N2,M2+1:N3,N2+1:M2))
        I1=K0*K6*K2
        I2=K6
@@ -7179,11 +7179,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N0+1:N2,M2+1:N3,N2+1:M2,M2+1:N3))
-       call reorder2341(M2,N3,N0,N2,M2,N3,N2,M2,
-     & N0,N2,M2,N3,N2,M2,M2,N3,S267,D1)
+       call reorder_shift(4,shape(S267),size(S267),shape(D1),size(D1),
+     & (/N0-N0,M2-M2,N2-N2,M2-M2/),'2341',S267,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S268(M2+1:N3,M2+1:N3,N2+1:M2,M2+1:N3))
        I1=K6*K0*K6
        I2=K6
@@ -7192,16 +7192,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum3124(M2,N3,N2,M2,M2,N3,M2,N3,X35,S268, 1.000)
+       call sum_stripe(4,shape(X35),size(X35),'3124',1.000,
+     & X35,S268)
        deallocate(S268)
 C
        call sumx_sorted3412(N2,N3,N2,N3,N2,N3,N2,M2,
      & M2,N3,N2,M2,M2,N3,M2,N3,X35,VCAPPP, 1.000)
 C
        allocate(F2(M2+1:N3,N2+1:M2,N1+1:M2,N0+1:M1,N0+1:M1,M1+1:N1))
-       call reorder123456(N2,N3,N2,M2,N1,N3,N0,M1,N0,M1,M1,N1,
-     & M2,N3,N2,M2,N1,M2,N0,M1,N0,M1,M1,N1,t3C4,F2)
+       call reorder_shift(6,shape(t3C4),size(t3C4),shape(F2),size(F2),
+     & (/M2-N2,N2-N2,N1-N1,N0-N0,N0-N0,M1-M1/),'123456',t3C4,F2)
        allocate(Z35(N1+1:M2,N0+1:M1,N0+1:M1,M1+1:N1,M2+1:N3,M2+1:N3))
        I1=K6*K6
        I2=K7*K5*K5*K9
@@ -7209,17 +7209,17 @@ C
        call EGEMM(I1,I2,I3,X35,F2,Z35)
        deallocate(F2)
 C
-       call
-     & sum345612(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z35, 1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'345612',
+     & 1.000,V3C,Z35)
        deallocate(Z35)
        deallocate(X35)
 C
        allocate(D1(N0+1:N2,N0+1:N2,N2+1:M2,N2+1:M2))
-       call reorder4312(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N0,N2,N2,M2,N2,M2,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/N0-N0,N0-N0,N2-N2,N2-N2/),'4312',VCHHPP,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S269(M2+1:N3,N0+1:N2,N2+1:M2,N2+1:M2))
        I1=K0*K0*K2
        I2=K6
@@ -7229,11 +7229,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N0+1:N2,N2+1:M2,N2+1:M2,M2+1:N3))
-       call reorder2341(M2,N3,N0,N2,N2,M2,N2,M2,
-     & N0,N2,N2,M2,N2,M2,M2,N3,S269,D1)
+       call reorder_shift(4,shape(S269),size(S269),shape(D1),size(D1),
+     & (/N0-N0,N2-N2,N2-N2,M2-M2/),'2341',S269,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S270(M2+1:N3,N2+1:M2,N2+1:M2,M2+1:N3))
        I1=K6*K0*K0
        I2=K6
@@ -7242,16 +7242,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum3124(N2,M2,N2,M2,M2,N3,M2,N3,X36,S270, 1.000)
+       call sum_stripe(4,shape(X36),size(X36),'3124',1.000,
+     & X36,S270)
        deallocate(S270)
 C
        call sumx_sorted3412(N2,N3,N2,N3,N2,N3,N2,M2,
      & N2,M2,N2,M2,M2,N3,M2,N3,X36,VCAPPP, 1.000)
 C
        allocate(F2(N2+1:M2,N2+1:M2,N1+1:M2,N0+1:M1,N0+1:M1,M1+1:N1))
-       call reorder123456(N2,N3,N2,M2,N1,N3,N0,M1,N0,M1,M1,N1,
-     & N2,M2,N2,M2,N1,M2,N0,M1,N0,M1,M1,N1,t3C4,F2)
+       call reorder_shift(6,shape(t3C4),size(t3C4),shape(F2),size(F2),
+     & (/N2-N2,N2-N2,N1-N1,N0-N0,N0-N0,M1-M1/),'123456',t3C4,F2)
        allocate(Z36(N1+1:M2,N0+1:M1,N0+1:M1,M1+1:N1,M2+1:N3,M2+1:N3))
        I1=K6*K6
        I2=K7*K5*K5*K9
@@ -7259,17 +7259,17 @@ C
        call EGEMM(I1,I2,I3,X36,F2,Z36)
        deallocate(F2)
 C
-       call
-     & sum345612(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z36, 0.500)
+       call sum_stripe(6,shape(V3C),size(V3C),'345612',
+     & 0.500,V3C,Z36)
        deallocate(Z36)
        deallocate(X36)
 C
        allocate(D1(N0+1:N2,N2+1:N3,N0+1:N2,M2+1:N3))
-       call reorder3142(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N2,N3,N0,N2,M2,N3,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,N0-N0,M2-N2/),'3142',VCHHPP,D1)
        allocate(B2(N0+1:N2,N2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,N2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,N2-N2/),'21',t1B,B2)
        allocate(Q53(N0+1:N2,M2+1:N3))
        I1=K6*K2
        I3=K4*K2
@@ -7278,8 +7278,8 @@ C
        deallocate(B2)
 C
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(Q54(M2+1:N3,M2+1:N3))
        I1=K6
        I2=K6
@@ -7287,16 +7287,16 @@ C
        call EGEMM(I1,I2,I3,Q53,B2,Q54)
        deallocate(B2)
 C
-       call
-     & sum21(M2,N3,M2,N3,X15,Q54,-1.000)
+       call sum_stripe(2,shape(X15),size(X15),'21',-1.000,
+     & X15,Q54)
        deallocate(Q54)
 C
        call sumx_sorted12(N2,N3,N2,N3,
      & M2,N3,M2,N3,X15,FBPP, 1.000)
 C
        allocate(F2(M2+1:N3,M2+1:N3,N1+1:M2,N0+1:M1,N0+1:M1,M1+1:N1))
-       call reorder123456(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,
-     & M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,t3C2,F2)
+       call reorder_shift(6,shape(t3C2),size(t3C2),shape(F2),size(F2),
+     & (/M2-M2,M2-M2,N1-N1,N0-N0,N0-N0,M1-M1/),'123456',t3C2,F2)
        allocate(Z15(M2+1:N3,N1+1:M2,N0+1:M1,N0+1:M1,M1+1:N1,M2+1:N3))
        I1=K6
        I2=K7*K5*K5*K9*K6
@@ -7304,19 +7304,19 @@ C
        call EGEMM(I1,I2,I3,X15,F2,Z15)
        deallocate(F2)
 C
-       call
-     & sum234561(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z15, 1.000)
-       call
-     & sum134562(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z15,-1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'234561',
+     & 1.000,V3C,Z15)
+       call sum_stripe(6,shape(V3C),size(V3C),'134562',
+     & -1.000,V3C,Z15)
        deallocate(Z15)
        deallocate(X15)
 C
        allocate(D1(N0+1:N2,N2+1:N3,N0+1:N2,N2+1:M2))
-       call reorder3142(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N2,N3,N0,N2,N2,M2,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,N0-N0,N2-N2/),'3142',VCHHPP,D1)
        allocate(B2(N0+1:N2,N2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,N2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,N2-N2/),'21',t1B,B2)
        allocate(Q55(N0+1:N2,N2+1:M2))
        I1=K0*K2
        I3=K4*K2
@@ -7325,8 +7325,8 @@ C
        deallocate(B2)
 C
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(Q56(M2+1:N3,N2+1:M2))
        I1=K0
        I2=K6
@@ -7334,16 +7334,16 @@ C
        call EGEMM(I1,I2,I3,Q55,B2,Q56)
        deallocate(B2)
 C
-       call
-     & sum21(N2,M2,M2,N3,X16,Q56,-1.000)
+       call sum_stripe(2,shape(X16),size(X16),'21',-1.000,
+     & X16,Q56)
        deallocate(Q56)
 C
        call sumx_sorted12(N2,N3,N2,N3,
      & N2,M2,M2,N3,X16,FBPP, 1.000)
 C
        allocate(F2(N2+1:M2,M2+1:N3,N1+1:M2,N0+1:M1,N0+1:M1,M1+1:N1))
-       call reorder213456(N2,N3,N2,M2,N1,N3,N0,M1,N0,M1,M1,N1,
-     & N2,M2,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,t3C4,F2)
+       call reorder_shift(6,shape(t3C4),size(t3C4),shape(F2),size(F2),
+     & (/N2-N2,M2-N2,N1-N1,N0-N0,N0-N0,M1-M1/),'213456',t3C4,F2)
        allocate(Z16(M2+1:N3,N1+1:M2,N0+1:M1,N0+1:M1,M1+1:N1,M2+1:N3))
        I1=K6
        I2=K7*K5*K5*K9*K6
@@ -7351,19 +7351,19 @@ C
        call EGEMM(I1,I2,I3,X16,F2,Z16)
        deallocate(F2)
 C
-       call
-     & sum234561(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z16,-1.000)
-       call
-     & sum134562(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z16, 1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'234561',
+     & -1.000,V3C,Z16)
+       call sum_stripe(6,shape(V3C),size(V3C),'134562',
+     & 1.000,V3C,Z16)
        deallocate(Z16)
        deallocate(X16)
 C
        allocate(D1(N2+1:N3,N0+1:N2,N0+1:N1,N1+1:N3))
-       call reorder1342(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N2,N3,N0,N2,N0,N1,N1,N3,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N2-N2,N0-N0,N0-N0,N1-N1/),'1342',VBHHPP,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S271(N0+1:M1,N0+1:N2,N0+1:N1,N1+1:N3))
        I1=K3*K1*K2
        I2=K5
@@ -7373,11 +7373,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N0+1:N2,N0+1:N1,N1+1:N3,N0+1:M1))
-       call reorder2341(N0,M1,N0,N2,N0,N1,N1,N3,
-     & N0,N2,N0,N1,N1,N3,N0,M1,S271,D1)
+       call reorder_shift(4,shape(S271),size(S271),shape(D1),size(D1),
+     & (/N0-N0,N0-N0,N1-N1,N0-N0/),'2341',S271,D1)
        allocate(D2(N0+1:N2,N0+1:N1,M2+1:N3,N1+1:M2))
-       call reorder3412(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N2,N0,N1,M2,N3,N1,M2,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N0-N0,M2-N2,N1-N1/),'3412',t2B,D2)
        allocate(S275(M2+1:N3,N1+1:M2,N1+1:N3,N0+1:M1))
        I1=K5*K3
        I2=K9*K6
@@ -7386,16 +7386,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum2314(N1,N3,M2,N3,N1,M2,N0,M1,X2,S275, 1.000)
+       call sum_stripe(4,shape(X2),size(X2),'2314',1.000,X2,
+     & S275)
        deallocate(S275)
 C
        allocate(D1(N0+1:N1,N1+1:N3,N0+1:N2,N0+1:M1))
-       call reorder3421(N0,M1,N0,N2,N0,N1,N1,N3,
-     & N0,N1,N1,N3,N0,N2,N0,M1,S271,D1)
+       call reorder_shift(4,shape(S271),size(S271),shape(D1),size(D1),
+     & (/N0-N0,N1-N1,N0-N0,N0-N0/),'3421',S271,D1)
        allocate(D2(N0+1:N1,N1+1:N3,M2+1:N3,N0+1:M1))
-       call reorder4213(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N1,N3,M2,N3,N0,M1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N1-N1,M2-N2,N0-N0/),'4213',t2B,D2)
        allocate(S276(M2+1:N3,N0+1:M1,N0+1:N2,N0+1:M1))
        I1=K5*K2
        I2=K5*K6
@@ -7404,16 +7404,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum2314(N0,N2,M2,N3,N0,M1,N0,M1,X45,S276, 1.000)
+       call sum_stripe(4,shape(X45),size(X45),'2314',1.000,
+     & X45,S276)
        deallocate(S276)
 C
        allocate(D1(N0+1:N2,N1+1:N3,N0+1:N1,N0+1:M1))
-       call reorder2431(N0,M1,N0,N2,N0,N1,N1,N3,
-     & N0,N2,N1,N3,N0,N1,N0,M1,S271,D1)
+       call reorder_shift(4,shape(S271),size(S271),shape(D1),size(D1),
+     & (/N0-N0,N1-N1,N0-N0,N0-N0/),'2431',S271,D1)
        allocate(D2(N0+1:N2,N1+1:N3,M2+1:N3,M1+1:N1))
-       call reorder3214(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N2,N1,N3,M2,N3,M1,N1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N1-N1,M2-N2,M1-N0/),'3214',t2B,D2)
        allocate(S277(M2+1:N3,M1+1:N1,N0+1:N1,N0+1:M1))
        I1=K5*K1
        I2=K7*K6
@@ -7422,16 +7422,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum2413(N0,N1,M2,N3,N0,M1,M1,N1,X1,S277,-1.000)
+       call sum_stripe(4,shape(X1),size(X1),'2413',-1.000,
+     & X1,S277)
        deallocate(S277)
 C
        allocate(D1(N0+1:N1,N1+1:N3,N0+1:N2,N0+1:M1))
-       call reorder3421(N0,M1,N0,N2,N0,N1,N1,N3,
-     & N0,N1,N1,N3,N0,N2,N0,M1,S271,D1)
+       call reorder_shift(4,shape(S271),size(S271),shape(D1),size(D1),
+     & (/N0-N0,N1-N1,N0-N0,N0-N0/),'3421',S271,D1)
        allocate(D2(N0+1:N1,N1+1:N3,N1+1:M2,M1+1:N1))
-       call reorder3124(N1,N3,N1,N3,N0,N1,N0,N1,
-     & N0,N1,N1,N3,N1,M2,M1,N1,t2A,D2)
+       call reorder_shift(4,shape(t2A),size(t2A),shape(D2),size(D2),
+     & (/N0-N0,N1-N1,N1-N1,M1-N0/),'3124',t2A,D2)
        allocate(S272(N1+1:M2,M1+1:N1,N0+1:N2,N0+1:M1))
        I1=K5*K2
        I2=K7*K9
@@ -7440,16 +7440,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum2413(N0,N2,N1,M2,N0,M1,M1,N1,X5,S272, 1.000)
+       call sum_stripe(4,shape(X5),size(X5),'2413',1.000,X5,
+     & S272)
        deallocate(S272)
 C
        allocate(D1(N0+1:N1,N1+1:N3,N0+1:N2,N2+1:N3))
-       call reorder4231(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N1,N3,N0,N2,N2,N3,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,N1-N1,N0-N0,N2-N2/),'4231',VBHHPP,D1)
        allocate(D2(N0+1:N1,N1+1:N3,N1+1:M2,M1+1:N1))
-       call reorder3124(N1,N3,N1,N3,N0,N1,N0,N1,
-     & N0,N1,N1,N3,N1,M2,M1,N1,t2A,D2)
+       call reorder_shift(4,shape(t2A),size(t2A),shape(D2),size(D2),
+     & (/N0-N0,N1-N1,N1-N1,M1-N0/),'3124',t2A,D2)
        allocate(S273(N1+1:M2,M1+1:N1,N0+1:N2,N2+1:N3))
        I1=K4*K2
        I2=K7*K9
@@ -7459,11 +7459,11 @@ C
        deallocate(D2)
 C
        allocate(D1(N0+1:N2,N2+1:N3,N1+1:M2,M1+1:N1))
-       call reorder3412(N1,M2,M1,N1,N0,N2,N2,N3,
-     & N0,N2,N2,N3,N1,M2,M1,N1,S273,D1)
+       call reorder_shift(4,shape(S273),size(S273),shape(D1),size(D1),
+     & (/N0-N0,N2-N2,N1-N1,M1-M1/),'3412',S273,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S274(M2+1:N3,N2+1:N3,N1+1:M2,M1+1:N1))
        I1=K7*K9*K4
        I2=K6
@@ -7472,16 +7472,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum2134(N2,N3,M2,N3,N1,M2,M1,N1,X6,S274,-1.000)
+       call sum_stripe(4,shape(X6),size(X6),'2134',-1.000,
+     & X6,S274)
        deallocate(S274)
 C
        allocate(D1(N0+1:N1,N2+1:N3,N0+1:N2,N1+1:N3))
-       call reorder4132(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N2,N3,N0,N2,N1,N3,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,N0-N0,N1-N1/),'4132',VBHHPP,D1)
        allocate(D2(N0+1:N1,N2+1:N3,N1+1:M2,N0+1:M1))
-       call reorder4123(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N2,N3,N1,M2,N0,M1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N2-N2,N1-N1,N0-N0/),'4123',t2B,D2)
        allocate(S278(N1+1:M2,N0+1:M1,N0+1:N2,N1+1:N3))
        I1=K3*K2
        I2=K5*K9
@@ -7491,11 +7491,11 @@ C
        deallocate(D2)
 C
        allocate(D1(N0+1:N2,N1+1:N3,N1+1:M2,N0+1:M1))
-       call reorder3412(N1,M2,N0,M1,N0,N2,N1,N3,
-     & N0,N2,N1,N3,N1,M2,N0,M1,S278,D1)
+       call reorder_shift(4,shape(S278),size(S278),shape(D1),size(D1),
+     & (/N0-N0,N1-N1,N1-N1,N0-N0/),'3412',S278,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S279(M2+1:N3,N1+1:N3,N1+1:M2,N0+1:M1))
        I1=K5*K9*K3
        I2=K6
@@ -7504,16 +7504,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum2134(N1,N3,M2,N3,N1,M2,N0,M1,X2,S279, 1.000)
+       call sum_stripe(4,shape(X2),size(X2),'2134',1.000,X2,
+     & S279)
        deallocate(S279)
 C
        allocate(D1(N0+1:N1,N1+1:N3,N0+1:N2,N2+1:N3))
-       call reorder4231(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N1,N3,N0,N2,N2,N3,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,N1-N1,N0-N0,N2-N2/),'4231',VBHHPP,D1)
        allocate(D2(N0+1:N1,N1+1:N3,M2+1:N3,N0+1:M1))
-       call reorder4213(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N1,N3,M2,N3,N0,M1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N1-N1,M2-N2,N0-N0/),'4213',t2B,D2)
        allocate(S280(M2+1:N3,N0+1:M1,N0+1:N2,N2+1:N3))
        I1=K4*K2
        I2=K5*K6
@@ -7523,11 +7523,11 @@ C
        deallocate(D2)
 C
        allocate(D1(N0+1:N2,N2+1:N3,M2+1:N3,N0+1:M1))
-       call reorder3412(M2,N3,N0,M1,N0,N2,N2,N3,
-     & N0,N2,N2,N3,M2,N3,N0,M1,S280,D1)
+       call reorder_shift(4,shape(S280),size(S280),shape(D1),size(D1),
+     & (/N0-N0,N2-N2,M2-M2,N0-N0/),'3412',S280,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S281(M2+1:N3,N2+1:N3,M2+1:N3,N0+1:M1))
        I1=K5*K6*K4
        I2=K6
@@ -7536,16 +7536,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum2134(N2,N3,M2,N3,M2,N3,N0,M1,X46,S281, 1.000)
+       call sum_stripe(4,shape(X46),size(X46),'2134',1.000,
+     & X46,S281)
        deallocate(S281)
 C
        allocate(D1(N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N1))
-       call reorder1234(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N2,N3,N1,N3,N0,N2,N0,N1,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N2-N2,N1-N1,N0-N0,N0-N0/),'1234',VBHHPP,D1)
        allocate(D2(N2+1:N3,N1+1:N3,N0+1:M1,M1+1:N1))
-       call reorder1234(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N2,N3,N1,N3,N0,M1,M1,N1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N2-N2,N1-N1,N0-N0,M1-N0/),'1234',t2B,D2)
        allocate(S282(N0+1:M1,M1+1:N1,N0+1:N2,N0+1:N1))
        I1=K1*K2
        I2=K7*K5
@@ -7555,11 +7555,11 @@ C
        deallocate(D2)
 C
        allocate(D1(N0+1:N2,N0+1:N1,N0+1:M1,M1+1:N1))
-       call reorder3412(N0,M1,M1,N1,N0,N2,N0,N1,
-     & N0,N2,N0,N1,N0,M1,M1,N1,S282,D1)
+       call reorder_shift(4,shape(S282),size(S282),shape(D1),size(D1),
+     & (/N0-N0,N0-N0,N0-N0,M1-M1/),'3412',S282,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S283(M2+1:N3,N0+1:N1,N0+1:M1,M1+1:N1))
        I1=K7*K5*K1
        I2=K6
@@ -7568,16 +7568,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum2134(N0,N1,M2,N3,N0,M1,M1,N1,X1,S283,-1.000)
+       call sum_stripe(4,shape(X1),size(X1),'2134',-1.000,
+     & X1,S283)
        deallocate(S283)
 C
        allocate(D1(N0+1:N2,N2+1:N3,N0+1:N1,N1+1:N3))
-       call reorder3142(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N2,N2,N3,N0,N1,N1,N3,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,N0-N0,N1-N1/),'3142',VBHHPP,D1)
        allocate(B2(N0+1:N2,N2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,N2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,N2-N2/),'21',t1B,B2)
        allocate(Q57(N0+1:N1,N1+1:N3))
        I1=K3*K1
        I3=K4*K2
@@ -7586,11 +7586,11 @@ C
        deallocate(B2)
 C
        allocate(B1(N1+1:N3,N0+1:N1))
-       call reorder21(N0,N1,N1,N3,
-     & N1,N3,N0,N1,Q57,B1)
+       call reorder_shift(2,shape(Q57),size(Q57),shape(B1),size(B1),
+     & (/N1-N1,N0-N0/),'21',Q57,B1)
        allocate(D2(N1+1:N3,M2+1:N3,N0+1:M1,M1+1:N1))
-       call reorder2134(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N1,N3,M2,N3,N0,M1,M1,N1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N1-N1,M2-N2,N0-N0,M1-N0/),'2134',t2B,D2)
        allocate(S284(M2+1:N3,N0+1:M1,M1+1:N1,N0+1:N1))
        I1=K1
        I2=K7*K5*K6
@@ -7599,16 +7599,16 @@ C
        deallocate(B1)
        deallocate(D2)
 C
-       call
-     & sum2341(N0,N1,M2,N3,N0,M1,M1,N1,X1,S284, 1.000)
+       call sum_stripe(4,shape(X1),size(X1),'2341',1.000,X1,
+     & S284)
        deallocate(S284)
 C
        call sumx_sorted2134(N2,N3,N0,N1,N0,N2,N0,N1,
      & N0,N1,M2,N3,N0,M1,M1,N1,X1,VBHHHP, 1.000)
 C
        allocate(D2(N0+1:N1,M2+1:N3,N1+1:M2,N0+1:M1))
-       call reorder4123(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,M2,N3,N1,M2,N0,M1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,M2-N2,N1-N1,N0-N0/),'4123',t2B,D2)
        allocate(Z1(M2+1:N3,N1+1:M2,N0+1:M1,M2+1:N3,N0+1:M1,M1+1:N1))
        I1=K7*K5*K6
        I2=K5*K9*K6
@@ -7616,23 +7616,23 @@ C
        call EGEMM(I1,I2,I3,X1,D2,Z1)
        deallocate(D2)
 C
-       call
-     & sum234156(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z1, 1.000)
-       call
-     & sum134256(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z1,-1.000)
-       call
-     & sum235146(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z1,-1.000)
-       call
-     & sum135246(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z1, 1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'234156',
+     & 1.000,V3C,Z1)
+       call sum_stripe(6,shape(V3C),size(V3C),'134256',
+     & -1.000,V3C,Z1)
+       call sum_stripe(6,shape(V3C),size(V3C),'235146',
+     & -1.000,V3C,Z1)
+       call sum_stripe(6,shape(V3C),size(V3C),'135246',
+     & 1.000,V3C,Z1)
        deallocate(Z1)
        deallocate(X1)
 C
        allocate(D1(N2+1:N3,N0+1:N2,N0+1:N2,N2+1:N3))
-       call reorder1342(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N2,N3,N0,N2,N0,N2,N2,N3,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/N2-N2,N0-N0,N0-N0,N2-N2/),'1342',VCHHPP,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S285(N0+1:M1,N0+1:N2,N0+1:N2,N2+1:N3))
        I1=K4*K2*K2
        I2=K5
@@ -7642,11 +7642,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N0+1:N2,N2+1:N3,N0+1:N2,N0+1:M1))
-       call reorder2431(N0,M1,N0,N2,N0,N2,N2,N3,
-     & N0,N2,N2,N3,N0,N2,N0,M1,S285,D1)
+       call reorder_shift(4,shape(S285),size(S285),shape(D1),size(D1),
+     & (/N0-N0,N2-N2,N0-N0,N0-N0/),'2431',S285,D1)
        allocate(D2(N0+1:N2,N2+1:N3,M2+1:N3,N0+1:M1))
-       call reorder3124(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N2,N3,M2,N3,N0,M1,t2C,D2)
+       call reorder_shift(4,shape(t2C),size(t2C),shape(D2),size(D2),
+     & (/N0-N0,N2-N2,M2-N2,N0-N0/),'3124',t2C,D2)
        allocate(S287(M2+1:N3,N0+1:M1,N0+1:N2,N0+1:M1))
        I1=K5*K2
        I2=K5*K6
@@ -7655,13 +7655,13 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum2314(N0,N2,M2,N3,N0,M1,N0,M1,X45,S287,-1.000)
+       call sum_stripe(4,shape(X45),size(X45),'2314',-1.000,
+     & X45,S287)
        deallocate(S287)
 C
        allocate(D2(N0+1:N2,M2+1:N3,N1+1:M2,M1+1:N1))
-       call reorder3124(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N2,M2,N3,N1,M2,M1,N1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,M2-N2,N1-N1,M1-N0/),'3124',t2B,D2)
        allocate(Z71(M2+1:N3,N1+1:M2,M1+1:N1,M2+1:N3,N0+1:M1,N0+1:M1))
        I1=K5*K5*K6
        I2=K7*K9*K6
@@ -7669,23 +7669,23 @@ C
        call EGEMM(I1,I2,I3,X45,D2,Z71)
        deallocate(D2)
 C
-       call
-     & sum236145(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z71,-1.000)
-       call
-     & sum136245(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z71, 1.000)
-       call
-     & sum236154(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z71, 1.000)
-       call
-     & sum136254(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z71,-1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'236145',
+     & -1.000,V3C,Z71)
+       call sum_stripe(6,shape(V3C),size(V3C),'136245',
+     & 1.000,V3C,Z71)
+       call sum_stripe(6,shape(V3C),size(V3C),'236154',
+     & 1.000,V3C,Z71)
+       call sum_stripe(6,shape(V3C),size(V3C),'136254',
+     & -1.000,V3C,Z71)
        deallocate(Z71)
        deallocate(X45)
 C
        allocate(D1(N0+1:N2,N2+1:N3,N0+1:N2,N0+1:M1))
-       call reorder3421(N0,M1,N0,N2,N0,N2,N2,N3,
-     & N0,N2,N2,N3,N0,N2,N0,M1,S285,D1)
+       call reorder_shift(4,shape(S285),size(S285),shape(D1),size(D1),
+     & (/N0-N0,N2-N2,N0-N0,N0-N0/),'3421',S285,D1)
        allocate(D2(N0+1:N2,N2+1:N3,N1+1:M2,M1+1:N1))
-       call reorder3124(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N2,N2,N3,N1,M2,M1,N1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N2-N2,N1-N1,M1-N0/),'3124',t2B,D2)
        allocate(S288(N1+1:M2,M1+1:N1,N0+1:N2,N0+1:M1))
        I1=K5*K2
        I2=K7*K9
@@ -7694,16 +7694,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum2413(N0,N2,N1,M2,N0,M1,M1,N1,X5,S288, 1.000)
+       call sum_stripe(4,shape(X5),size(X5),'2413',1.000,X5,
+     & S288)
        deallocate(S288)
 C
        allocate(D1(N2+1:N3,N0+1:N2,N0+1:N2,N0+1:M1))
-       call reorder4231(N0,M1,N0,N2,N0,N2,N2,N3,
-     & N2,N3,N0,N2,N0,N2,N0,M1,S285,D1)
+       call reorder_shift(4,shape(S285),size(S285),shape(D1),size(D1),
+     & (/N2-N2,N0-N0,N0-N0,N0-N0/),'4231',S285,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S304(N0+1:M1,N0+1:N2,N0+1:N2,N0+1:M1))
        I1=K5*K2*K2
        I2=K5
@@ -7713,11 +7713,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N0+1:N2,N0+1:N2,N0+1:M1,N0+1:M1))
-       call reorder2314(N0,M1,N0,N2,N0,N2,N0,M1,
-     & N0,N2,N0,N2,N0,M1,N0,M1,S304,D1)
+       call reorder_shift(4,shape(S304),size(S304),shape(D1),size(D1),
+     & (/N0-N0,N0-N0,N0-N0,N0-N0/),'2314',S304,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S305(M2+1:N3,N0+1:N2,N0+1:M1,N0+1:M1))
        I1=K5*K5*K2
        I2=K6
@@ -7726,16 +7726,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum2134(N0,N2,M2,N3,N0,M1,N0,M1,X3,S305, 1.000)
+       call sum_stripe(4,shape(X3),size(X3),'2134',1.000,X3,
+     & S305)
        deallocate(S305)
 C
        allocate(D1(N0+1:N2,N0+1:N2,N2+1:N3,N0+1:M1))
-       call reorder3241(N0,M1,N0,N2,N0,N2,N2,N3,
-     & N0,N2,N0,N2,N2,N3,N0,M1,S285,D1)
+       call reorder_shift(4,shape(S285),size(S285),shape(D1),size(D1),
+     & (/N0-N0,N0-N0,N2-N2,N0-N0/),'3241',S285,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S306(M2+1:N3,N0+1:N2,N2+1:N3,N0+1:M1))
        I1=K5*K4*K2
        I2=K6
@@ -7745,11 +7745,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N0+1:N2,N2+1:N3,M2+1:N3,N0+1:M1))
-       call reorder2314(M2,N3,N0,N2,N2,N3,N0,M1,
-     & N0,N2,N2,N3,M2,N3,N0,M1,S306,D1)
+       call reorder_shift(4,shape(S306),size(S306),shape(D1),size(D1),
+     & (/N0-N0,N2-N2,M2-M2,N0-N0/),'2314',S306,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S307(M2+1:N3,N2+1:N3,M2+1:N3,N0+1:M1))
        I1=K5*K6*K4
        I2=K6
@@ -7758,16 +7758,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum2134(N2,N3,M2,N3,M2,N3,N0,M1,X4,S307,-1.000)
+       call sum_stripe(4,shape(X4),size(X4),'2134',-1.000,
+     & X4,S307)
        deallocate(S307)
 C
        allocate(D1(N0+1:N2,N0+1:N2,N2+1:N3,N0+1:M1))
-       call reorder2341(N0,M1,N0,N2,N0,N2,N2,N3,
-     & N0,N2,N0,N2,N2,N3,N0,M1,S285,D1)
+       call reorder_shift(4,shape(S285),size(S285),shape(D1),size(D1),
+     & (/N0-N0,N0-N0,N2-N2,N0-N0/),'2341',S285,D1)
        allocate(D2(N0+1:N2,N0+1:N2,M2+1:N3,M2+1:N3))
-       call reorder3412(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N0,N2,M2,N3,M2,N3,t2C,D2)
+       call reorder_shift(4,shape(t2C),size(t2C),shape(D2),size(D2),
+     & (/N0-N0,N0-N0,M2-N2,M2-N2/),'3412',t2C,D2)
        allocate(S286(M2+1:N3,M2+1:N3,N2+1:N3,N0+1:M1))
        I1=K5*K4
        I2=K6*K6
@@ -7776,16 +7776,16 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum2314(N2,N3,M2,N3,M2,N3,N0,M1,X4,S286,-0.500)
+       call sum_stripe(4,shape(X4),size(X4),'2314',-0.500,
+     & X4,S286)
        deallocate(S286)
 C
        call sumx_sorted2314(N2,N3,N2,N3,N2,N3,N0,N2,
      & N2,N3,M2,N3,M2,N3,N0,M1,X4,VCHPPP, 1.000)
 C
        allocate(D2(N2+1:N3,N1+1:M2,N0+1:M1,M1+1:N1))
-       call reorder1234(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N2,N3,N1,M2,N0,M1,M1,N1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N2-N2,N1-N1,N0-N0,M1-N0/),'1234',t2B,D2)
        allocate(Z4(N1+1:M2,N0+1:M1,M1+1:N1,M2+1:N3,M2+1:N3,N0+1:M1))
        I1=K5*K6*K6
        I2=K7*K5*K9
@@ -7793,19 +7793,19 @@ C
        call EGEMM(I1,I2,I3,X4,D2,Z4)
        deallocate(D2)
 C
-       call
-     & sum346125(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z4, 1.000)
-       call
-     & sum356124(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z4,-1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'346125',
+     & 1.000,V3C,Z4)
+       call sum_stripe(6,shape(V3C),size(V3C),'356124',
+     & -1.000,V3C,Z4)
        deallocate(Z4)
        deallocate(X4)
 C
        allocate(D1(N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2))
-       call reorder1234(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N2,N3,N2,N3,N0,N2,N0,N2,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/N2-N2,N2-N2,N0-N0,N0-N0/),'1234',VCHHPP,D1)
        allocate(D2(N2+1:N3,N2+1:N3,N0+1:M1,N0+1:M1))
-       call reorder1234(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N2,N3,N2,N3,N0,M1,N0,M1,t2C,D2)
+       call reorder_shift(4,shape(t2C),size(t2C),shape(D2),size(D2),
+     & (/N2-N2,N2-N2,N0-N0,N0-N0/),'1234',t2C,D2)
        allocate(S292(N0+1:M1,N0+1:M1,N0+1:N2,N0+1:N2))
        I1=K2*K2
        I2=K5*K5
@@ -7815,11 +7815,11 @@ C
        deallocate(D2)
 C
        allocate(D1(N0+1:N2,N0+1:N2,N0+1:M1,N0+1:M1))
-       call reorder3412(N0,M1,N0,M1,N0,N2,N0,N2,
-     & N0,N2,N0,N2,N0,M1,N0,M1,S292,D1)
+       call reorder_shift(4,shape(S292),size(S292),shape(D1),size(D1),
+     & (/N0-N0,N0-N0,N0-N0,N0-N0/),'3412',S292,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S293(M2+1:N3,N0+1:N2,N0+1:M1,N0+1:M1))
        I1=K5*K5*K2
        I2=K6
@@ -7828,16 +7828,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum2134(N0,N2,M2,N3,N0,M1,N0,M1,X3,S293,-0.500)
+       call sum_stripe(4,shape(X3),size(X3),'2134',-0.500,
+     & X3,S293)
        deallocate(S293)
 C
        allocate(D1(N0+1:N2,N2+1:N3,N0+1:N2,N2+1:N3))
-       call reorder4231(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N2,N3,N0,N2,N2,N3,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,N0-N0,N2-N2/),'4231',VCHHPP,D1)
        allocate(D2(N0+1:N2,N2+1:N3,N1+1:M2,M1+1:N1))
-       call reorder3124(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N2,N2,N3,N1,M2,M1,N1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,N2-N2,N1-N1,M1-N0/),'3124',t2B,D2)
        allocate(S294(N1+1:M2,M1+1:N1,N0+1:N2,N2+1:N3))
        I1=K4*K2
        I2=K7*K9
@@ -7847,11 +7847,11 @@ C
        deallocate(D2)
 C
        allocate(D1(N0+1:N2,N2+1:N3,N1+1:M2,M1+1:N1))
-       call reorder3412(N1,M2,M1,N1,N0,N2,N2,N3,
-     & N0,N2,N2,N3,N1,M2,M1,N1,S294,D1)
+       call reorder_shift(4,shape(S294),size(S294),shape(D1),size(D1),
+     & (/N0-N0,N2-N2,N1-N1,M1-M1/),'3412',S294,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S295(M2+1:N3,N2+1:N3,N1+1:M2,M1+1:N1))
        I1=K7*K9*K4
        I2=K6
@@ -7860,16 +7860,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum2134(N2,N3,M2,N3,N1,M2,M1,N1,X6,S295,-1.000)
+       call sum_stripe(4,shape(X6),size(X6),'2134',-1.000,
+     & X6,S295)
        deallocate(S295)
 C
        allocate(D1(N0+1:N2,N2+1:N3,N0+1:N2,N2+1:N3))
-       call reorder3142(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N2,N3,N0,N2,N2,N3,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,N0-N0,N2-N2/),'3142',VCHHPP,D1)
        allocate(B2(N0+1:N2,N2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,N2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,N2-N2/),'21',t1B,B2)
        allocate(Q58(N0+1:N2,N2+1:N3))
        I1=K4*K2
        I3=K4*K2
@@ -7878,11 +7878,11 @@ C
        deallocate(B2)
 C
        allocate(B1(N2+1:N3,N0+1:N2))
-       call reorder21(N0,N2,N2,N3,
-     & N2,N3,N0,N2,Q58,B1)
+       call reorder_shift(2,shape(Q58),size(Q58),shape(B1),size(B1),
+     & (/N2-N2,N0-N0/),'21',Q58,B1)
        allocate(D2(N2+1:N3,N1+1:M2,N0+1:M1,M1+1:N1))
-       call reorder1234(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N2,N3,N1,M2,N0,M1,M1,N1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N2-N2,N1-N1,N0-N0,M1-N0/),'1234',t2B,D2)
        allocate(S291(N1+1:M2,N0+1:M1,M1+1:N1,N0+1:N2))
        I1=K2
        I2=K7*K5*K9
@@ -7891,16 +7891,16 @@ C
        deallocate(B1)
        deallocate(D2)
 C
-       call
-     & sum2341(N0,N2,N1,M2,N0,M1,M1,N1,X5,S291, 1.000)
+       call sum_stripe(4,shape(X5),size(X5),'2341',1.000,X5,
+     & S291)
        deallocate(S291)
 C
        allocate(B1(N2+1:N3,N0+1:N2))
-       call reorder21(N0,N2,N2,N3,
-     & N2,N3,N0,N2,Q58,B1)
+       call reorder_shift(2,shape(Q58),size(Q58),shape(B1),size(B1),
+     & (/N2-N2,N0-N0/),'21',Q58,B1)
        allocate(D2(N2+1:N3,M2+1:N3,N0+1:M1,N0+1:M1))
-       call reorder1234(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N2,N3,M2,N3,N0,M1,N0,M1,t2C,D2)
+       call reorder_shift(4,shape(t2C),size(t2C),shape(D2),size(D2),
+     & (/N2-N2,M2-N2,N0-N0,N0-N0/),'1234',t2C,D2)
        allocate(S296(M2+1:N3,N0+1:M1,N0+1:M1,N0+1:N2))
        I1=K2
        I2=K5*K5*K6
@@ -7909,16 +7909,16 @@ C
        deallocate(B1)
        deallocate(D2)
 C
-       call
-     & sum2341(N0,N2,M2,N3,N0,M1,N0,M1,X3,S296,-1.000)
+       call sum_stripe(4,shape(X3),size(X3),'2341',-1.000,
+     & X3,S296)
        deallocate(S296)
 C
        allocate(D1(N0+1:N1,N0+1:N2,N2+1:N3,M1+1:N1))
-       call reorder4312(N2,N3,N0,N1,N0,N2,N0,N1,
-     & N0,N1,N0,N2,N2,N3,M1,N1,VBHHHP,D1)
+       call reorder_shift(4,shape(VBHHHP),size(VBHHHP),shape(D1),
+     & size(D1),(/N0-N0,N0-N0,N2-N2,M1-N0/),'4312',VBHHHP,D1)
        allocate(B2(N0+1:N1,N1+1:M2))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,M2,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N0-N0,N1-N1/),'21',t1A,B2)
        allocate(S195(N1+1:M2,N0+1:N2,N2+1:N3,M1+1:N1))
        I1=K7*K4*K2
        I2=K9
@@ -7928,11 +7928,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N0+1:N2,N2+1:N3,N1+1:M2,M1+1:N1))
-       call reorder2314(N1,M2,N0,N2,N2,N3,M1,N1,
-     & N0,N2,N2,N3,N1,M2,M1,N1,S195,D1)
+       call reorder_shift(4,shape(S195),size(S195),shape(D1),size(D1),
+     & (/N0-N0,N2-N2,N1-N1,M1-M1/),'2314',S195,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S196(M2+1:N3,N2+1:N3,N1+1:M2,M1+1:N1))
        I1=K7*K9*K4
        I2=K6
@@ -7941,16 +7941,16 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum2134(N2,N3,M2,N3,N1,M2,M1,N1,X6,S196, 1.000)
+       call sum_stripe(4,shape(X6),size(X6),'2134',1.000,X6,
+     & S196)
        deallocate(S196)
 C
        call sumx_sorted2314(N2,N3,N1,N3,N2,N3,N0,N1,
      & N2,N3,M2,N3,N1,M2,M1,N1,X6,VBHPPP, 1.000)
 C
        allocate(D2(N2+1:N3,M2+1:N3,N0+1:M1,N0+1:M1))
-       call reorder1234(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N2,N3,M2,N3,N0,M1,N0,M1,t2C,D2)
+       call reorder_shift(4,shape(t2C),size(t2C),shape(D2),size(D2),
+     & (/N2-N2,M2-N2,N0-N0,N0-N0/),'1234',t2C,D2)
        allocate(Z6(M2+1:N3,N0+1:M1,N0+1:M1,M2+1:N3,N1+1:M2,M1+1:N1))
        I1=K7*K9*K6
        I2=K5*K5*K6
@@ -7958,19 +7958,19 @@ C
        call EGEMM(I1,I2,I3,X6,D2,Z6)
        deallocate(D2)
 C
-       call
-     & sum245136(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z6, 1.000)
-       call
-     & sum145236(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z6,-1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'245136',
+     & 1.000,V3C,Z6)
+       call sum_stripe(6,shape(V3C),size(V3C),'145236',
+     & -1.000,V3C,Z6)
        deallocate(Z6)
        deallocate(X6)
 C
        allocate(D1(N0+1:N1,N1+1:N3,N0+1:N2,N2+1:N3))
-       call reorder4231(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N1,N1,N3,N0,N2,N2,N3,VBHHPP,D1)
+       call reorder_shift(4,shape(VBHHPP),size(VBHHPP),shape(D1),
+     & size(D1),(/N0-N0,N1-N1,N0-N0,N2-N2/),'4231',VBHHPP,D1)
        allocate(B2(N0+1:N1,N1+1:N3))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,N3,t1A,B2)
+       call reorder_shift(2,shape(t1A),size(t1A),shape(B2),size(B2),
+     & (/N0-N0,N1-N1/),'21',t1A,B2)
        allocate(Q48(N0+1:N2,N2+1:N3))
        I1=K4*K2
        I3=K3*K1
@@ -7979,11 +7979,11 @@ C
        deallocate(B2)
 C
        allocate(B1(N2+1:N3,N0+1:N2))
-       call reorder21(N0,N2,N2,N3,
-     & N2,N3,N0,N2,Q48,B1)
+       call reorder_shift(2,shape(Q48),size(Q48),shape(B1),size(B1),
+     & (/N2-N2,N0-N0/),'21',Q48,B1)
        allocate(D2(N2+1:N3,M2+1:N3,N0+1:M1,N0+1:M1))
-       call reorder1234(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N2,N3,M2,N3,N0,M1,N0,M1,t2C,D2)
+       call reorder_shift(4,shape(t2C),size(t2C),shape(D2),size(D2),
+     & (/N2-N2,M2-N2,N0-N0,N0-N0/),'1234',t2C,D2)
        allocate(S234(M2+1:N3,N0+1:M1,N0+1:M1,N0+1:N2))
        I1=K2
        I2=K5*K5*K6
@@ -7992,16 +7992,16 @@ C
        deallocate(B1)
        deallocate(D2)
 C
-       call
-     & sum2341(N0,N2,M2,N3,N0,M1,N0,M1,X3,S234,-1.000)
+       call sum_stripe(4,shape(X3),size(X3),'2341',-1.000,
+     & X3,S234)
        deallocate(S234)
 C
        call sumx_sorted2134(N2,N3,N0,N2,N0,N2,N0,N2,
      & N0,N2,M2,N3,N0,M1,N0,M1,X3,VCHHHP, 1.000)
 C
        allocate(D2(N0+1:N2,M2+1:N3,N1+1:M2,M1+1:N1))
-       call reorder3124(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N0,N2,M2,N3,N1,M2,M1,N1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N0-N0,M2-N2,N1-N1,M1-N0/),'3124',t2B,D2)
        allocate(Z3(M2+1:N3,N1+1:M2,M1+1:N1,M2+1:N3,N0+1:M1,N0+1:M1))
        I1=K5*K5*K6
        I2=K7*K9*K6
@@ -8009,19 +8009,19 @@ C
        call EGEMM(I1,I2,I3,X3,D2,Z3)
        deallocate(D2)
 C
-       call
-     & sum236145(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z3,-1.000)
-       call
-     & sum136245(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z3, 1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'236145',
+     & -1.000,V3C,Z3)
+       call sum_stripe(6,shape(V3C),size(V3C),'136245',
+     & 1.000,V3C,Z3)
        deallocate(Z3)
        deallocate(X3)
 C
        allocate(B1(N2+1:N3,N0+1:N2))
-       call reorder21(N0,N2,N2,N3,
-     & N2,N3,N0,N2,Q48,B1)
+       call reorder_shift(2,shape(Q48),size(Q48),shape(B1),size(B1),
+     & (/N2-N2,N0-N0/),'21',Q48,B1)
        allocate(D2(N2+1:N3,N1+1:M2,N0+1:M1,M1+1:N1))
-       call reorder1234(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N2,N3,N1,M2,N0,M1,M1,N1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N2-N2,N1-N1,N0-N0,M1-N0/),'1234',t2B,D2)
        allocate(S232(N1+1:M2,N0+1:M1,M1+1:N1,N0+1:N2))
        I1=K2
        I2=K7*K5*K9
@@ -8030,16 +8030,16 @@ C
        deallocate(B1)
        deallocate(D2)
 C
-       call
-     & sum2341(N0,N2,N1,M2,N0,M1,M1,N1,X5,S232, 1.000)
+       call sum_stripe(4,shape(X5),size(X5),'2341',1.000,X5,
+     & S232)
        deallocate(S232)
 C
        call sumx_sorted1234(N0,N2,N1,N3,N0,N2,N0,N1,
      & N0,N2,N1,M2,N0,M1,M1,N1,X5,VBHHPH, 1.000)
 C
        allocate(D2(N0+1:N2,M2+1:N3,M2+1:N3,N0+1:M1))
-       call reorder3124(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,M2,N3,M2,N3,N0,M1,t2C,D2)
+       call reorder_shift(4,shape(t2C),size(t2C),shape(D2),size(D2),
+     & (/N0-N0,M2-N2,M2-N2,N0-N0/),'3124',t2C,D2)
        allocate(Z5(M2+1:N3,M2+1:N3,N0+1:M1,N1+1:M2,N0+1:M1,M1+1:N1))
        I1=K7*K5*K9
        I2=K5*K6*K6
@@ -8047,19 +8047,19 @@ C
        call EGEMM(I1,I2,I3,X5,D2,Z5)
        deallocate(D2)
 C
-       call
-     & sum124356(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z5, 1.000)
-       call
-     & sum125346(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z5,-1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'124356',
+     & 1.000,V3C,Z5)
+       call sum_stripe(6,shape(V3C),size(V3C),'125346',
+     & -1.000,V3C,Z5)
        deallocate(Z5)
        deallocate(X5)
 C
        allocate(D1(N0+1:N2,N2+1:N3,N0+1:N2,N2+1:N3))
-       call reorder4132(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N2,N3,N0,N2,N2,N3,VCHHPP,D1)
+       call reorder_shift(4,shape(VCHHPP),size(VCHHPP),shape(D1),
+     & size(D1),(/N0-N0,N2-N2,N0-N0,N2-N2/),'4132',VCHHPP,D1)
        allocate(D2(N0+1:N2,N2+1:N3,M2+1:N3,N0+1:M1))
-       call reorder3124(N2,N3,N2,N3,N0,N2,N0,N2,
-     & N0,N2,N2,N3,M2,N3,N0,M1,t2C,D2)
+       call reorder_shift(4,shape(t2C),size(t2C),shape(D2),size(D2),
+     & (/N0-N0,N2-N2,M2-N2,N0-N0/),'3124',t2C,D2)
        allocate(S289(M2+1:N3,N0+1:M1,N0+1:N2,N2+1:N3))
        I1=K4*K2
        I2=K5*K6
@@ -8069,11 +8069,11 @@ C
        deallocate(D2)
 C
        allocate(D1(N0+1:N2,N2+1:N3,M2+1:N3,N0+1:M1))
-       call reorder3412(M2,N3,N0,M1,N0,N2,N2,N3,
-     & N0,N2,N2,N3,M2,N3,N0,M1,S289,D1)
+       call reorder_shift(4,shape(S289),size(S289),shape(D1),size(D1),
+     & (/N0-N0,N2-N2,M2-M2,N0-N0/),'3412',S289,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S290(M2+1:N3,N2+1:N3,M2+1:N3,N0+1:M1))
        I1=K5*K6*K4
        I2=K6
@@ -8082,13 +8082,13 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum2134(N2,N3,M2,N3,M2,N3,N0,M1,X46,S290,-1.000)
+       call sum_stripe(4,shape(X46),size(X46),'2134',-1.000,
+     & X46,S290)
        deallocate(S290)
 C
        allocate(D2(N2+1:N3,N1+1:M2,N0+1:M1,M1+1:N1))
-       call reorder1234(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N2,N3,N1,M2,N0,M1,M1,N1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N2-N2,N1-N1,N0-N0,M1-N0/),'1234',t2B,D2)
        allocate(Z72(N1+1:M2,N0+1:M1,M1+1:N1,M2+1:N3,M2+1:N3,N0+1:M1))
        I1=K5*K6*K6
        I2=K7*K5*K9
@@ -8096,23 +8096,23 @@ C
        call EGEMM(I1,I2,I3,X46,D2,Z72)
        deallocate(D2)
 C
-       call
-     & sum346125(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z72,-1.000)
-       call
-     & sum346215(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z72, 1.000)
-       call
-     & sum356124(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z72, 1.000)
-       call
-     & sum356214(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z72,-1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'346125',
+     & -1.000,V3C,Z72)
+       call sum_stripe(6,shape(V3C),size(V3C),'346215',
+     & 1.000,V3C,Z72)
+       call sum_stripe(6,shape(V3C),size(V3C),'356124',
+     & 1.000,V3C,Z72)
+       call sum_stripe(6,shape(V3C),size(V3C),'356214',
+     & -1.000,V3C,Z72)
        deallocate(Z72)
        deallocate(X46)
 C
        allocate(D1(N2+1:N3,N0+1:N2,N1+1:N3,N1+1:M2))
-       call reorder1324(N2,N3,N1,N3,N0,N2,N1,N3,
-     & N2,N3,N0,N2,N1,N3,N1,M2,VBPHPP,D1)
+       call reorder_shift(4,shape(VBPHPP),size(VBPHPP),shape(D1),
+     & size(D1),(/N2-N2,N0-N0,N1-N1,N1-N1/),'1324',VBPHPP,D1)
        allocate(B2(N2+1:N3,N0+1:M1))
-       call reorder12(N2,N3,N0,N2,
-     & N2,N3,N0,M1,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N2-N2,N0-N0/),'12',t1B,B2)
        allocate(S236(N0+1:M1,N0+1:N2,N1+1:N3,N1+1:M2))
        I1=K9*K3*K2
        I2=K5
@@ -8122,11 +8122,11 @@ C
        deallocate(B2)
 C
        allocate(D1(N0+1:N2,N1+1:N3,N1+1:M2,N0+1:M1))
-       call reorder2341(N0,M1,N0,N2,N1,N3,N1,M2,
-     & N0,N2,N1,N3,N1,M2,N0,M1,S236,D1)
+       call reorder_shift(4,shape(S236),size(S236),shape(D1),size(D1),
+     & (/N0-N0,N1-N1,N1-N1,N0-N0/),'2341',S236,D1)
        allocate(B2(N0+1:N2,M2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,M2,N3,t1B,B2)
+       call reorder_shift(2,shape(t1B),size(t1B),shape(B2),size(B2),
+     & (/N0-N0,M2-N2/),'21',t1B,B2)
        allocate(S237(M2+1:N3,N1+1:N3,N1+1:M2,N0+1:M1))
        I1=K5*K9*K3
        I2=K6
@@ -8136,16 +8136,16 @@ C
        deallocate(B2)
        deallocate(S236)
 C
-       call
-     & sum2134(N1,N3,M2,N3,N1,M2,N0,M1,X2,S237,-1.000)
+       call sum_stripe(4,shape(X2),size(X2),'2134',-1.000,
+     & X2,S237)
        deallocate(S237)
 C
        call sumx_sorted2341(N2,N3,N1,N3,N0,N2,N1,N3,
      & N1,N3,M2,N3,N1,M2,N0,M1,X2,VBPHPP, 1.000)
 C
        allocate(D2(N1+1:N3,M2+1:N3,N0+1:M1,M1+1:N1))
-       call reorder2134(N2,N3,N1,N3,N0,N2,N0,N1,
-     & N1,N3,M2,N3,N0,M1,M1,N1,t2B,D2)
+       call reorder_shift(4,shape(t2B),size(t2B),shape(D2),size(D2),
+     & (/N1-N1,M2-N2,N0-N0,M1-N0/),'2134',t2B,D2)
        allocate(Z2(M2+1:N3,N0+1:M1,M1+1:N1,M2+1:N3,N1+1:M2,N0+1:M1))
        I1=K5*K9*K6
        I2=K7*K5*K6
@@ -8153,23 +8153,23 @@ C
        call EGEMM(I1,I2,I3,X2,D2,Z2)
        deallocate(D2)
 C
-       call
-     & sum246135(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z2,-1.000)
-       call
-     & sum146235(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z2, 1.000)
-       call
-     & sum256134(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z2, 1.000)
-       call
-     & sum156234(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z2,-1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'246135',
+     & -1.000,V3C,Z2)
+       call sum_stripe(6,shape(V3C),size(V3C),'146235',
+     & 1.000,V3C,Z2)
+       call sum_stripe(6,shape(V3C),size(V3C),'256134',
+     & 1.000,V3C,Z2)
+       call sum_stripe(6,shape(V3C),size(V3C),'156234',
+     & -1.000,V3C,Z2)
        deallocate(Z2)
        deallocate(X2)
 C
        allocate(D1(M1+1:N2,N2+1:M2,N1+1:M2,M1+1:N1))
-       call reorder1324(N0,N2,N1,N3,N2,N3,N0,N1,
-     & M1,N2,N2,M2,N1,M2,M1,N1,VBHPPH,D1)
+       call reorder_shift(4,shape(VBHPPH),size(VBHPPH),shape(D1),
+     & size(D1),(/M1-N0,N2-N2,N1-N1,M1-N0/),'1324',VBHPPH,D1)
        allocate(F2(M1+1:N2,N2+1:M2,M2+1:N3,M2+1:N3,N0+1:M1,N0+1:M1))
-       call reorder631245(N2,N3,N2,N3,N2,M2,N0,N2,N0,N2,M1,N2,
-     & M1,N2,N2,M2,M2,N3,M2,N3,N0,M1,N0,M1,t3D,F2)
+       call reorder_shift(6,shape(t3D),size(t3D),shape(F2),size(F2),
+     & (/M1-M1,N2-N2,M2-N2,M2-N2,N0-N0,N0-N0/),'631245',t3D,F2)
        allocate(Z37(M2+1:N3,M2+1:N3,N0+1:M1,N0+1:M1,N1+1:M2,M1+1:N1))
        I1=K7*K9
        I2=K5*K5*K6*K6
@@ -8178,8 +8178,8 @@ C
        deallocate(D1)
        deallocate(F2)
 C
-       call
-     & sum124536(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,V3C,Z37, 1.000)
+       call sum_stripe(6,shape(V3C),size(V3C),'124536',
+     & 1.000,V3C,Z37)
        deallocate(Z37)
 C
        call sumx_sorted3(M2,N3,M2,N3,N1,M2,N0,M1,N0,M1,M1,N1,

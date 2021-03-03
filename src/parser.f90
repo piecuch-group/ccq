@@ -305,7 +305,7 @@ contains
 
         close(tmp_unit)
 
-        sys%froz = 0
+        !sys%froz = 0
         sys%nel = nelec
         sys%nvirt = 2*norb - nelec
 
