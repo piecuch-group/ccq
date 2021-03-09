@@ -591,7 +591,8 @@ subroutine t2c_update(n0, n1, n2, n3, k1, k2, k3, k4, lvl_t, lvl_q, shift &
         end if
         if (dt3diag3 .ne. 0) then
             factor = dt3diag3
-            call sumx2134(n0, n3, n0, n2, n0, n1, n1, n3, n0, n2, x8, intm, factor)
+  call sum_shift(4,shape(intm),size(intm),shape(x8), &
+   size(x8),(/n0-n0,n0-n0,n1-n0,n0-n0/),'2134',factor,intm,x8)
 
         end if
         allocate (f2(n0 + 1:n2, n0 + 1:n1, n1 + 1:n3, n2 + 1:n3, n2 + 1:n3, n0 + 1:n2))
@@ -699,7 +700,8 @@ subroutine t2c_update(n0, n1, n2, n3, k1, k2, k3, k4, lvl_t, lvl_q, shift &
         deallocate (q9)
 
     end if
-    call sumx12(0, n3, n0, n1, n1, n3, x7, fockr, 1.000)
+  call sum_shift(2,shape(fockr),size(fockr),shape(x7), &
+   size(x7),(/n0,n1/),'12',1.000,fockr,x7)
 
     allocate (f2(n0 + 1:n1, n1 + 1:n3, n2 + 1:n3, n2 + 1:n3, n0 + 1:n2, n0 + 1:n2))
     call reorder_stripe(6, shape(t3c), size(t3c), '631245', t3c, f2)
@@ -740,7 +742,9 @@ subroutine t2c_update(n0, n1, n2, n3, k1, k2, k3, k4, lvl_t, lvl_q, shift &
         end if
         if (dt3diag3 .ne. 0) then
             factor = dt3diag3
-            call sumx2143(n0, n3, n0, n2, n0, n2, n2, n3, n0, n2, x10, intb, factor)
+  call sum_shift(4,shape(intb),size(intb),shape(x10), &
+   size(x10),(/n0-n0,n0-n0,n2-n0,n0-n0/),'2143',factor,intb, &
+   x10)
 
         end if
         allocate (f2(n0 + 1:n2, n0 + 1:n2, n2 + 1:n3, n2 + 1:n3, n2 + 1:n3, n0 + 1:n2))
@@ -866,7 +870,8 @@ subroutine t2c_update(n0, n1, n2, n3, k1, k2, k3, k4, lvl_t, lvl_q, shift &
     end if
     end if
 
-    call sumx2143(n0, n3, n0, n2, n2, n3, n0, n2, n0, n2, x1, intb, 1.000)
+  call sum_shift(4,shape(intb),size(intb),shape(x1), &
+   size(x1),(/n0-n0,n2-n0,n0-n0,n0-n0/),'2143',1.000,intb,x1)
 
     allocate (b2(n0 + 1:n2, n2 + 1:n3))
     call reorder_stripe(2, shape(t1b), size(t1b), '21', t1b, b2)
@@ -928,7 +933,8 @@ subroutine t2c_update(n0, n1, n2, n3, k1, k2, k3, k4, lvl_t, lvl_q, shift &
         deallocate (q10)
 
     end if
-    call sumx12(0, n3, n0, n2, n2, n3, x9, fockb, 1.000)
+  call sum_shift(2,shape(fockb),size(fockb),shape(x9), &
+   size(x9),(/n0,n2/),'12',1.000,fockb,x9)
 
     allocate (f2(n0 + 1:n2, n2 + 1:n3, n2 + 1:n3, n2 + 1:n3, n0 + 1:n2, n0 + 1:n2))
     call reorder_stripe(6, shape(t3d), size(t3d), '412356', t3d, f2)
@@ -1091,7 +1097,8 @@ subroutine t2c_update(n0, n1, n2, n3, k1, k2, k3, k4, lvl_t, lvl_q, shift &
         factor = 0
     end if
 
-    call sumx1324(n0, n3, n0, n1, n1, n3, n2, n3, n0, n2, x2, intm, 1.000)
+  call sum_shift(4,shape(intm),size(intm),shape(x2), &
+   size(x2),(/n0-n0,n1-n0,n2-n0,n0-n0/),'1324',1.000,intm,x2)
 
     allocate (d2(n0 + 1:n1, n1 + 1:n3, n2 + 1:n3, n0 + 1:n2))
     call reorder_stripe(4, shape(t2b), size(t2b), '4213', t2b, d2)
@@ -1179,7 +1186,8 @@ subroutine t2c_update(n0, n1, n2, n3, k1, k2, k3, k4, lvl_t, lvl_q, shift &
         factor = 0
     end if
 
-    call sumx3142(n0, n3, n0, n2, n2, n3, n2, n3, n0, n2, x6, intb, 1.000)
+  call sum_shift(4,shape(intb),size(intb),shape(x6), &
+   size(x6),(/n0-n0,n2-n0,n2-n0,n0-n0/),'3142',1.000,intb,x6)
 
     allocate (d2(n0 + 1:n2, n2 + 1:n3, n2 + 1:n3, n0 + 1:n2))
     call reorder_stripe(4, shape(t2c), size(t2c), '3124', t2c, d2)
@@ -1322,7 +1330,8 @@ subroutine t2c_update(n0, n1, n2, n3, k1, k2, k3, k4, lvl_t, lvl_q, shift &
         factor = 0
     end if
 
-    call sumx21(0, n3, n2, n3, n2, n3, x4, fockb, 1.000)
+  call sum_shift(2,shape(fockb),size(fockb),shape(x4), &
+   size(x4),(/n2,n2/),'21',1.000,fockb,x4)
 
     allocate (d2(n2 + 1:n3, n2 + 1:n3, n0 + 1:n2, n0 + 1:n2))
     call reorder_stripe(4, shape(t2c), size(t2c), '1234', t2c, d2)
@@ -1473,7 +1482,8 @@ subroutine t2c_update(n0, n1, n2, n3, k1, k2, k3, k4, lvl_t, lvl_q, shift &
         factor = 0
     end if
 
-    call sumx2143(n0, n3, n0, n2, n0, n2, n0, n2, n0, n2, x5, intb, 1.000)
+  call sum_shift(4,shape(intb),size(intb),shape(x5), &
+   size(x5),(/n0-n0,n0-n0,n0-n0,n0-n0/),'2143',1.000,intb,x5)
 
     allocate (d2(n0 + 1:n2, n0 + 1:n2, n2 + 1:n3, n2 + 1:n3))
     call reorder_stripe(4, shape(t2c), size(t2c), '3412', t2c, d2)
@@ -1578,7 +1588,8 @@ subroutine t2c_update(n0, n1, n2, n3, k1, k2, k3, k4, lvl_t, lvl_q, shift &
         factor = 0
     end if
 
-    call sumx12(0, n3, n0, n2, n0, n2, x3, fockb, 1.000)
+  call sum_shift(2,shape(fockb),size(fockb),shape(x3), &
+   size(x3),(/n0,n0/),'12',1.000,fockb,x3)
 
     allocate (d2(n0 + 1:n2, n2 + 1:n3, n2 + 1:n3, n0 + 1:n2))
     call reorder_stripe(4, shape(t2c), size(t2c), '3124', t2c, d2)

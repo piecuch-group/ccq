@@ -6663,7 +6663,8 @@ subroutine t4b_update(n0, n1, n2, n3, k1, k2, k3, k4, shift, &
     call sum_stripe(4, shape(x13), size(x13), '3241', -1.000, &
                     x13, s97)
 
-    call sumx3142(n0, n3, n0, n1, n1, n3, n1, n3, n0, n1, x13, intr, 1.000)
+  call sum_shift(4,shape(intr),size(intr),shape(x13), &
+   size(x13),(/n0-n0,n1-n0,n1-n0,n0-n0/),'3142',1.000,intr,x13)
 
     do i = n0 + 1, n1 - 2; do j = i + 1, n1 - 1; do k = j + 1, n1; do l = n0 + 1, n2
         if (indocc(l, k, j, i) .eq. 1) cycle
@@ -6727,7 +6728,8 @@ subroutine t4b_update(n0, n1, n2, n3, k1, k2, k3, k4, shift, &
     call sum_stripe(4, shape(x12), size(x12), '3241', 1.000, &
                     x12, s96)
 
-    call sumx2143(n0, n3, n0, n1, n0, n1, n0, n1, n0, n1, x12, intr, 1.000)
+  call sum_shift(4,shape(intr),size(intr),shape(x12), &
+   size(x12),(/n0-n0,n0-n0,n0-n0,n0-n0/),'2143',1.000,intr,x12)
 
     do i = n0 + 1, n1 - 2; do j = i + 1, n1 - 1; do k = j + 1, n1; do l = n0 + 1, n2
         if (indocc(l, k, j, i) .eq. 1) cycle
@@ -6814,7 +6816,8 @@ subroutine t4b_update(n0, n1, n2, n3, k1, k2, k3, k4, shift, &
                     x3, s155)
     deallocate (s155)
 
-    call sumx2143(n0, n3, n0, n1, n1, n3, n0, n1, n0, n1, x3, intr, 1.000)
+  call sum_shift(4,shape(intr),size(intr),shape(x3), &
+   size(x3),(/n0-n0,n1-n0,n0-n0,n0-n0/),'2143',1.000,intr,x3)
 
     do i = n0 + 1, n1 - 2; do j = i + 1, n1 - 1; do k = j + 1, n1; do l = n0 + 1, n2
         if (indocc(l, k, j, i) .eq. 1) cycle
@@ -6889,7 +6892,8 @@ subroutine t4b_update(n0, n1, n2, n3, k1, k2, k3, k4, shift, &
                     x14, s99)
     deallocate (s99)
 
-    call sumx4321(n0, n3, n1, n3, n1, n3, n1, n3, n1, n3, x14, intr, 1.000)
+  call sum_shift(4,shape(intr),size(intr),shape(x14), &
+   size(x14),(/n1-n0,n1-n0,n1-n0,n1-n0/),'4321',1.000,intr,x14)
 
     do i = n0 + 1, n1 - 2; do j = i + 1, n1 - 1; do k = j + 1, n1; do l = n0 + 1, n2
         if (indocc(l, k, j, i) .eq. 1) cycle
@@ -7040,7 +7044,8 @@ subroutine t4b_update(n0, n1, n2, n3, k1, k2, k3, k4, shift, &
     x8 = x8 + q23
     deallocate (q23)
 
-    call sumx12(0, n3, n0, n1, n0, n1, x8, fockr, 1.000)
+  call sum_shift(2,shape(fockr),size(fockr),shape(x8), &
+   size(x8),(/n0,n0/),'12',1.000,fockr,x8)
 
     do i = n0 + 1, n1 - 2; do j = i + 1, n1 - 1; do k = j + 1, n1; do l = n0 + 1, n2
         if (indocc(l, k, j, i) .eq. 1) cycle
@@ -7081,7 +7086,8 @@ subroutine t4b_update(n0, n1, n2, n3, k1, k2, k3, k4, shift, &
                     x16, s111)
     deallocate (s111)
 
-    call sumx1342(n0, n3, n0, n1, n2, n3, n2, n3, n0, n1, x16, intm, 1.000)
+  call sum_shift(4,shape(intm),size(intm),shape(x16), &
+   size(x16),(/n0-n0,n2-n0,n2-n0,n0-n0/),'1342',1.000,intm,x16)
 
     do i = n0 + 1, n1 - 2; do j = i + 1, n1 - 1; do k = j + 1, n1; do l = n0 + 1, n2
         if (indocc(l, k, j, i) .eq. 1) cycle
@@ -7121,7 +7127,8 @@ subroutine t4b_update(n0, n1, n2, n3, k1, k2, k3, k4, shift, &
     call sum_stripe(4, shape(x15), size(x15), '3241', 1.000, &
                     x15, s110)
 
-    call sumx2143(n0, n3, n0, n2, n0, n1, n0, n2, n0, n1, x15, intm, 1.000)
+  call sum_shift(4,shape(intm),size(intm),shape(x15), &
+   size(x15),(/n0-n0,n0-n0,n0-n0,n0-n0/),'2143',1.000,intm,x15)
 
     do i = n0 + 1, n1 - 2; do j = i + 1, n1 - 1; do k = j + 1, n1; do l = n0 + 1, n2
         if (indocc(l, k, j, i) .eq. 1) cycle
@@ -7217,7 +7224,8 @@ subroutine t4b_update(n0, n1, n2, n3, k1, k2, k3, k4, shift, &
                     x1, s159)
     deallocate (s159)
 
-    call sumx1243(n0, n3, n0, n1, n2, n3, n0, n2, n0, n1, x1, intm, 1.000)
+  call sum_shift(4,shape(intm),size(intm),shape(x1), &
+   size(x1),(/n0-n0,n2-n0,n0-n0,n0-n0/),'1243',1.000,intm,x1)
 
     do i = n0 + 1, n1 - 2; do j = i + 1, n1 - 1; do k = j + 1, n1; do l = n0 + 1, n2
         if (indocc(l, k, j, i) .eq. 1) cycle
@@ -7258,7 +7266,8 @@ subroutine t4b_update(n0, n1, n2, n3, k1, k2, k3, k4, shift, &
     call sum_stripe(4, shape(x20), size(x20), '3241', -1.000, &
                     x20, s101)
 
-    call sumx3142(n0, n3, n0, n2, n2, n3, n1, n3, n0, n1, x20, intm, 1.000)
+  call sum_shift(4,shape(intm),size(intm),shape(x20), &
+   size(x20),(/n0-n0,n2-n0,n1-n0,n0-n0/),'3142',1.000,intm,x20)
 
     do i = n0 + 1, n1 - 2; do j = i + 1, n1 - 1; do k = j + 1, n1; do l = n0 + 1, n2
         if (indocc(l, k, j, i) .eq. 1) cycle
@@ -7322,7 +7331,8 @@ subroutine t4b_update(n0, n1, n2, n3, k1, k2, k3, k4, shift, &
                     x5, s157)
     deallocate (s157)
 
-    call sumx2143(n0, n3, n0, n2, n1, n3, n0, n2, n0, n1, x5, intm, 1.000)
+  call sum_shift(4,shape(intm),size(intm),shape(x5), &
+   size(x5),(/n0-n0,n1-n0,n0-n0,n0-n0/),'2143',1.000,intm,x5)
 
     do i = n0 + 1, n1 - 2; do j = i + 1, n1 - 1; do k = j + 1, n1; do l = n0 + 1, n2
         if (indocc(l, k, j, i) .eq. 1) cycle
@@ -7427,7 +7437,8 @@ subroutine t4b_update(n0, n1, n2, n3, k1, k2, k3, k4, shift, &
                     x7, s138)
     deallocate (s138)
 
-    call sumx1324(n0, n3, n0, n1, n1, n3, n2, n3, n0, n2, x7, intm, 1.000)
+  call sum_shift(4,shape(intm),size(intm),shape(x7), &
+   size(x7),(/n0-n0,n1-n0,n2-n0,n0-n0/),'1324',1.000,intm,x7)
 
     do i = n0 + 1, n1 - 2; do j = i + 1, n1 - 1; do k = j + 1, n1; do l = n0 + 1, n2
         if (indocc(l, k, j, i) .eq. 1) cycle
@@ -7481,7 +7492,8 @@ subroutine t4b_update(n0, n1, n2, n3, k1, k2, k3, k4, shift, &
     call sum_stripe(4, shape(x17), size(x17), '3241', -1.000, &
                     x17, s113)
 
-    call sumx3124(n0, n3, n0, n2, n1, n3, n1, n3, n0, n2, x17, intm, 1.000)
+  call sum_shift(4,shape(intm),size(intm),shape(x17), &
+   size(x17),(/n0-n0,n1-n0,n1-n0,n0-n0/),'3124',1.000,intm,x17)
 
     do i = n0 + 1, n1 - 2; do j = i + 1, n1 - 1; do k = j + 1, n1; do l = n0 + 1, n2
         if (indocc(l, k, j, i) .eq. 1) cycle
@@ -7550,7 +7562,8 @@ subroutine t4b_update(n0, n1, n2, n3, k1, k2, k3, k4, shift, &
     x9 = x9 - q27
     deallocate (q27)
 
-    call sumx21(0, n3, n1, n3, n1, n3, x9, fockr, 1.000)
+  call sum_shift(2,shape(fockr),size(fockr),shape(x9), &
+   size(x9),(/n1,n1/),'21',1.000,fockr,x9)
 
     do i = n0 + 1, n1 - 2; do j = i + 1, n1 - 1; do k = j + 1, n1; do l = n0 + 1, n2
         if (indocc(l, k, j, i) .eq. 1) cycle
@@ -7592,7 +7605,8 @@ subroutine t4b_update(n0, n1, n2, n3, k1, k2, k3, k4, shift, &
                     x18, s115)
     deallocate (s115)
 
-    call sumx4321(n0, n3, n2, n3, n1, n3, n2, n3, n1, n3, x18, intm, 1.000)
+  call sum_shift(4,shape(intm),size(intm),shape(x18), &
+   size(x18),(/n2-n0,n1-n0,n2-n0,n1-n0/),'4321',1.000,intm,x18)
 
     do i = n0 + 1, n1 - 2; do j = i + 1, n1 - 1; do k = j + 1, n1; do l = n0 + 1, n2
         if (indocc(l, k, j, i) .eq. 1) cycle
@@ -7735,7 +7749,8 @@ subroutine t4b_update(n0, n1, n2, n3, k1, k2, k3, k4, shift, &
                     x10, q29)
     deallocate (q29)
 
-    call sumx12(0, n3, n0, n2, n0, n2, x10, fockb, 1.000)
+  call sum_shift(2,shape(fockb),size(fockb),shape(x10), &
+   size(x10),(/n0,n0/),'12',1.000,fockb,x10)
 
     do i = n0 + 1, n1 - 2; do j = i + 1, n1 - 1; do k = j + 1, n1; do l = n0 + 1, n2
         if (indocc(l, k, j, i) .eq. 1) cycle
@@ -7775,7 +7790,8 @@ subroutine t4b_update(n0, n1, n2, n3, k1, k2, k3, k4, shift, &
                     x19, s140)
     deallocate (s140)
 
-    call sumx3142(n0, n3, n0, n2, n2, n3, n2, n3, n0, n2, x19, intb, 1.000)
+  call sum_shift(4,shape(intb),size(intb),shape(x19), &
+   size(x19),(/n0-n0,n2-n0,n2-n0,n0-n0/),'3142',1.000,intb,x19)
 
     do i = n0 + 1, n1 - 2; do j = i + 1, n1 - 1; do k = j + 1, n1; do l = n0 + 1, n2
         if (indocc(l, k, j, i) .eq. 1) cycle
@@ -7826,7 +7842,8 @@ subroutine t4b_update(n0, n1, n2, n3, k1, k2, k3, k4, shift, &
                     s154)
     deallocate (s154)
 
-    call sumx3241(n0, n3, n2, n3, n2, n3, n1, n3, n0, n1, x6, intm, 1.000)
+  call sum_shift(4,shape(intm),size(intm),shape(x6), &
+   size(x6),(/n2-n0,n2-n0,n1-n0,n0-n0/),'3241',1.000,intm,x6)
 
     do i = n0 + 1, n1 - 2; do j = i + 1, n1 - 1; do k = j + 1, n1; do l = n0 + 1, n2
         if (indocc(l, k, j, i) .eq. 1) cycle
@@ -7874,7 +7891,8 @@ subroutine t4b_update(n0, n1, n2, n3, k1, k2, k3, k4, shift, &
                     x11, q31)
     deallocate (q31)
 
-    call sumx21(0, n3, n2, n3, n2, n3, x11, fockb, 1.000)
+  call sum_shift(2,shape(fockb),size(fockb),shape(x11), &
+   size(x11),(/n2,n2/),'21',1.000,fockb,x11)
 
     do i = n0 + 1, n1 - 2; do j = i + 1, n1 - 1; do k = j + 1, n1; do l = n0 + 1, n2
         if (indocc(l, k, j, i) .eq. 1) cycle
@@ -7925,7 +7943,8 @@ subroutine t4b_update(n0, n1, n2, n3, k1, k2, k3, k4, shift, &
                     x2, s150)
     deallocate (s150)
 
-    call sumx3214(n0, n3, n1, n3, n2, n3, n1, n3, n0, n2, x2, intm, 1.000)
+  call sum_shift(4,shape(intm),size(intm),shape(x2), &
+   size(x2),(/n1-n0,n2-n0,n1-n0,n0-n0/),'3214',1.000,intm,x2)
 
     do i = n0 + 1, n1 - 2; do j = i + 1, n1 - 1; do k = j + 1, n1; do l = n0 + 1, n2
         if (indocc(l, k, j, i) .eq. 1) cycle
@@ -7967,7 +7986,8 @@ subroutine t4b_update(n0, n1, n2, n3, k1, k2, k3, k4, shift, &
                     x4, s144)
     deallocate (s144)
 
-    call sumx3241(n0, n3, n1, n3, n1, n3, n1, n3, n0, n1, x4, intr, 1.000)
+  call sum_shift(4,shape(intr),size(intr),shape(x4), &
+   size(x4),(/n1-n0,n1-n0,n1-n0,n0-n0/),'3241',1.000,intr,x4)
 
     do i = n0 + 1, n1 - 2; do j = i + 1, n1 - 1; do k = j + 1, n1; do l = n0 + 1, n2
         if (indocc(l, k, j, i) .eq. 1) cycle

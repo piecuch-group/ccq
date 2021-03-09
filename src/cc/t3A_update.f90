@@ -631,7 +631,8 @@ subroutine t3a_update(n0, n1, n2, n3, k1, k2, k3, k4, lvl_q, shift, v3a &
     call sum_stripe(4, shape(x10), size(x10), '4123', 1.000, &
                     x10, s11)
 
-    call sumx2143(n0, n3, n0, n1, n0, n1, n1, n3, n0, n1, x10, intr, 1.000)
+  call sum_shift(4,shape(intr),size(intr),shape(x10), &
+   size(x10),(/n0-n0,n0-n0,n1-n0,n0-n0/),'2143',1.000,intr,x10)
 
     if (lvl_q) then
         allocate (t4a(n1 + 1:n3, n1 + 1:n3, n1 + 1:n3, n1 + 1:n3, & !ilias: if no quadruples comment out the following 4 lines
@@ -833,7 +834,8 @@ subroutine t3a_update(n0, n1, n2, n3, k1, k2, k3, k4, lvl_q, shift, v3a &
                     s51)
     deallocate (s51)
 
-    call sumx3241(n0, n3, n1, n3, n1, n3, n1, n3, n0, n1, x2, intr, 1.000)
+  call sum_shift(4,shape(intr),size(intr),shape(x2), &
+   size(x2),(/n1-n0,n1-n0,n1-n0,n0-n0/),'3241',1.000,intr,x2)
 
     do i = n0 + 1, n1 - 2; do j = i + 1, n1 - 1; do k = j + 1, n1
         if (indocc(k, j, i) .eq. 1) cycle
@@ -917,7 +919,8 @@ subroutine t3a_update(n0, n1, n2, n3, k1, k2, k3, k4, lvl_q, shift, v3a &
     call sum_stripe(4, shape(x11), size(x11), '4123', -1.000, &
                     x11, s12)
 
-    call sumx4132(n0, n3, n0, n1, n1, n3, n1, n3, n1, n3, x11, intr, 1.000)
+  call sum_shift(4,shape(intr),size(intr),shape(x11), &
+   size(x11),(/n0-n0,n1-n0,n1-n0,n1-n0/),'4132',1.000,intr,x11)
 
     if (lvl_q) then
         allocate (t4a(n1 + 1:n3, n1 + 1:n3, n1 + 1:n3, n1 + 1:n3, & !ilias: if no quadruples comment out the following 4 lines
@@ -1132,7 +1135,8 @@ subroutine t3a_update(n0, n1, n2, n3, k1, k2, k3, k4, lvl_q, shift, v3a &
     call sum_stripe(4, shape(x13), size(x13), '4123', 1.000, &
                     x13, s13)
 
-    call sumx2143(n0, n3, n0, n2, n0, n1, n2, n3, n0, n1, x13, intm, 1.000)
+  call sum_shift(4,shape(intm),size(intm),shape(x13), &
+   size(x13),(/n0-n0,n0-n0,n2-n0,n0-n0/),'2143',1.000,intm,x13)
 
     if (lvl_q) then
         allocate (t4b(n2 + 1:n3, n1 + 1:n3, n1 + 1:n3, n1 + 1:n3, & !ilias: if no quadruples comment out the following 4 lines
@@ -1232,7 +1236,8 @@ subroutine t3a_update(n0, n1, n2, n3, k1, k2, k3, k4, lvl_q, shift, v3a &
     call sum_stripe(4, shape(x14), size(x14), '4123', -1.000, &
                     x14, s14)
 
-    call sumx4132(n0, n3, n0, n2, n2, n3, n1, n3, n1, n3, x14, intm, 1.000)
+  call sum_shift(4,shape(intm),size(intm),shape(x14), &
+   size(x14),(/n0-n0,n2-n0,n1-n0,n1-n0/),'4132',1.000,intm,x14)
 
     if (lvl_q) then
         allocate (t4b(n2 + 1:n3, n1 + 1:n3, n1 + 1:n3, n1 + 1:n3, & !ilias: if no quadruples comment out the following 4 lines
@@ -1359,7 +1364,8 @@ subroutine t3a_update(n0, n1, n2, n3, k1, k2, k3, k4, lvl_q, shift, v3a &
 
     x9 = x9 + q9
 
-    call sumx12(0, n3, n0, n1, n1, n3, x9, fockr, 1.000)
+  call sum_shift(2,shape(fockr),size(fockr),shape(x9), &
+   size(x9),(/n0,n1/),'12',1.000,fockr,x9)
 
     if (lvl_q) then
         allocate (t4a(n1 + 1:n3, n1 + 1:n3, n1 + 1:n3, n1 + 1:n3, & !ilias: if no quadruples comment out the following 4 lines
@@ -1422,7 +1428,8 @@ subroutine t3a_update(n0, n1, n2, n3, k1, k2, k3, k4, lvl_q, shift, v3a &
     x12 = x12 + q10
     deallocate (q10)
 
-    call sumx12(0, n3, n0, n2, n2, n3, x12, fockb, 1.000)
+  call sum_shift(2,shape(fockb),size(fockb),shape(x12), &
+   size(x12),(/n0,n2/),'12',1.000,fockb,x12)
 
     if (lvl_q) then
         allocate (t4b(n2 + 1:n3, n1 + 1:n3, n1 + 1:n3, n1 + 1:n3, & !ilias: if no quadruples comment out the following 4 lines
@@ -1640,7 +1647,8 @@ subroutine t3a_update(n0, n1, n2, n3, k1, k2, k3, k4, lvl_q, shift, v3a &
         deallocate (s19)
 
     end if
-    call sumx2143(n0, n3, n0, n1, n1, n3, n0, n1, n0, n1, x1, intr, 1.000)
+  call sum_shift(4,shape(intr),size(intr),shape(x1), &
+   size(x1),(/n0-n0,n1-n0,n0-n0,n0-n0/),'2143',1.000,intr,x1)
 
     do i = n0 + 1, n1 - 2; do j = i + 1, n1 - 1; do k = j + 1, n1
         if (indocc(k, j, i) .eq. 1) cycle
@@ -1830,7 +1838,8 @@ subroutine t3a_update(n0, n1, n2, n3, k1, k2, k3, k4, lvl_q, shift, v3a &
         deallocate (s23)
 
     end if
-    call sumx2143(n0, n3, n0, n1, n0, n1, n0, n1, n0, n1, x5, intr, 1.000)
+  call sum_shift(4,shape(intr),size(intr),shape(x5), &
+   size(x5),(/n0-n0,n0-n0,n0-n0,n0-n0/),'2143',1.000,intr,x5)
 
     do i = n0 + 1, n1 - 2; do j = i + 1, n1 - 1; do k = j + 1, n1
         if (indocc(k, j, i) .eq. 1) cycle
@@ -1943,7 +1952,8 @@ subroutine t3a_update(n0, n1, n2, n3, k1, k2, k3, k4, lvl_q, shift, v3a &
         deallocate (s26)
 
     end if
-    call sumx4321(n0, n3, n1, n3, n1, n3, n1, n3, n1, n3, x7, intr, 1.000)
+  call sum_shift(4,shape(intr),size(intr),shape(x7), &
+   size(x7),(/n1-n0,n1-n0,n1-n0,n1-n0/),'4321',1.000,intr,x7)
 
     do i = n0 + 1, n1 - 2; do j = i + 1, n1 - 1; do k = j + 1, n1
         if (indocc(k, j, i) .eq. 1) cycle
@@ -2121,7 +2131,8 @@ subroutine t3a_update(n0, n1, n2, n3, k1, k2, k3, k4, lvl_q, shift, v3a &
         deallocate (s30)
 
     end if
-    call sumx3142(n0, n3, n0, n1, n1, n3, n1, n3, n0, n1, x6, intr, 1.000)
+  call sum_shift(4,shape(intr),size(intr),shape(x6), &
+   size(x6),(/n0-n0,n1-n0,n1-n0,n0-n0/),'3142',1.000,intr,x6)
 
     do i = n0 + 1, n1 - 2; do j = i + 1, n1 - 1; do k = j + 1, n1
         if (indocc(k, j, i) .eq. 1) cycle
@@ -2172,7 +2183,8 @@ subroutine t3a_update(n0, n1, n2, n3, k1, k2, k3, k4, lvl_q, shift, v3a &
         deallocate (q13)
 
     end if
-    call sumx12(0, n3, n0, n1, n0, n1, x3, fockr, 1.000)
+  call sum_shift(2,shape(fockr),size(fockr),shape(x3), &
+   size(x3),(/n0,n0/),'12',1.000,fockr,x3)
 
     do i = n0 + 1, n1 - 2; do j = i + 1, n1 - 1; do k = j + 1, n1
         if (indocc(k, j, i) .eq. 1) cycle
@@ -2217,7 +2229,8 @@ subroutine t3a_update(n0, n1, n2, n3, k1, k2, k3, k4, lvl_q, shift, v3a &
         deallocate (q14)
 
     end if
-    call sumx21(0, n3, n1, n3, n1, n3, x4, fockr, 1.000)
+  call sum_shift(2,shape(fockr),size(fockr),shape(x4), &
+   size(x4),(/n1,n1/),'21',1.000,fockr,x4)
 
     do i = n0 + 1, n1 - 2; do j = i + 1, n1 - 1; do k = j + 1, n1
         if (indocc(k, j, i) .eq. 1) cycle
@@ -2267,7 +2280,8 @@ subroutine t3a_update(n0, n1, n2, n3, k1, k2, k3, k4, lvl_q, shift, v3a &
         deallocate (s31)
 
     end if
-    call sumx3142(n0, n3, n0, n2, n2, n3, n1, n3, n0, n1, x8, intm, 1.000)
+  call sum_shift(4,shape(intm),size(intm),shape(x8), &
+   size(x8),(/n0-n0,n2-n0,n1-n0,n0-n0/),'3142',1.000,intm,x8)
 
     do i = n0 + 1, n1 - 2; do j = i + 1, n1 - 1; do k = j + 1, n1
         if (indocc(k, j, i) .eq. 1) cycle

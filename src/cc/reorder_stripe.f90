@@ -101,7 +101,7 @@ subroutine reorder_shift(rank, a_shape, a_size, b_shape, b_size, b_shifts, permu
     character(len=*), intent(in) :: permutation_string
 
     real(p), intent(in) :: A(a_size)
-    real(p), intent(inout) :: B(b_size)
+    real(p), intent(in out) :: B(b_size)
 
 
     !integer :: identity(rank)
@@ -282,6 +282,109 @@ subroutine sum_stripe(rank, mat_shape, mat_size, perm_str, beta, A, B)
 
 end subroutine sum_stripe
 
+subroutine sum_shift(rank, a_shape, a_size, b_shape, b_size, b_shifts, permutation_string, beta, A, B)
+
+    use const, only: p
+    use cc_utils, only: gen_perm_array
+
+    integer, intent(in) :: rank
+    integer, intent(in) :: a_shape(rank)
+    integer, intent(in) :: a_size
+    integer, intent(in) :: b_shape(rank)
+    integer, intent(in) :: b_size
+    integer, intent(in) :: b_shifts(rank)
+    character(len=*), intent(in) :: permutation_string
+
+    real(p), intent(in) :: A(a_size)
+    real(p), intent(in out) :: B(b_size)
+
+
+    !integer :: identity(rank)
+    integer :: permutation(rank)
+    integer :: tmp_permutation(rank)
+
+    integer :: identity(rank)
+
+    integer :: new_shape(rank)
+    integer :: shifts(rank)
+
+    integer :: stride_a(rank)
+
+    integer :: stride_a_inner
+    integer :: size_outer, size_inner
+    integer :: shift_inner
+    integer :: offset_a, offset_b
+
+    integer :: i, j, j_tmp
+    integer :: rank_indx
+
+    call gen_perm_array(permutation_string, permutation)
+
+    tmp_permutation = permutation
+    identity = [ (i, i=1, rank) ]
+    call permute_array(rank, tmp_permutation, identity, permutation)
+
+    call permute_array(rank, permutation, b_shape, new_shape)
+    call permute_array(rank, permutation, b_shifts, shifts)
+
+
+    !permutation = tmp_permutation
+
+
+    ! Stride sizes per dimension
+    stride_a(1) = 1
+    do i=2, rank
+        stride_a(i) = stride_a(i-1) * a_shape(i-1)
+    enddo
+
+    ! The idea here is to reshape the N-rank array into a 2-rank array
+    ! where the inner_size corresponds to the left index (fastest changing)
+    ! and outer_size, to the right index (slowest chaging)
+
+    ! Size of the fastest changing index
+    size_inner = new_shape(permutation(1))
+    ! Size of the remaining dimension
+    size_outer = product(new_shape) / size_inner
+    ! Size of the stride corresponding to this index in the A matrix
+    stride_a_inner = stride_a(permutation(1))
+    shift_inner = shifts(permutation(1))
+
+    !$omp parallel default(none), &
+    !$omp shared(rank, new_shape, shifts, permutation, &
+    !$omp size_outer, size_inner, shift_inner, &
+    !$omp stride_a, stride_a_inner, &
+    !$omp beta, A, B), &
+    !$omp private(i, j, j_tmp, offset_a, offset_b, rank_indx)
+
+    !$omp do
+    do j=0, size_outer-1
+        offset_a = 0
+
+        j_tmp = j
+
+        do i=2, rank
+            rank_indx = modulo(j_tmp, new_shape(permutation(i)))
+            j_tmp = j_tmp / new_shape(permutation(i))
+            offset_a = offset_a &
+                + (rank_indx * stride_a(permutation(i))) &
+                + (shifts(permutation(i)) * stride_a(permutation(i)))
+        enddo
+        offset_a = offset_a + (shift_inner * stride_a_inner)
+
+        offset_b = j * size_inner
+        do i=0, size_inner-1
+            B(offset_b + i + 1) = B(offset_b + i + 1) + beta * A(offset_a + (i * stride_a_inner) + 1)
+        enddo
+
+
+    enddo
+    !$omp end do
+
+    !$omp end parallel
+
+
+end subroutine sum_shift
+
 subroutine permute_array(rank, permutation, A, B)
     integer, intent(in) :: rank
     integer, intent(in) :: permutation(rank)
@@ -293,17 +396,18 @@ subroutine permute_array(rank, permutation, A, B)
     do i=1, rank
         B(permutation(i)) = A(i)
     end do
+
 end subroutine permute_array
 
-!subroutine inverse_permute_array(rank, permutation, A, B)
-!    integer, intent(in) :: rank
-!    integer, intent(in) :: permutation(rank)
-!    integer, intent(in) :: A(rank)
-!    integer, intent(in out) :: B(rank)
-!
-!    integer :: i
-!
-!    do i=1, rank
-!        B(i) = A(permutation(i))
-!    end do
-!end subroutine inverse_permute_array
+subroutine inverse_permute_array(rank, permutation, A, B)
+    integer, intent(in) :: rank
+    integer, intent(in) :: permutation(rank)
+    integer, intent(in) :: A(rank)
+    integer, intent(in out) :: B(rank)
+
+    integer :: i
+
+    do i=1, rank
+        B(i) = A(permutation(i))
+    end do
+end subroutine inverse_permute_array

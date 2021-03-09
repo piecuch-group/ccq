@@ -239,7 +239,8 @@ subroutine t1b_update(n0, n1, n2, n3, k1, k2, k3, k4, lvl_t, shift, v1b, &
     x3 = x3 + q32
     deallocate (q32)
 
-    call sumx12(0, n3, n0, n1, n1, n3, x3, fockr, 1.000)
+  call sum_shift(2,shape(fockr),size(fockr),shape(x3), &
+   size(x3),(/n0,n1/),'12',1.000,fockr,x3)
 
     allocate (d2(n0 + 1:n1, n1 + 1:n3, n2 + 1:n3, n0 + 1:n2))
     call reorder_stripe(4, shape(t2b), size(t2b), '4213', t2b, d2)
@@ -270,7 +271,8 @@ subroutine t1b_update(n0, n1, n2, n3, k1, k2, k3, k4, lvl_t, shift, v1b, &
                     q34)
     deallocate (q34)
 
-    call sumx21(0, n3, n2, n3, n2, n3, x2, fockb, 1.000)
+  call sum_shift(2,shape(fockb),size(fockb),shape(x2), &
+   size(x2),(/n2,n2/),'21',1.000,fockb,x2)
 
     allocate (b2(n2 + 1:n3, n0 + 1:n2))
     call reorder_stripe(2, shape(t1b), size(t1b), '12', t1b, b2)
@@ -317,7 +319,8 @@ subroutine t1b_update(n0, n1, n2, n3, k1, k2, k3, k4, lvl_t, shift, v1b, &
 
     x4 = x4 + q38
 
-    call sumx12(0, n3, n0, n2, n2, n3, x4, fockb, 1.000)
+  call sum_shift(2,shape(fockb),size(fockb),shape(x4), &
+   size(x4),(/n0,n2/),'12',1.000,fockb,x4)
 
     allocate (d2(n0 + 1:n2, n2 + 1:n3, n2 + 1:n3, n0 + 1:n2))
     call reorder_stripe(4, shape(t2c), size(t2c), '3124', t2c, d2)
@@ -348,7 +351,8 @@ subroutine t1b_update(n0, n1, n2, n3, k1, k2, k3, k4, lvl_t, shift, v1b, &
                     q42)
     deallocate (q42)
 
-    call sumx12(0, n3, n0, n2, n0, n2, x1, fockb, 1.000)
+  call sum_shift(2,shape(fockb),size(fockb),shape(x1), &
+   size(x1),(/n0,n0/),'12',1.000,fockb,x1)
 
     allocate (b2(n0 + 1:n2, n2 + 1:n3))
     call reorder_stripe(2, shape(t1b), size(t1b), '21', t1b, b2)
