@@ -90,7 +90,7 @@ contains
 
     end subroutine load_e2int
 
-    subroutine load_fcidump(fcidump, e1int, e2int, hh)
+    subroutine load_fcidump(norbs, fcidump, e1int, e2int, hh)
 
         ! Load integrals from a FCIDUMP file as opposed to the
         ! onebody.inp and twobody.inp files from CC_PACKAGE
@@ -104,11 +104,16 @@ contains
         !   hh: internuclear repulsion energy
 
         use const, only: tmp_unit, p, line_len
+        use ranking, only: insertion_rank
 
+        integer, intent(in) :: norbs
         character(len=*), intent(in) :: fcidump
         real(p), allocatable, intent(in out) :: e1int(:,:)
         real(p), allocatable, intent(in out) :: e2int(:,:,:,:)
         real(p), intent(in out) :: hh
+
+        real(p) :: eigenvalues(norbs)
+        integer :: rank(norbs), inv_rank(norbs)
 
         character(len=line_len) :: cur_line
         integer :: idx
@@ -120,6 +125,36 @@ contains
 
 
         open(tmp_unit, file=trim(fcidump), status="old")
+        do
+
+            ! Skip FCIDUMP header. The information contained in it has
+            ! been already parsed in parser.f90
+            if (.not. read_flag) then
+
+                read(tmp_unit, *) cur_line
+                idx = index(cur_line, "END")
+                if (idx /= 0) read_flag = .true.
+
+            else
+
+                ! Read integrals
+                read(tmp_unit, *, iostat=ios) val, i, a, j, b
+                if (ios /= 0) exit
+
+                if (i /= 0 .and. a + j + b == 0) eigenvalues(i) = val
+
+            endif
+
+        enddo
+
+        rewind(tmp_unit)
+        read_flag = .false.
+
+        ! Get ranking and inverse ranking
+        call insertion_rank(eigenvalues, rank)
+        do idx=1, norbs
+            inv_rank(rank(idx)) = idx
+        enddo
 
         do
 
@@ -137,8 +172,13 @@ contains
                 read(tmp_unit, *, iostat=ios) val, i, a, j, b
                 if (ios /= 0) exit
 
+
                 if (i /= 0 .and. a /= 0 .and. j /= 0 .and. b /= 0) then
                     ! Twobody integrals
+                    i = inv_rank(i)
+                    a = inv_rank(a)
+                    j = inv_rank(j)
+                    b = inv_rank(b)
                     e2int(i, j, a, b) = val
                     e2int(j, i, b, a) = val
                     e2int(a, b, i, j) = val
@@ -150,6 +190,8 @@ contains
 
                 else if (i /= 0 .and. a /= 0 .and. j + b == 0) then
                     ! Onebody integrals
+                    i = inv_rank(i)
+                    a = inv_rank(a)
                     e1int(i, a) = val
                     e1int(a, i) = val
 
@@ -207,7 +249,7 @@ contains
 
 
         if (trim(run%fcidump) /= '') then
-            call load_fcidump(run%fcidump, sys%ints%e1int, sys%ints%e2int, sys%en_repul)
+            call load_fcidump(sys%orbs, run%fcidump, sys%ints%e1int, sys%ints%e2int, sys%en_repul)
         else
             onebody_lines = count_file_lines(run%onebody_file)
             orbs = int(-(1 - sqrt(real(1 + 8*onebody_lines))) / 2)

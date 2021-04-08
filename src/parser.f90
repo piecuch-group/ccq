@@ -365,6 +365,18 @@ contains
             run%lvl_t = .false.
             run%lvl_q = .false.
 
+        case ('CR-CC(2,3)')
+            run%calc_type = 'CR-CC(2,3)'
+            run%act_ind_t = 0
+            run%act_ind_q = 0
+
+            run%hbar = .true.
+            run%lcc = .true.
+            run%mm_23 = .true.
+
+            run%lvl_t = .false.
+            run%lvl_q = .false.
+
         case ('CCSDt')
             run%calc_type = 'CCSDt'
             run%sorted_ints = .true.
