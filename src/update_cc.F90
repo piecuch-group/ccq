@@ -24,7 +24,8 @@ contains
         use system, only: sys_t, run_t
         use cc_types, only: cc_t
         use stoch_cc, only: update_stoch_t3
-        use cc_utils, only: antisym_t
+
+        use contract_t3, only: hbar_on_t2a, hbar_on_t2b, hbar_on_t2c
 
         implicit none
 
@@ -100,10 +101,14 @@ contains
                 intr=>sys%ints%v_aa, intb=>sys%ints%v_bb, intm=>sys%ints%v_ab)
 
             allocate(v2(n1+1:n3,n1+1:n3,n0+1:n1,n0+1:n1))
-            v2=0.0d0
+            v2=0.0_p
+
+            ! Externally corrected pre-load
             if (run%ext_cor) then
                 v2(:,:,:,:) = cc%ext_cor%t2a(:,:,:,:)
+                call hbar_on_t2a(sys, cc, v2)
             endif
+
             call sumx2143(n0,n3,n1,n3,n1,n3,n0,n1,n0,n1,v2,intr,1.000)
 
             call t2a_update(n0,n1,n2,n3,k1,k2,k3,k4,run%lvl_t,run%lvl_q,run%shift,v2, &
@@ -120,10 +125,13 @@ contains
                 enddo
             else
                 allocate(v2(n2+1:n3,n2+1:n3,n0+1:n2,n0+1:n2))
-                v2=0.0d0
+                v2=0.0_p
+
                 if (run%ext_cor) then
                     v2(:,:,:,:) = cc%ext_cor%t2c(:,:,:,:)
+                    call hbar_on_t2c(sys, cc, v2)
                 endif
+
                 call sumx2143(n0,n3,n2,n3,n2,n3,n0,n2,n0,n2,v2,intb,1.000)
 
                 call t2c_update(n0,n1,n2,n3,k1,k2,k3,k4,run%lvl_t,run%lvl_q,run%shift,v2, &
@@ -136,10 +144,13 @@ contains
             endif
 
             allocate(v2(n2+1:n3,n1+1:n3,n0+1:n2,n0+1:n1))
-            v2=0.0d0
+            v2=0.0_p
+
             if (run%ext_cor) then
                 v2(:,:,:,:) = cc%ext_cor%t2b(:,:,:,:)
+                call hbar_on_t2b(sys, cc, v2)
             endif
+
             call sumx2143(n0,n3,n2,n3,n1,n3,n0,n2,n0,n1,v2,intm,1.000)
 
             call t2b_update(n0,n1,n2,n3,k1,k2,k3,k4,run%lvl_t,run%lvl_q,run%shift,v2, &
@@ -151,8 +162,13 @@ contains
             deallocate(v2)
 
             allocate(v1(n1+1:n3,n0+1:n1))
-            v1=0.0d0
+            v1=0.0_p
+
             call sumx12(0,n3,n1,n3,n0,n1,v1,fockr, 1.000)   !!!!!not sure if the 0 should be n0
+
+            if (run%ext_cor) then
+                v1(:,:) = cc%ext_cor%t1a(:,:)
+            endif
 
             call t1a_update(n0,n1,n2,n3,k1,k2,k3,k4,run%lvl_t,run%shift,v1, &
                 fockr,fockb,intr,intb,intm,t(k1a),t(k1b),t(k2a),t(k2b),t(k2c), &
@@ -166,8 +182,13 @@ contains
                 enddo
             else
                 allocate(v1(n2+1:n3,n0+1:n2))
-                v1=0.0d0
+                v1=0.0_p
+
                 call sumx12(0,n3,n2,n3,n0,n2,v1,fockb, 1.000)
+
+                if (run%ext_cor) then
+                    v1(:,:) = cc%ext_cor%t1b(:,:)
+                endif
 
                 call t1b_update(n0,n1,n2,n3,k1,k2,k3,k4,run%lvl_t,run%shift,v1, &
                     fockr,fockb,intr,intb,intm,t(k1a),t(k1b),t(k2a),t(k2b),t(k2c), &
@@ -336,6 +357,7 @@ contains
         type(run_t), intent(in) :: run
         type(cc_t), intent(inout), target :: cc
 
+#ifndef DISABLE_OPT_T3
         real(p), pointer :: t(:) => null()
 
         ! Adapt for Jun's old scheme
@@ -370,13 +392,8 @@ contains
 
         real(p), allocatable :: ht3d(:,:,:,:,:,:)
 
-#ifdef DISABLE_OPT_T3
-        call stop_all('update_clusters_t3_opt', 'ERROR: Feature not compiled.')
-#else
-
         ! Compatibility vars
         ! [TODO] all this has to be removed
-        integer :: n0, n1, n2 ,n3, m1, m2
         integer :: k1, k2, k3, k4
         integer :: k5, k6 ,k7, k8, k9, k0
 
@@ -386,6 +403,9 @@ contains
 
         integer :: i, i0, i1
         integer :: ipa, ipb, ipc
+#endif
+
+        integer :: n0, n1, n2 ,n3, m1, m2
 
         ! Compatibility layer
         n0 = sys%froz
@@ -395,6 +415,17 @@ contains
         m1 = sys%act_occ_b
         m2 = sys%act_unocc_a
 
+
+#ifdef DISABLE_OPT_T3
+        ! [TODO] come up with a better way of removing compiler warnings
+        ! when this is disabled
+        cc%t_size = 0
+        n0 = run%diis_space
+        call stop_all('update_clusters_t3_opt', 'ERROR: Feature not compiled.')
+#else
+
+        ! Compatibility vars
+        ! [TODO] all this has to be removed
         ipa = part_ints_a_unit
         ipb = part_ints_b_unit
         ipc = part_ints_c_unit
@@ -2182,7 +2213,7 @@ contains
         ! ACC compatibility routine. Used to help transition between
         ! the new dervied type, acc, and the way Ilias wrote the
         ! original code.
-        
+
         ! [TODO] This subroutine should be deprecated at one point
 
         use const, only: sp

@@ -28,11 +28,10 @@ C
        real*8,allocatable::U2(:,:)
 C
        allocate(D1(N0+1:N1,N1+1:N3,N1+1:N3,N0+1:N1))
-       call reorder3124(N0,N3,N0,N3,N0,N3,N0,N3,
-     & N0,N1,N1,N3,N1,N3,N0,N1,IntR,D1)
+       call reorder_shift(4,shape(IntR),size(IntR),shape(D1),size(D1),
+     & (/N0-n0,N1-n0,N1-n0,N0-n0/),'3124',IntR,D1)
        allocate(B2(N0+1:N1,N1+1:N3))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,N3,t1A,B2)
+       call reorder_stripe(2,shape(t1A),size(t1A),'21',t1A,B2)
        allocate(U1(N1+1:N3,N0+1:N1))
        I1=K1*K3
        I3=K3*K1
@@ -44,11 +43,10 @@ C
        deallocate(U1)
 C
        allocate(D1(N0+1:N2,N2+1:N3,N1+1:N3,N0+1:N1))
-       call reorder3124(N0,N3,N0,N3,N0,N3,N0,N3,
-     & N0,N2,N2,N3,N1,N3,N0,N1,IntM,D1)
+       call reorder_shift(4,shape(IntM),size(IntM),shape(D1),size(D1),
+     & (/N0-n0,N2-n0,N1-n0,N0-n0/),'3124',IntM,D1)
        allocate(B2(N0+1:N2,N2+1:N3))
-       call reorder21(N2,N3,N0,N2,
-     & N0,N2,N2,N3,t1B,B2)
+       call reorder_stripe(2,shape(t1B),size(t1B),'21',t1B,B2)
        allocate(U2(N1+1:N3,N0+1:N1))
        I1=K1*K3
        I3=K4*K2

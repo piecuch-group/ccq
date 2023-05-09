@@ -218,7 +218,7 @@ contains
 
         ! The lookup table contains the list of bits set for all possible integers contained in a given number of bits.
         ! Number of bits in integers in the lookup table (assume a power of 2!).
-        integer, parameter :: field_size = ubound(bit_table_256, dim=1)
+        integer(i0), parameter :: field_size = ubound(bit_table_256, dim=1)
         ! Number of such bit chunks in integers of kind i0.
         integer, parameter :: nfields = i0_length/field_size
         ! Bit mask to extract a chunk containing field_size bits.

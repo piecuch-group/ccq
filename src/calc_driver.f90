@@ -26,7 +26,7 @@ contains
         use const, only: p
         use printing, only: print_calc_params, print_date, print_summary
 
-        use external_correction, only: ext_cor_driver
+        use external_correction, only: external_correction_driver
         use solver, only: solve_cc, solve_lcc
         use hbar_gen, only: hbar2
         use mm_correct, only: crcc23
@@ -48,7 +48,7 @@ contains
         ! Externally corrected CC methods
         ! -------------------------------
         if (run%ext_cor) then
-            call ext_cor_driver(sys, run, cc)
+            call external_correction_driver(sys, run, cc)
         endif
 
         ! Solve coupled cluster
@@ -59,7 +59,7 @@ contains
         ! ---------------
         ! [TODO] improve naming of hbar2
         if (run%hbar) then
-            call hbar2(sys, run, cc)
+            call hbar2(sys, cc)
         endif
 
         ! Solve left coupled cluster
@@ -69,7 +69,7 @@ contains
 
         ! Calculate MM correction
         if (run%mm_23) then
-            call crcc23(sys, run, cc)
+            call crcc23(sys, cc)
         endif
 
         ! Wrap up
@@ -85,20 +85,23 @@ contains
         ! Initialize system for CC calculations
 
         use system, only: sys_t, run_t
-        use cc_utils, only: open_t4_files
         use cc_types, only: cc_t, init_p_space_slater
+
         use integrals, only: load_ints, load_sorted_ints
+        use energy, only: calc_hf_energy, calc_orbital_energy
+
         use basis_types, only: init_basis_strings
         use excitations, only: init_excitations
-        use cc_utils, only: get_t_sizes, get_t_sizes_act
+
+        use cc_utils, only: get_t_sizes, get_t_sizes_act, open_t4_files
 
         use hdf5_io, only: init_h5_file
 
         use omp_lib, only: omp_set_num_threads
 
-        type(sys_t), intent(inout) :: sys
+        type(sys_t), intent(in out) :: sys
         type(run_t), intent(in) :: run
-        type(cc_t), intent(inout) :: cc
+        type(cc_t), intent(in out) :: cc
 
         ! [TODO] improve calculation type passing maybe use procedure pointers?
         if (run%sorted_ints) then
@@ -110,7 +113,11 @@ contains
         ! Load integrals
         call load_ints(sys, run)
         ! [TODO] everything should be sorted in the future
-        call load_sorted_ints(sys, run)
+        call load_sorted_ints(sys)
+
+        ! Calculate initial energies
+        call calc_orbital_energy(sys, sys%ints%e1int, sys%ints%e2int)
+        sys%en_ref = calc_hf_energy(sys, sys%ints%e1int, sys%ints%e2int) + sys%en_repul
 
         ! Initialize determinant and excitation systems
         call init_basis_strings(sys%basis)
@@ -135,25 +142,41 @@ contains
 
     subroutine clean_system(sys, run, cc, cc_failed)
 
-        use const, only: tmp_unit
+        use const, only: tmp_unit, c_len
         use system, only: sys_t, run_t
         use cc_types, only: cc_t
+
         use integrals, only: unload_ints, unload_sorted_ints
+
         use basis_types, only: dealloc_basis_t
         use excitations, only: end_excitations
+
         use cc_utils, only: close_t4_files
 
-        type(sys_t), intent(inout) :: sys
+        use errors, only: stop_all
+
+        type(sys_t), intent(in out) :: sys
         type(run_t), intent(in) :: run
-        type(cc_t), intent(inout) :: cc
+        type(cc_t), intent(in out) :: cc
         logical, intent(in) :: cc_failed
 
-        integer :: idx
+        character(len=c_len) :: cmd
+        integer :: ierr
+
+
+        ! Remove binary data
+        if (.not. run%keep_bin) then
+            write(cmd, '(a, a)') "rm -f ", trim(run%h5_master_file)
+            call execute_command_line(trim(cmd), exitstat=ierr)
+            if (ierr /= 0) &
+                call stop_all('clean_system', 'ERROR: could not remove H5 master file')
+
+            ! [TODO] add binary file too (run%bin_file)
+        endif
 
         ! Close T vec file
         ! [TODO] cleanup: write bin files and deal with failure to converge
-
-        if (run%lvl_q) call close_t4_files(sys, run%keep_bin, cc_failed)
+        if (run%lvl_q) call close_t4_files(run%keep_bin, cc_failed)
 
         ! [TODO] clean deallocations and allocations. Prolly better to have a module handling this
         ! Deallocate T
@@ -165,10 +188,9 @@ contains
 
         call dealloc_basis_t(sys%basis)
         call end_excitations(sys%basis%excit_mask)
+
         call unload_ints(sys)
-        if (run%sorted_ints) then
-            call unload_sorted_ints(sys)
-        endif
+        call unload_sorted_ints(sys)
 
     end subroutine clean_system
 
@@ -182,8 +204,6 @@ contains
 
         type(run_t), intent(in) :: run
         type(cc_t), intent(inout) :: cc
-
-        logical :: t_exists
 
         ! Initialize T vector
         if (.not. allocated(cc%t_vec)) then

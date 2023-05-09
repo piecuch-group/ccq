@@ -1,4 +1,4 @@
-# Brief Makefile for modern fortran projects
+# Brief Makefile for modern Fortran projects
 #
 # Inspired (almost the same as) in James Spencer's
 # http://github.com/jsspencer/generic_makefile
@@ -24,6 +24,10 @@ endif
 # --------------
 PROGRAM := ccq
 TEST_DIR := tests
+ENTRY := main.f90
+
+SHARED_LIBRARY := libccq.so
+STATIC_LIBRARY := libccq.a
 
 
 # Source handling
@@ -51,6 +55,16 @@ else
 F_DEPEND := $(DEPEND_DIR)/fortran.d
 endif
 
+# Library objects
+ENTRY_OBJ := $(call objects_path, $(ENTRY))
+LIB_OBJS := $(filter-out $(ENTRY_OBJ),$(OBJS))
+AR := ar
+ARFLAGS := -rcs
+
+# Force good coding
+WARNINGS := -Wall -std=f2018 -fall-intrinsics
+
+
 # Enviroment data logging
 # -----------------------
 COMP_HOST := $(shell hostname --fqdn)
@@ -62,14 +76,17 @@ GIT_SHA1 := $(GIT_SHA1)$(shell test -z "$$(git status --porcelain 2>/dev/null)" 
 # Compilation macros
 .SUFFIXES:
 .SUFFIXES: $(EXTS)
-.PHONY: all clean cleanall debug test
+.PHONY: all lib clean cleanall debug test
 
 all: $(BIN_DIR)/$(PROGRAM)
+
+lib: FFLAGS += -fpic
+lib: CFLAGS += -fpic
+lib: $(BIN_DIR)/$(SHARED_LIBRARY) $(BIN_DIR)/$(STATIC_LIBRARY)
 
 
 # Fortran
 # -------
-#
 $(BUILD_DIR)/printing.o: src/printing.F90
 	$(FC) -c $(FFLAGS) -DCOMP_HOST="'$(COMP_HOST)'" -DCOMP_TIME="'$(COMP_TIME)'" -DVERSION="'$(GIT_SHA1)'" -DFLAGS="'$(FFLAGS)'" -o $@ $< $(F90_MOD_FLAG) $(BUILD_DIR)
 
@@ -77,36 +94,40 @@ $(BUILD_DIR)/%.o: %.F
 	$(FC) $(CPPFLAGS) -c $(FFLAGS) $< -o $@ $(F90_MOD_FLAG) $(BUILD_DIR)
 
 $(BUILD_DIR)/%.o: %.F90
-	$(FC) $(CPPFLAGS) -c $(FFLAGS) $< -o $@ $(F90_MOD_FLAG) $(BUILD_DIR)
+	$(FC) $(CPPFLAGS) -c $(WARNINGS) $(FFLAGS) $< -o $@ $(F90_MOD_FLAG) $(BUILD_DIR)
 
 $(BUILD_DIR)/%.o: %.f
 	$(FC) -c $(FFLAGS) $< -o $@ $(F90_MOD_FLAG) $(BUILD_DIR)
 
 $(BUILD_DIR)/%.o: %.f90
-	$(FC) -c $(FFLAGS) $< -o $@ $(F90_MOD_FLAG) $(BUILD_DIR)
+	$(FC) -c $(WARNINGS) $(FFLAGS) $< -o $@ $(F90_MOD_FLAG) $(BUILD_DIR)
 
 %.mod: ;
 
 # C
 # -
 $(BUILD_DIR)/%.o: %.c
-	$(CC) -c -o $@ $<
+	$(CC) -c $(CFLAGS) -o $@ $<
 
 
 # Goals
 # -------
-#
 
 # Compile binary
 $(BIN_DIR)/$(PROGRAM): $(OBJS) | $(BIN_DIR)
 	$(LD) -o $@ $(LDFLAGS) -I $(BUILD_DIR) $(OBJS) $(LIBS)
-
 
 $(BIN_DIR) $(BUILD_DIR) $(DEPEND_DIR):
 	mkdir -p $@
 
 $(F_DEPEND): $(F_FILES)
 	@tools/sfmakedepend --file - --silent --objdir \$$\(BUILD_DIR\) --moddir \$$\(BUILD_DIR\) --depend=mod $^ > $@
+
+$(BIN_DIR)/$(SHARED_LIBRARY): $(LIB_OBJS) | $(BIN_DIR)
+	$(LD) -shared -o $@ $(LDFLAGS) -I $(BUILD_DIR) $(LIB_OBJS) $(LIBS)
+
+$(BIN_DIR)/$(STATIC_LIBRARY): $(LIB_OBJS) | $(BIN_DIR)
+	$(AR) $(ARFLAGS) $@ $(LIB_OBJS)
 
 # Phonies
 # -------
@@ -122,7 +143,7 @@ debug: FFLAGS = $(FFLAGS_DEBUG)
 debug: $(BIN_DIR)/$(PROGRAM)
 
 test:
-	cd $(TEST_DIR) && pytest -v --tb=line
+	cd $(TEST_DIR) && pytest -v --tb=line test_small.py
 
 # Dependencies
 # -------------------

@@ -5,13 +5,13 @@ module system
     ! run_t, which contains information about the runtime configuration
     ! ints_t, which hold the molecular integrals, etc.
 
-    use const, only: int_32, p, sp, line_len
+    use const, only: int_32, p, sp, line_len, c_len
     use basis_types, only: basis_t
 
     type ints_t
         ! Bare integrals
         real(p), allocatable :: e1int(:,:)
-        ! e2int equivalent to v_ab so no needed (for now)
+        real(p), allocatable :: e2int(:,:,:,:)
 
 
         ! Unsorted integrals for older CC codes and CCSDTQ derivatives
@@ -65,7 +65,10 @@ module system
         integer :: orbs
         integer :: mult
 
+        character(len=5) :: point_group = ''
+
         ! Spin orbital molecular information
+        integer :: froz_spin
         integer :: nel
         integer :: nvirt
         integer :: nalpha
@@ -87,13 +90,15 @@ module system
         type(ints_t) :: ints
 
         ! Initial energies
+        integer, allocatable :: orbital_syms(:)
+        real(p), allocatable :: orbital_energies(:)
         real(p) :: en_repul
         real(p) :: en_ref
 
     end type sys_t
 
     type config_t
-        character(len=255) :: filename
+        character(len=c_len) :: filename
         character(len=line_len) :: lines(200)
         integer :: file_size = 0
 
@@ -112,9 +117,8 @@ module system
         ! Parallel
         integer(int_32) :: num_threads = 1_int_32
 
-
         ! Calculation ID
-        character(len=255) :: label
+        character(len=c_len) :: label
         character(len=37) :: uuid
 
         ! Coupled-cluster level information
@@ -141,15 +145,21 @@ module system
         type(config_t) :: config
         logical :: keep_bin
 
-        character(len=255) :: h5_master_file
+        character(len=c_len) :: h5_master_file
 
-        character(len=255) :: ext_cor_file
-        character(len=255) :: sym_file
+        ! External correcion I/O
+        character(len=c_len) :: ext_cor_file
+        logical :: ext_cor_file_h5
 
-        character(len=255) :: output_file
-        character(len=255) :: onebody_file
-        character(len=255) :: twobody_file
-        character(len=255) :: bin_file
+        character(len=c_len) :: sym_file
+
+        character(len=c_len) :: output_file
+        character(len=c_len) :: onebody_file
+        character(len=c_len) :: twobody_file
+        character(len=c_len) :: bin_file
+
+        character(len=c_len) :: fcidump
+
     end type run_t
 
 end module system

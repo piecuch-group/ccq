@@ -3,23 +3,23 @@
 
 module utils
 
-! Various utilities and tools...
+    ! Various utilities and tools...
 
-implicit none
+    implicit none
 
-interface int_fmt
-    !module procedure int_fmt_int_32
-    module procedure int_fmt_int_64
-end interface int_fmt
-interface tri_ind
-    !module procedure tri_ind_int_32
-    module procedure tri_ind_int_64
-end interface tri_ind
+    interface int_fmt
+        module procedure int_fmt_int_32
+        module procedure int_fmt_int_64
+    end interface int_fmt
+    interface tri_ind
+        module procedure tri_ind_int_32
+        module procedure tri_ind_int_64
+    end interface tri_ind
 
 
 contains
 
-! --- Combinatorics ---
+    ! --- Combinatorics ---
 
     elemental function binom_i(m, n) result(binom)
 
@@ -211,37 +211,37 @@ contains
 
     end subroutine combs
 
-!--- format statement formatting ---
+    !--- format statement formatting ---
 
-!    elemental function int_fmt_int_32(i, padding) result(fmt1)
-!
-!        ! In:
-!        !    i: an integer
-!        !    padding (optional): amount of padding to add to format statement.
-!        !        Default: 2.
-!        ! Returns:
-!        !    fmt1: a format statement for an integer field which will hold
-!        !        i perfectly plus an amount of padding.
-!
-!        ! This does take i/o formatting to a slightly OCD level addmittedly...
-!
-!        use const, only: dp
-!
-!        character(4) :: fmt1
-!        integer, intent(in) :: i
-!        integer, intent(in), optional :: padding
-!        real(dp) :: logi
-!
-!        if (i == 0 .or. i==1) then
-!            logi = 1.0
-!        else
-!            logi = log10(real(abs(i)+1,dp))
-!        end if
-!        if (i < 0) logi = logi + 1
-!
-!        fmt1 = int_fmt_helper(logi, padding)
-!
-!    end function int_fmt_int_32
+    elemental function int_fmt_int_32(i, padding) result(fmt1)
+
+        ! In:
+        !    i: an integer
+        !    padding (optional): amount of padding to add to format statement.
+        !        Default: 2.
+        ! Returns:
+        !    fmt1: a format statement for an integer field which will hold
+        !        i perfectly plus an amount of padding.
+
+        ! This does take i/o formatting to a slightly OCD level addmittedly...
+
+        use const, only: int_32, dp
+
+        character(4) :: fmt1
+        integer(int_32), intent(in) :: i
+        integer, intent(in), optional :: padding
+        real(dp) :: logi
+
+        if (i == 0 .or. i==1) then
+            logi = 1.0
+        else
+            logi = log10(real(abs(i)+1,dp))
+        end if
+        if (i < 0) logi = logi + 1
+
+        fmt1 = int_fmt_helper(logi, padding)
+
+    end function int_fmt_int_32
 
     elemental function int_fmt_int_64(i, padding) result(fmt1)
 
@@ -311,7 +311,7 @@ contains
 
     end function int_fmt_helper
 
-! --- File names and file handling ---
+    ! --- File names and file handling ---
 
     function get_free_unit() result(free_unit)
 
@@ -326,6 +326,8 @@ contains
         integer :: i
         logical :: t_open, t_exist
 
+        free_unit = -1
+
         do i = 10, max_unit
             inquire(unit=i, opened=t_open, exist=t_exist)
             if (.not.t_open .and. t_exist) then
@@ -333,7 +335,7 @@ contains
                 exit
             end if
         end do
-        if (i == max_unit+1) call stop_all('get_free_unit','Cannot find a free unit below max_unit.')
+        if (i == max_unit+1 .or. i == -1) call stop_all('get_free_unit','Cannot find a free unit below max_unit.')
 
     end function get_free_unit
 
@@ -351,7 +353,7 @@ contains
 
     end subroutine append_ext
 
-   subroutine get_unique_filename(stem, suffix, tnext, istart, filename, id, reduce)
+    subroutine get_unique_filename(stem, suffix, tnext, istart, filename, id)
 
         ! Find a filename which is either the "newest" or the next to be used.
         ! The filename is assumed to be stem.xsuffix, where x is an integer.
@@ -376,7 +378,6 @@ contains
         integer, intent(in) :: istart
         character(*), intent(out) :: filename
         integer, optional, intent(out) :: id
-        logical, optional, intent(in) :: reduce
 
         integer :: i
         logical :: exists
@@ -411,7 +412,56 @@ contains
 
     end subroutine get_unique_filename
 
-! --- Array indexing ---
+
+    subroutine parse_key_val(string, key, val)
+
+        ! Parse key value pairs within a comma separated list.
+
+        ! In:
+        !   string: string to be parsed
+        !   key: name of the key so be searched
+
+        ! Out:
+        !   val: value of the key
+
+        use const, only: line_len
+
+        character(len=*), intent(in) :: string
+        character(len=*), intent(in) :: key
+        character(len=line_len), intent(out) :: val
+
+        integer :: idx_key, idx_comma, idx_equal
+
+        val = ''
+
+        ! Find the position of the key
+        idx_key = index(string, trim(key))
+
+        if (idx_key /= 0) then
+
+            ! Find the position of the separating comma
+            idx_comma = index(string(idx_key:), ",")
+
+            if (idx_comma == 0) then
+                ! If no comma between the key and the end of the string,
+                ! assume no comma
+                idx_equal = index(string(idx_key:), "=")
+
+                val = string(idx_key + idx_equal:)
+
+            else
+                ! If there is a comma, only search for the = sign between the
+                ! key and the next comma.
+                idx_equal = index(string(idx_key:idx_key + idx_comma - 2), "=")
+
+                val = string(idx_key + idx_equal: idx_key + idx_comma - 2)
+            endif
+
+        endif
+
+    end subroutine parse_key_val
+
+    ! --- Array indexing ---
 
     elemental function tri_ind_int_64(i,j) result(indx)
 
@@ -515,7 +565,7 @@ contains
 
     end function tri_ind_reorder
 
-! --- String conversion ---
+    ! --- String conversion ---
 
     pure function fstring_to_carray(string_f03) result(array_c)
 
@@ -598,7 +648,7 @@ contains
 
     end function count_file_lines
 
-!--- Informative output ---
+    !--- Informative output ---
 
     subroutine print_matrix(matrix)
 
@@ -621,19 +671,19 @@ contains
 
     end subroutine print_matrix
 
-!--- Timing ---
+    !--- Timing ---
 
     function get_wall_time() result(t)
 
-        use const, only: int_64, p
+        use const, only: int_64, dp
 
-        real(p) :: t
+        real(dp) :: t
 
         integer(int_64) :: t_int, count_rate, count_max
 
         call system_clock(t_int, count_rate, count_max)
 
-        t = real(t_int, p) / real(count_rate, p)
+        t = real(t_int, dp) / real(count_rate, dp)
 
     end function get_wall_time
 

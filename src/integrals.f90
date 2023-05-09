@@ -8,9 +8,6 @@ module integrals
 
 contains
 
-    ! [TODO] add interfaces to more standard integral files (i.e. FCIDUMP, that
-    ! according to some people has become the "quantum chemistry standard")
-
     subroutine load_e1int(orbs, filename, e1int)
 
         ! Load onebody molecular integrals
@@ -45,12 +42,11 @@ contains
 
     end subroutine load_e1int
 
-    subroutine load_e2int(orbs, filename, e2int, en_repul)
+    subroutine load_e2int(filename, e2int, en_repul)
 
         ! Load twobody molecular integrals
 
         ! In:
-        !    orbs: number of spatial orbitals
         !    filename: path to the file containing the integrals
 
         ! In/Out:
@@ -61,7 +57,6 @@ contains
 
         use const, only: p, tmp_unit
 
-        integer, intent(in) :: orbs
         character(len=*), intent(in) :: filename
         real(p), allocatable, intent(inout) :: e2int(:,:,:,:)
         real(p), intent(out) :: en_repul
@@ -95,10 +90,128 @@ contains
 
     end subroutine load_e2int
 
+    subroutine load_fcidump(norbs, fcidump, e1int, e2int, hh)
+
+        ! Load integrals from a FCIDUMP file as opposed to the
+        ! onebody.inp and twobody.inp files from CC_PACKAGE
+
+        ! In:
+        !   fcidump: path to the FCIDUMP file
+
+        ! In/Out:
+        !   e1int: onebody integral array
+        !   e2int: twobody integral array
+        !   hh: internuclear repulsion energy
+
+        use const, only: tmp_unit, p, line_len
+        use ranking, only: insertion_rank
+
+        integer, intent(in) :: norbs
+        character(len=*), intent(in) :: fcidump
+        real(p), allocatable, intent(in out) :: e1int(:,:)
+        real(p), allocatable, intent(in out) :: e2int(:,:,:,:)
+        real(p), intent(in out) :: hh
+
+        real(p) :: eigenvalues(norbs)
+        integer :: rank(norbs), inv_rank(norbs)
+
+        character(len=line_len) :: cur_line
+        integer :: idx
+        integer :: ios
+        logical :: read_flag = .false.
+
+        integer :: i, j, a, b
+        real(p) :: val
+
+
+        open(tmp_unit, file=trim(fcidump), status="old")
+        do
+
+            ! Skip FCIDUMP header. The information contained in it has
+            ! been already parsed in parser.f90
+            if (.not. read_flag) then
+
+                read(tmp_unit, *) cur_line
+                idx = index(cur_line, "END")
+                if (idx /= 0) read_flag = .true.
+
+            else
+
+                ! Read integrals
+                read(tmp_unit, *, iostat=ios) val, i, a, j, b
+                if (ios /= 0) exit
+
+                if (i /= 0 .and. a + j + b == 0) eigenvalues(i) = val
+
+            endif
+
+        enddo
+
+        rewind(tmp_unit)
+        read_flag = .false.
+
+        ! Get ranking and inverse ranking
+        call insertion_rank(eigenvalues, rank)
+        do idx=1, norbs
+            inv_rank(rank(idx)) = idx
+        enddo
+
+        do
+
+            ! Skip FCIDUMP header. The information contained in it has
+            ! been already parsed in parser.f90
+            if (.not. read_flag) then
+
+                read(tmp_unit, *) cur_line
+                idx = index(cur_line, "END")
+                if (idx /= 0) read_flag = .true.
+
+            else
+
+                ! Read integrals
+                read(tmp_unit, *, iostat=ios) val, i, a, j, b
+                if (ios /= 0) exit
+
+
+                if (i /= 0 .and. a /= 0 .and. j /= 0 .and. b /= 0) then
+                    ! Twobody integrals
+                    i = inv_rank(i)
+                    a = inv_rank(a)
+                    j = inv_rank(j)
+                    b = inv_rank(b)
+                    e2int(i, j, a, b) = val
+                    e2int(j, i, b, a) = val
+                    e2int(a, b, i, j) = val
+                    e2int(b, a, j, i) = val
+                    e2int(a, j, i, b) = val
+                    e2int(b, i, j, a) = val
+                    e2int(i, b, a, j) = val
+                    e2int(j, a, b, i) = val
+
+                else if (i /= 0 .and. a /= 0 .and. j + b == 0) then
+                    ! Onebody integrals
+                    i = inv_rank(i)
+                    a = inv_rank(a)
+                    e1int(i, a) = val
+                    e1int(a, i) = val
+
+                else if (i + a + j + b == 0) then
+                    ! Repulsion energy
+                    hh = val
+                endif
+
+            endif
+
+
+        enddo
+
+        close(tmp_unit)
+
+    end subroutine load_fcidump
+
     subroutine load_ints(sys, run)
 
-        ! Load one and twobody integrals from CC_PACKAGE
-        ! onebody.inp and twobody.inp files
+        ! Load one- and two-body integrals from a file/files.
 
         ! In:
         !    run: runtime configuration and data
@@ -106,23 +219,17 @@ contains
         ! In/Out:
         !    sys: molecular system data. On return, the
         !         integrals will be loaded on sys%ints
-        
+
         use const, only: p
-        use energy, only: calc_hf_energy
+        use system, only: sys_t, run_t
+
         use checking, only: check_allocate
         use errors, only: stop_all
-        use system, only: sys_t, run_t
         use utils, only: count_file_lines
 
         type(sys_t), intent(inout) :: sys
         type(run_t), intent(in) :: run
 
-        real(p), allocatable :: e1int(:,:)
-        real(p), allocatable :: e2int(:,:,:,:)
-        real(p) :: hh
-
-        integer :: ios
-        integer :: indx
         integer :: i, j, a, b
         integer :: onebody_lines, orbs
 
@@ -131,19 +238,26 @@ contains
 
         ! Initialize onebody electronic integrals array
         allocate(sys%ints%e1int(sys%orbs, sys%orbs), stat=ierr)
-        call check_allocate('sys%ints%e1int', sys%orbs * sys%orbs, ierr)
+        call check_allocate('sys%ints%e1int', sys%orbs ** 2, ierr)
         sys%ints%e1int = 0.0_p
 
-        onebody_lines = count_file_lines(run%onebody_file)
-        orbs = -(1 - sqrt(real(1 + 8*onebody_lines))) / 2
-        if (int(orbs) /= sys%orbs) call stop_all('load_ints', "Number of orbitals doesn't match the number of integrals")
-        call load_e1int(sys%orbs, run%onebody_file, sys%ints%e1int)
 
         ! Initialize twobody electronic integrals array
-        allocate(e2int(sys%orbs, sys%orbs, sys%orbs, sys%orbs), stat=ierr)
-        call check_allocate('e2int', sys%orbs ** 4, ierr)
-        e2int = 0.0_p
-        call load_e2int(sys%orbs, run%twobody_file, e2int, sys%en_repul)
+        allocate(sys%ints%e2int(sys%orbs, sys%orbs, sys%orbs, sys%orbs), stat=ierr)
+        call check_allocate('sys%ints%e2int', sys%orbs ** 4, ierr)
+        sys%ints%e2int = 0.0_p
+
+
+        if (trim(run%fcidump) /= '') then
+            call load_fcidump(sys%orbs, run%fcidump, sys%ints%e1int, sys%ints%e2int, sys%en_repul)
+        else
+            onebody_lines = count_file_lines(run%onebody_file)
+            orbs = int(-(1 - sqrt(real(1 + 8*onebody_lines))) / 2)
+            if (int(orbs) /= sys%orbs) call stop_all('load_ints', "Number of orbitals doesn't match the number of integrals")
+            call load_e1int(sys%orbs, run%onebody_file, sys%ints%e1int)
+
+            call load_e2int(run%twobody_file, sys%ints%e2int, sys%en_repul)
+        endif
 
         associate(froz=>sys%froz, occ_a=>sys%occ_a, occ_b=>sys%occ_b, orbs=>sys%orbs)
 
@@ -167,23 +281,21 @@ contains
                 do j=froz+1,orbs
                     do a=froz+1,orbs
                         do b=froz+1,orbs
-                            sys%ints%v_ab(i,j,a,b) = e2int(i,j,a,b)
-                            sys%ints%v_aa(i,j,a,b) = e2int(i,j,a,b) - e2int(i,j,b,a)
-                            sys%ints%v_bb(i,j,a,b) = e2int(i,j,a,b) - e2int(i,j,b,a)
+                            sys%ints%v_ab(i,j,a,b) = sys%ints%e2int(i,j,a,b)
+                            sys%ints%v_aa(i,j,a,b) = sys%ints%e2int(i,j,a,b) - sys%ints%e2int(i,j,b,a)
+                            sys%ints%v_bb(i,j,a,b) = sys%ints%e2int(i,j,a,b) - sys%ints%e2int(i,j,b,a)
                         enddo
                     enddo
                 enddo
             enddo
 
             ! Generate fock matrix
-            call gen_fock_operator(sys, sys%ints%e1int, e2int)
-            sys%en_ref = calc_hf_energy(sys, sys%ints%e1int, e2int) + sys%en_repul
-
-            deallocate(e2int)
+            call gen_fock_operator(sys, sys%ints%e1int, sys%ints%e2int)
 
         end associate
 
     end subroutine load_ints
+
 
     subroutine gen_fock_operator(sys, e1int, e2int)
 
@@ -215,7 +327,7 @@ contains
             sys%ints%f_a = e1int
             sys%ints%f_b = e1int
 
-            ! By this point f cointains only z
+            ! At this point f cointains only z
             do i=1,orbs
                 do j=1,i
 
@@ -251,6 +363,7 @@ contains
 
     end subroutine gen_fock_operator
 
+
     subroutine unload_ints(sys)
 
         ! Unload and deallocate all unsorted integrals
@@ -274,34 +387,27 @@ contains
 
     !---- Sorted integral section
 
-    subroutine load_sorted_ints(sys, run)
+    subroutine load_sorted_ints(sys)
 
         ! This routine sorts integrals into unique cases.
 
         ! In:
         !    sys: system information
-        !    run: runtime configurations
+
         ! Out:
         !    sorted integrals in sys%ints
 
         use const, only: p, tmp_unit, part_ints_a_unit, part_ints_b_unit, part_ints_c_unit
-        use system, only: sys_t, run_t
+        use system, only: sys_t
 
-        type(sys_t), intent(inout) :: sys
-        type(run_t), intent(in) :: run
-
-        real(p), allocatable :: e1int(:,:)
-        real(p), allocatable :: e2int(:,:,:,:)
-        real(p) :: hh
+        type(sys_t), intent(in out) :: sys
 
         ! Aux matrices used to generate all particle arrays
         real(p), allocatable :: vappp(:,:,:)
         real(p), allocatable :: vbppp(:,:,:)
         real(p), allocatable :: vcppp(:,:,:)
 
-        integer :: ios
-        integer :: indx
-        integer :: i, j, a, b, c, d, l
+        integer :: b, c, d, l
 
         integer :: unocc_a, unocc_b
 
@@ -426,6 +532,8 @@ contains
             unocc_a = orbs - occ_a
             unocc_b = orbs - occ_b
 
+            ! [TODO] URGENT: reformat these files. Record reading is not
+            ! supported any more!
             open(part_ints_a_unit,file='part_ints_a.bin',form='unformatted', &
                 recl=(unocc_a**3)*8, access='direct')
             open(part_ints_b_unit,file='part_ints_b.bin',form='unformatted', &
@@ -518,6 +626,7 @@ contains
         if (allocated(sys%ints%fbhh)) deallocate(sys%ints%fbhh)
         if (allocated(sys%ints%fbhp)) deallocate(sys%ints%fbhp)
         if (allocated(sys%ints%fbpp)) deallocate(sys%ints%fbpp)
+
         if (allocated(sys%ints%vahhhh)) deallocate(sys%ints%vahhhh)
         if (allocated(sys%ints%vahhhp)) deallocate(sys%ints%vahhhp)
         if (allocated(sys%ints%vahhpp)) deallocate(sys%ints%vahhpp)

@@ -10,21 +10,21 @@ module printing
 
 contains
 
-    subroutine init_print(run)
+    subroutine init_print(output_file)
 
         ! Initialize printing
 
         ! In:
-        !   run: information about the current run configuration 
+        !   run: information about this run's configuration
 
         use const, only: log_unit
         use system, only: run_t
 
-        type(run_t), intent(in) :: run
+        character(len=*) :: output_file
 
         ! Open output file if it is provided in the configuration file
-        if (trim(run%output_file) /= '' .and. trim(run%output_file) /= 'stdout') then
-            open(log_unit, file=trim(run%output_file), status='unknown')
+        if (trim(output_file) /= '' .and. trim(output_file) /= 'stdout') then
+            open(log_unit, file=trim(output_file), status='unknown')
             io = log_unit
         endif
 
@@ -38,24 +38,13 @@ contains
 
     end subroutine close_print
 
-    subroutine print_header(run)
+    subroutine print_compilation_info()
 
         ! Print ccq information. This includes information about
         ! the compilation, the host, authors, etc.
 
         ! In:
         !   run: runtime configuration data
-
-        use system, only: run_t
-
-        type(run_t), intent(in) :: run
-
-        character(len=255) :: hostname
-        character(len=255) :: cmd
-        character(len=255) :: cwd
-        character(len=255) :: user
-        character(len=30) :: date
-
 
         write(io,'(a)') 'ccq Coupled-Cluster Program'
         write(io,'(a/)') '==========================='
@@ -102,6 +91,27 @@ contains
         write(io,'(2x,a20,1x,a)') 'Git SHA', &
             VERSION
 #endif
+        call flush(io)
+
+    end subroutine print_compilation_info
+
+    subroutine print_host_info(run)
+
+        ! Print ccq information. This includes information about
+        ! the compilation, the host, authors, etc.
+
+        ! In:
+        !   run: runtime configuration data
+
+        use system, only: run_t
+
+        type(run_t), intent(in) :: run
+
+        character(len=255) :: hostname
+        character(len=255) :: cmd
+        character(len=255) :: cwd
+        character(len=255) :: user
+        character(len=30) :: date
 
         write(io,'(/a)') 'Host information'
         write(io,'(a)') '----------------'
@@ -116,11 +126,11 @@ contains
         write(io,'(2x,a20,1x,a)') 'User', trim(user)
         write(io,'(2x,a20,1x,a)') 'Date', trim(date)
         write(io,'(2x,a20,1x,a)') 'UUID', trim(run%uuid(1:36))
-        write(io,'(2x,a20,1x,i4/)') 'Threads', run%num_threads
+        write(io,'(2x,a20,1x,i0/)') 'Threads', run%num_threads
 
         call flush(io)
 
-    end subroutine print_header
+    end subroutine print_host_info
 
     subroutine print_calc_params(sys, run, cc)
 
@@ -137,46 +147,57 @@ contains
         use system, only: sys_t, run_t
         use cc_types, only: cc_t
 
+        use symmetry, only: reverse_map_irrep
+
         type(sys_t), intent(in) :: sys
         type(run_t), intent(in) :: run
         type(cc_t), intent(in) :: cc
 
+        character(len=5) :: irrep
+        character(len=1) :: occ
+        integer :: idx
+
         write(io,'(a)') 'System information'
         write(io,'(a)') '------------------'
-        if (trim(run%label) /= '') then
+        if (trim(run%label) /= '') &
             write(io,'(2x,a27,2x,a)') 'Label', trim(run%label)
-        endif
-        write(io,'(2x,a27,2x,i16)') 'Number of electrons', sys%nel
-        write(io,'(2x,a27,2x,i16)') 'Number of virtuals', sys%nvirt
-        write(io,'(2x,a27,2x,i16)') 'Frozen orbitals', sys%froz
-        write(io,'(2x,a27,2x,i16)') 'Occupied orbitals (alpha)',sys%occ_a
-        write(io,'(2x,a27,2x,i16)') 'Occupied orbitals (beta)', sys%occ_b
-        write(io,'(2x,a27,2x,i16/)') 'Total orbitals', sys%orbs
+        write(io,'(2x,a27,2x,i0)') 'Number of electrons', sys%nel
+        write(io,'(2x,a27,2x,i0)') 'Number of virtuals', sys%nvirt
+        write(io,'(2x,a27,2x,i0)') 'Frozen orbitals', sys%froz
+        write(io,'(2x,a27,2x,i0)') 'Occupied orbitals (alpha)',sys%occ_a
+        write(io,'(2x,a27,2x,i0)') 'Occupied orbitals (beta)', sys%occ_b
+        write(io,'(2x,a27,2x,i0/)') 'Total orbitals', sys%orbs
 
         write(io,'(2x,a)') 'Active space partitioning:'
-        write(io,'(2x,a27,2x,i16)') 'Occupied (alpha)', sys%act_occ_a
-        write(io,'(2x,a27,2x,i16)') 'Occupied (beta)', sys%act_occ_b
-        write(io,'(2x,a27,2x,i16)') 'Unoccupied (alpha)', sys%act_unocc_a
-        write(io,'(2x,a27,2x,i16)') 'Unoccupied (beta)', sys%act_unocc_b
+        write(io,'(2x,a27,2x,i0)') 'Occupied (alpha)', sys%act_occ_a
+        write(io,'(2x,a27,2x,i0)') 'Occupied (beta)', sys%act_occ_b
+        write(io,'(2x,a27,2x,i0)') 'Unoccupied (alpha)', sys%act_unocc_a
+        write(io,'(2x,a27,2x,i0)') 'Unoccupied (beta)', sys%act_unocc_b
+
+
+        if (trim(sys%point_group) /= '') &
+            write(io,'(/2x,a27,2x,a)') 'Point group', trim(sys%point_group)
 
 
         write(io,'(/a)') 'CC settings'
         write(io,'(a)')  '-----------'
         !      write(io,'(2x,a27,2x,i16)') 'Number of excited states', nroot
-        write(io,'(2x,a27,2x,a16)') 'Calculation type', trim(run%calc_type)
-        write(io,'(2x,a27,2x,es16.2)') 'Convergence tolerance', run%tol
-        write(io,'(2x,a27,2x,i16)') 'Max. iterations', run%max_iter
-        write(io,'(2x,a27,2x,i16)') 'DIIS space', run%diis_space
-        write(io,'(2x,a27,2x,f16.4)') 'Shift energy', run%shift
-        write(io,'(2x,a27,2x,l16)') 'Restart', run%restart
-        write(io,'(2x,a27,2x,l16/)') 'Restricted CC', run%rhf
+        write(io,'(2x,a27,2x,a)') 'Calculation type', trim(run%calc_type)
+        write(io,'(2x,a27,2x,es10.2)') 'Convergence tolerance', run%tol
+        write(io,'(2x,a27,2x,i0)') 'Max iterations', run%max_iter
+        write(io,'(2x,a27,2x,i0)') 'DIIS space', run%diis_space
+        write(io,'(2x,a27,2x,f8.4)') 'Shift energy', run%shift
+        write(io,'(2x,a27,2x,l)') 'Restart', run%restart
+        write(io,'(2x,a27,2x,l/)') 'Restricted CC', run%rhf
 
-        write(io,'(2x,a27,2x,i16)') 'Active triples indices', run%act_ind_t
-        write(io,'(2x,a27,2x,i16/)') 'Active quadruples indices', run%act_ind_q
+        write(io,'(2x,a27,2x,i0)') 'Active triples indices', run%act_ind_t
+        write(io,'(2x,a27,2x,i0/)') 'Active quadruples indices', run%act_ind_q
 
         if (run%ext_cor) then
-            write(io,'(2x,a)') 'External correction parameters:'
-            write(io,'(2x,a27,2x,l16/)') 'Use singles and doubles', run%ext_cor_sd
+            write(io,'(2x,a)') 'External correction settings:'
+            write(io,'(2x,a27,2x,l)') 'Use singles and doubles', run%ext_cor_sd
+            write(io,'(2x,a27,2x,l)') 'Read NECI HDF5 POPSFILE', run%ext_cor_file_h5
+            write(io,'(2x,a27,2x,a/)') 'External determinant list', trim(run%ext_cor_file)
         endif
 
 
@@ -187,10 +208,24 @@ contains
         write(io,'(2x,a27,2x,3f6.2)') 'T2^2 -> T3 =', cc%acc%t2t2_t3
         write(io,'(2x,a27,2x,5f6.2)') 'T2*T3 -> T3 =', cc%acc%t2t3_t3
 
-        write(io,'(/a)') 'Starting energies (Eh)'
-        write(io,'(a)')  '----------------------'
-        write(io,'(2x,a27,2x,f16.10)') 'Nuclear repulsion', sys%en_repul
-        write(io,'(2x,a27,2x,f16.10/)') 'Reference (HF)', sys%en_ref
+        write(io,'(/a)') 'Molecular orbital basis'
+        write(io,'(a)')  '-----------------------'
+        write(io,'(2x,a27,2x,f16.10)') 'Nuclear repulsion (Eh)', sys%en_repul
+        write(io,'(2x,a27,2x,f16.10)') 'Reference (Eh)', sys%en_ref
+
+        write(io,'(/2x,a10,2x,a10,a15,a10)') 'MO Index', 'Symmetry', 'Energy (Eh)', 'Occupied'
+        write(io,'(2x,47("-"))')
+        do idx=1, sys%orbs
+            irrep = reverse_map_irrep(sys%orbital_syms(idx), sys%point_group)
+            if (idx <= sys%occ_a) then
+                occ = '*'
+            else
+                occ = ''
+            endif
+            write(io,'(2x,i10,2x,i5,a5,f15.8,2x,a)') idx, sys%orbital_syms(idx), trim(irrep), sys%orbital_energies(idx), occ
+        enddo
+
+        write(io, '(a)') ''
 
         call flush(io)
 
@@ -298,7 +333,6 @@ contains
         real(p), intent(in) :: energy_diff
         real(p), intent(in) :: res
         real(p), intent(in) :: prev_time, new_time
-        real(p) :: cputime
 
         real(p) :: nsec
         integer :: nmin
@@ -356,5 +390,8 @@ contains
         write(io, '(/)')
 
     end subroutine print_config
+
+    ! [TODO] write a couple routines to write down the largest T amplitudes,
+    ! R amplitudes, L amplitudes
 
 end module printing

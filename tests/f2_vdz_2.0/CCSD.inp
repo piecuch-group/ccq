@@ -1,0 +1,15 @@
+# System information
+froz=4
+nel=18
+nvir=42
+onebody=f2_vdz_2.0/onebody.inp
+twobody=f2_vdz_2.0/twobody.inp
+num_threads=1
+
+# Calculation options
+keep_bin=.false.
+diis_space=6
+tol=1.0e-8
+max_iterations=60
+calc_type=CCSD
+rhf=.true.

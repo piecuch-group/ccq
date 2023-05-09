@@ -8,7 +8,45 @@ module energy
 
 contains
 
-    function calc_hf_energy(sys, e1int, e2int ) result(hf_energy)
+    subroutine calc_orbital_energy(sys, e1int, e2int)
+
+        ! Calculate the molecular orbital energies using one-
+        ! and two-body integrals
+
+        ! In:
+        !   e1int: onebody integrals (Z)
+        !   e2int: twobody integrals (V)
+
+        ! In/Out:
+        !   sys: molecular orbital energies
+
+        use const, only: p
+        use system, only: sys_t
+
+        type(sys_t), intent(in out) :: sys
+        real(p), allocatable, intent(in) :: e1int(:,:)
+        real(p), allocatable, intent(in) :: e2int(:,:,:,:)
+
+        integer :: i, j
+        real(p) :: acc
+
+
+        ! [TODO] move to init system and extend for open shells
+        if (.not. allocated(sys%orbital_energies)) &
+            allocate(sys%orbital_energies(sys%orbs))
+
+        do i=1, sys%orbs
+            acc = e1int(i,i)
+            do j=1, sys%occ_a
+                acc = acc + 2.0_p * e2int(i,j,i,j) - e2int(i,j,j,i)
+            enddo
+            sys%orbital_energies(i) = acc
+        enddo
+
+
+    end subroutine calc_orbital_energy
+
+    function calc_hf_energy(sys, e1int, e2int) result(hf_energy)
 
         ! Calculate Hartree--Fock energy
 
@@ -67,7 +105,7 @@ contains
         ! Calculate the energy of a Lambda CC state
 
         ! In:
-        !   sys: molecular system information
+        !   sys: molecular system data
         !   cc: CC vectors
 
         ! Out:
@@ -84,6 +122,10 @@ contains
         integer :: i
 
         energy = 0.0_p
+
+        ! [TODO] find a better way to deal with the unused
+        ! var warning
+        i = sys%froz
 
         do i=1, cc%l_size
             energy = energy + cc%lh_vec(i) * cc%lh_vec(i)

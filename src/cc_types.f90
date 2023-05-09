@@ -1,10 +1,12 @@
 module cc_types
 
     ! This module holds the types defining all CC-related data.
-    ! For exmaple, T vector, L vector, Moments, ACC parameters, etc.
+    ! For example, T vector, L vector, Moments, ACC parameters, etc.
 
     use const, only: p, sp, int_32, i0
     use ext_cor_types, only: ext_cor_t
+
+    implicit none
 
     ! ACC parameters for scaling square powers of T
     type acc_t
@@ -18,6 +20,9 @@ module cc_types
     end type acc_t
 
     ! Similarity transformed Hamiltonian
+    ! The indices are layout such that the first half corresponds
+    ! to the ket, and the second half, to the bra. For example,
+    ! hbar%aa(a,i,k,j) -> <jk|hbar|ia>.
     type hbar_t
         real(p), allocatable :: a(:,:)
         real(p), allocatable :: b(:,:)
@@ -207,6 +212,8 @@ contains
         ! [TODO] make this variable more clear.
         ! Might be temporary due to the i/o of walkers eventually changing
         integer :: id_walkers(2)
+
+        integer :: excit_rank
 
         integer(i0) :: f(sys%basis%string_len)
         integer :: occ_list(sys%nel)

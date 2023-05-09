@@ -1,0 +1,5 @@
+onebody*.inp filter=lfs diff=lfs merge=lfs -text
+twobody*.inp filter=lfs diff=lfs merge=lfs -text
+ewalkers* filter=lfs diff=lfs merge=lfs -text
+p_space filter=lfs diff=lfs merge=lfs -text
+*.dat filter=lfs diff=lfs merge=lfs -text

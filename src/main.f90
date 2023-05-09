@@ -11,7 +11,8 @@ program main
     use system, only: sys_t, run_t
     use cc_types, only: cc_t
     use parser, only: get_opts, get_config
-    use printing, only: init_print, print_header, print_config, close_print
+    use printing, only: init_print, print_compilation_info, print_host_info, &
+        print_config, close_print
 
     implicit none
 
@@ -20,18 +21,19 @@ program main
     type(cc_t) :: cc
 
     ! Parse and load configurations
-    call get_opts(sys, run)
+    call get_opts(run)
     call get_config(sys, run, cc)
 
     ! Initialize printing system
-    call init_print(run)
+    call init_print(run%output_file)
 
-    ! Print settings, configurations, host and compilationn
-    ! formation to the output file
-    call print_header(run)
+    ! Print settings, configurations, host, and compilation
+    ! information to the output stream
+    call print_compilation_info()
+    call print_host_info(run)
     if (run%config%echo) call print_config(run%config)
 
-    ! Run CC calculations
+    ! Run calculations
     call run_calcs(sys, run, cc)
 
     ! Close output file

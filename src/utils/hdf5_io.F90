@@ -1,8 +1,11 @@
 module hdf5_io
 
-#ifdef ENABLE_HDF5
 
     use const, only: int_32
+
+
+#ifdef ENABLE_HDF5
+
     use hdf5, only: hid_t, hsize_t
 
     implicit none
@@ -20,6 +23,8 @@ module hdf5_io
         integer(hid_t) :: dp
     end type hdf5_kinds_t
 
+#else
+    implicit none
 #endif
 
 contains
@@ -49,17 +54,16 @@ contains
 
     end subroutine hdf5_kinds_init
 
-    subroutine write_calc_data(sys, run, cc)
+    subroutine write_calc_data(run, cc)
 
         use const, only: int_32, int_64
-        use system, only: sys_t, run_t
+        use system, only: run_t
         use cc_types, only: cc_t
 
         use hdf5, only: h5open_f, h5fcreate_f, h5gcreate_f, &
             h5gclose_f, h5fclose_f, h5close_f, &
             H5F_ACC_TRUNC_F
 
-        type(sys_t), intent(in) :: sys
         type(run_t), intent(in) :: run
         type(cc_t), intent(in) :: cc
 
@@ -118,7 +122,7 @@ contains
         integer(int_32) :: ierr
         type(hdf5_kinds_t) :: kinds
 
-        rank = size(dims)
+        rank = int(size(dims), int_32)
 
         ! According to HANDE this has to be called everytime. HDF5 is tricky...
         call h5open_f(ierr)
@@ -169,7 +173,7 @@ contains
         use hdf5, only: h5open_f, h5fopen_f, h5dopen_f, &
             h5dwrite_f, &
             h5dclose_f, h5fclose_f, h5close_f, &
-            H5F_ACC_RDWR_F, H5T_NATIVE_DOUBLE
+            H5F_ACC_RDWR_F
 
 
         character(len=*), intent(in) :: filename
@@ -212,14 +216,14 @@ contains
         use hdf5, only: h5open_f, h5fopen_f, h5dopen_f, &
             h5dwrite_f, &
             h5dclose_f, h5fclose_f, h5close_f, &
-            H5F_ACC_RDWR_F, H5T_NATIVE_DOUBLE
+            H5F_ACC_RDWR_F
 
 
         character(len=*), intent(in) :: filename
         character(len=*), intent(in) :: dset_name
+        integer, intent(in) :: matrix_size
         real(dp), intent(in) :: matrix(matrix_size)
         integer, intent(in) :: matrix_shape(:)
-        integer, intent(in) :: matrix_size
 
         integer(int_32) :: rank
 
@@ -228,7 +232,7 @@ contains
         integer(int_32) :: ierr
         type(hdf5_kinds_t) :: kinds
 
-        rank = size(matrix_shape)
+        rank = int(size(matrix_shape), int_32)
 
         ! According to HANDE this has to be called everytime. HDF5 is tricky...
         call h5open_f(ierr)
@@ -302,9 +306,9 @@ contains
 
         character(len=*), intent(in) :: filename
         character(len=*), intent(in) :: dset_name
+        integer, intent(in) :: mat_size
         real(dp), intent(in) :: mat(mat_size)
         integer, intent(in) :: mat_dims(:)
-        integer, intent(in) :: mat_size
 
         integer(hid_t) :: fid
         integer(hid_t) :: dset_id, dspace_id
@@ -313,7 +317,7 @@ contains
         integer(hsize_t), allocatable :: mat_dims_in(:)
         integer(int_32) :: rank
 
-        rank = size(mat_dims)
+        rank = int(size(mat_dims), int_32)
         allocate(mat_dims_in(rank))
         mat_dims_in = int(mat_dims, hsize_t)
 
@@ -370,7 +374,6 @@ contains
         integer(int_32) :: ierr
         type(hdf5_kinds_t) :: kinds
 
-        integer :: i
 
         ! According to HANDE this has to be called everytime. HDF5 is tricky...
         call h5open_f(ierr)
@@ -405,6 +408,105 @@ contains
         call h5close_f(ierr)
 
     end subroutine write_column_in_mat
+
+
+    subroutine read_popsfile_h5(filename, dets, coefs, list_size)
+
+        use const, only: int_32, int_64, i0, dp
+        use system, only: run_t
+
+        use hdf5, only: h5open_f, h5fopen_f, h5dopen_f, &
+             h5dread_f, h5dget_space_f, &
+             h5sget_simple_extent_dims_f, h5sget_simple_extent_ndims_f, &
+             h5sclose_f, h5dclose_f, h5fclose_f, h5close_f, &
+             H5F_ACC_RDONLY_F
+
+        character(len=*), intent(in) :: filename
+        integer(i0), allocatable, intent(in out) :: dets(:,:)
+        real(dp), allocatable, intent(in out) :: coefs(:,:)
+        integer, intent(out) :: list_size
+
+        integer(hid_t) :: fid
+        integer(hid_t) :: dspace_id, dset_id
+
+        integer(int_32) :: rank
+        integer(hsize_t), allocatable :: dims(:)
+        integer(hsize_t), allocatable :: maxdims(:)
+
+        integer(int_32) :: ierr
+        type(hdf5_kinds_t) :: kinds
+
+        ! According to HANDE this has to be called everytime. HDF5 is tricky...
+        call h5open_f(ierr)
+        call hdf5_kinds_init(kinds)
+
+        ! Open file in RO mode
+        call h5fopen_f(trim(filename), H5F_ACC_RDONLY_F, fid, ierr)
+
+
+
+        ! Read ilut matrix
+        ! Open dataset
+        call h5dopen_f(fid, "/wavefunction/ilut", dset_id, ierr)
+
+        ! Open data space
+        call h5dget_space_f(dset_id, dspace_id, ierr)
+        call h5sget_simple_extent_ndims_f(dspace_id, rank, ierr)
+
+        ! Allocate dims and ndims
+        allocate(dims(rank), maxdims(rank))
+        call h5sget_simple_extent_dims_f(dspace_id, dims, maxdims, ierr)
+
+        allocate(dets(int(dims(1)), int(dims(2))))
+
+        call h5sclose_f(dspace_id, ierr)
+
+        ! Read ilut array
+        call h5dread_f(dset_id, kinds%i64, dets, dims, ierr)
+
+        list_size = dims(2)
+
+        deallocate(dims, maxdims)
+
+        ! Close dataset, dataspace, and file
+        call h5dclose_f(dset_id, ierr)
+
+
+
+
+        ! Read sgns matrix
+        ! Open dataset
+        call h5dopen_f(fid, "/wavefunction/sgns", dset_id, ierr)
+
+        ! Open data space
+        call h5dget_space_f(dset_id, dspace_id, ierr)
+        call h5sget_simple_extent_ndims_f(dspace_id, rank, ierr)
+
+        ! Allocate dims and ndims
+        allocate(dims(rank), maxdims(rank))
+        call h5sget_simple_extent_dims_f(dspace_id, dims, maxdims, ierr)
+
+        call h5sclose_f(dspace_id, ierr)
+
+        allocate(coefs(int(dims(1)), int(dims(2))))
+
+        ! Read ilut array
+        call h5dread_f(dset_id, kinds%dp, coefs, dims, ierr)
+        deallocate(dims, maxdims)
+
+        ! Close dataset, dataspace, and file
+        call h5dclose_f(dset_id, ierr)
+
+
+
+
+        ! Close dataset, dataspace, and file
+        call h5fclose_f(fid, ierr)
+
+        call h5close_f(ierr)
+
+
+    end subroutine read_popsfile_h5
 
     subroutine read_column_in_mat(filename, dset_name, vector, col_size, col_indx)
 
@@ -495,16 +597,13 @@ contains
         integer(int_32) :: ierr
         type(hdf5_kinds_t) :: kinds
 
-        real(dp), allocatable :: v1(:), v2(:), v3(:)
+        real(dp), allocatable :: v1(:), v2(:)
         integer(hsize_t) :: offset(rank)
         integer(hsize_t) :: element_count(rank)
         integer(hsize_t) :: mod_size
 
         integer(int_32) :: full_chunks
         integer :: idx
-
-
-        real(dp) :: ddot, axpy
 
 
         ! According to HANDE this has to be called everytime. HDF5 is tricky...
@@ -521,7 +620,7 @@ contains
         ! Get current dimensions
         call h5sget_simple_extent_dims_f(dspace_id, cur_dims, max_dims, ierr)
 
-        full_chunks = cur_dims(1) / size_chunk
+        full_chunks = int(cur_dims(1) / size_chunk, int_32)
         if (full_chunks > 0) then
 
             allocate(v1(size_chunk))
@@ -542,7 +641,7 @@ contains
                     call h5dread_f(dset_id, kinds%dp, v1, [int(size_chunk, hsize_t)], ierr, &
                         memspace, dspace_id)
 
-                    call daxpy(size_chunk, C(col_indx), v1, 1, &
+                    call daxpy(int(size_chunk), C(col_indx), v1, 1, &
                         vector( &
                         ((idx - 1) * size_chunk) + 1: &
                         idx * size_chunk), &
@@ -554,7 +653,7 @@ contains
         endif
 
         ! Get the rest
-        mod_size = modulo(cur_dims(1), size_chunk)
+        mod_size = modulo(cur_dims(1), int(size_chunk, hsize_t))
 
         if (mod_size /= 0) then
 
@@ -579,7 +678,7 @@ contains
 
                 v2(1:mod_size) = vector((full_chunks * size_chunk) + 1:(full_chunks * size_chunk) + mod_size)
 
-                call daxpy(mod_size, C(col_indx), v1, 1, v2, 1)
+                call daxpy(int(mod_size), C(col_indx), v1, 1, v2, 1)
                 vector((full_chunks * size_chunk) + 1:(full_chunks * size_chunk) + mod_size) = v2(1:mod_size)
             enddo
 
@@ -637,7 +736,7 @@ contains
         integer :: idx
 
 
-        real(dp) :: ddot, axpy
+        real(dp) :: ddot
 
 
         ! According to HANDE this has to be called everytime. HDF5 is tricky...
@@ -654,7 +753,7 @@ contains
         ! Get current dimensions
         call h5sget_simple_extent_dims_f(dspace_id, cur_dims, max_dims, ierr)
 
-        full_chunks = cur_dims(1) / size_chunk
+        full_chunks = int(cur_dims(1) / size_chunk, int_32)
         if (full_chunks > 0) then
 
             allocate(v1(size_chunk))
@@ -734,7 +833,7 @@ contains
 
 
         ! Get the rest
-        mod_size = modulo(cur_dims(1), size_chunk)
+        mod_size = modulo(cur_dims(1), int(size_chunk, hsize_t))
 
         if (mod_size /= 0) then
 
@@ -848,9 +947,7 @@ contains
         integer(int_32) :: ierr
         type(hdf5_kinds_t) :: kinds
 
-        integer :: col_indx, col_indy
-
-        real(dp), allocatable :: v1(:), v2(:), v3(:)
+        real(dp), allocatable :: v1(:), v2(:)
         integer(hsize_t) :: offset(rank)
         integer(hsize_t) :: element_count(rank)
         integer(hsize_t) :: mod_size
@@ -878,7 +975,7 @@ contains
         ! Get current dimensions
         call h5sget_simple_extent_dims_f(dspace_id, cur_dims, max_dims, ierr)
 
-        full_chunks = cur_dims(1) / size_chunk
+        full_chunks = int(cur_dims(1) / size_chunk, int_32)
         if (full_chunks > 0) then
 
             allocate(v1(size_chunk))
@@ -923,7 +1020,7 @@ contains
 
 
         ! Get the rest
-        mod_size = modulo(cur_dims(1), size_chunk)
+        mod_size = int(modulo(cur_dims(1), int(size_chunk, hsize_t)), hsize_t)
 
         if (mod_size /= 0) then
 
@@ -1045,11 +1142,23 @@ contains
         character(len=*), intent(in) :: dset_name
         integer, intent(in) :: dims(:)
 
+        character(len=200) :: dummy_filename, dummy_dset_name
+        integer :: i
+
+        dummy_filename = filename
+        dummy_dset_name = dset_name
+        i = dims(1)
+
+
     end subroutine init_dset
 
     subroutine init_h5_file(filename)
 
         character(len=*), intent(in) :: filename
+
+        character(len=200) :: dummy_filename
+
+        dummy_filename = filename
 
     end subroutine init_h5_file
 
@@ -1061,8 +1170,27 @@ contains
         type(run_t), intent(in) :: run
         type(cc_t), intent(in) :: cc
 
+        integer :: dummy_diis_space, dummy_t_size
+
+        dummy_diis_space = run%diis_space
+        dummy_t_size = cc%t_size
+
     end subroutine write_ext_cor_vecs
 
+    subroutine read_popsfile_h5(filename, dets, coefs, list_size)
+
+        use const, only: i0, dp
+
+        use errors, only: stop_all
+
+        character(len=*), intent(in) :: filename
+        integer(i0), allocatable, intent(in out) :: dets(:,:)
+        real(dp), allocatable, intent(in out) :: coefs(:,:)
+        integer, intent(out) :: list_size
+
+        call stop_all('read_popsfile_h5', 'ERROR: compilation has no HDF5 support')
+
+    end subroutine read_popsfile_h5
 
 #endif
 

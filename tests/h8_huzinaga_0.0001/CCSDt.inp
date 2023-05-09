@@ -1,0 +1,19 @@
+# System information
+froz=0
+nel=8
+nvir=8
+onebody=h8_huzinaga_0.0001/onebody.inp
+twobody=h8_huzinaga_0.0001/twobody.inp
+
+# Calculation options
+keep_bin = .false.
+diis_space=10
+tol=1.0e-11
+max_iterations=60
+calc_type=CCSDt
+rhf=.true.
+num_threads=1
+
+# Active space options
+act_occ=1
+act_unocc=1

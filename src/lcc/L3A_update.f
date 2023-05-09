@@ -64,11 +64,10 @@ C
        enddo;enddo;enddo;enddo;enddo;enddo
 C
        allocate(D1(N0+1:N1,N1+1:N3,N0+1:N1,N0+1:N1))
-       call reorder1234(N0,N3,N0,N3,N0,N3,N0,N3,
-     & N0,N1,N1,N3,N0,N1,N0,N1,H2A,D1)
+       call reorder_shift(4,shape(H2A),size(H2A),shape(D1),size(D1),
+     & (/N0-n0,N1-n0,N0-n0,N0-n0/),'1234',H2A,D1)
        allocate(D2(N0+1:N1,N1+1:N3,N1+1:N3,N0+1:N1))
-       call reorder3124(N1,N3,N1,N3,N0,N1,N0,N1,
-     & N0,N1,N1,N3,N1,N3,N0,N1,l2A,D2)
+       call reorder_stripe(4,shape(l2A),size(l2A),'3124',l2A,D2)
        allocate(U1(N1+1:N3,N1+1:N3,N0+1:N1,N1+1:N3,N0+1:N1,N0+1:N1))
        I1=K1*K1*K3
        I2=K1*K3*K3
@@ -77,32 +76,31 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum234156(N1,N3,N1,N3,N1,N3,N0,N1,N0,N1,N0,N1,V3A,U1,1.000)
-       call
-     & sum134256(N1,N3,N1,N3,N1,N3,N0,N1,N0,N1,N0,N1,V3A,U1,-1.000)
-       call
-     & sum124356(N1,N3,N1,N3,N1,N3,N0,N1,N0,N1,N0,N1,V3A,U1,1.000)
-       call
-     & sum235146(N1,N3,N1,N3,N1,N3,N0,N1,N0,N1,N0,N1,V3A,U1,-1.000)
-       call
-     & sum135246(N1,N3,N1,N3,N1,N3,N0,N1,N0,N1,N0,N1,V3A,U1,1.000)
-       call
-     & sum125346(N1,N3,N1,N3,N1,N3,N0,N1,N0,N1,N0,N1,V3A,U1,-1.000)
-       call
-     & sum236145(N1,N3,N1,N3,N1,N3,N0,N1,N0,N1,N0,N1,V3A,U1,1.000)
-       call
-     & sum136245(N1,N3,N1,N3,N1,N3,N0,N1,N0,N1,N0,N1,V3A,U1,-1.000)
-       call
-     & sum126345(N1,N3,N1,N3,N1,N3,N0,N1,N0,N1,N0,N1,V3A,U1,1.000)
+       call sum_stripe(6,shape(V3A),size(V3A),'234156',
+     & 1.000,V3A,U1)
+       call sum_stripe(6,shape(V3A),size(V3A),'134256',
+     & -1.000,V3A,U1)
+       call sum_stripe(6,shape(V3A),size(V3A),'124356',
+     & 1.000,V3A,U1)
+       call sum_stripe(6,shape(V3A),size(V3A),'235146',
+     & -1.000,V3A,U1)
+       call sum_stripe(6,shape(V3A),size(V3A),'135246',
+     & 1.000,V3A,U1)
+       call sum_stripe(6,shape(V3A),size(V3A),'125346',
+     & -1.000,V3A,U1)
+       call sum_stripe(6,shape(V3A),size(V3A),'236145',
+     & 1.000,V3A,U1)
+       call sum_stripe(6,shape(V3A),size(V3A),'136245',
+     & -1.000,V3A,U1)
+       call sum_stripe(6,shape(V3A),size(V3A),'126345',
+     & 1.000,V3A,U1)
        deallocate(U1)
 C
        allocate(D1(N1+1:N3,N1+1:N3,N1+1:N3,N0+1:N1))
-       call reorder3124(N0,N3,N0,N3,N0,N3,N0,N3,
-     & N1,N3,N1,N3,N1,N3,N0,N1,H2A,D1)
+       call reorder_shift(4,shape(H2A),size(H2A),shape(D1),size(D1),
+     & (/N1-n0,N1-n0,N1-n0,N0-n0/),'3124',H2A,D1)
        allocate(D2(N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1))
-       call reorder1234(N1,N3,N1,N3,N0,N1,N0,N1,
-     & N1,N3,N1,N3,N0,N1,N0,N1,l2A,D2)
+       call reorder_stripe(4,shape(l2A),size(l2A),'1234',l2A,D2)
        allocate(U2(N1+1:N3,N0+1:N1,N0+1:N1,N1+1:N3,N1+1:N3,N0+1:N1))
        I1=K1*K3*K3
        I2=K1*K1*K3
@@ -111,24 +109,24 @@ C
        deallocate(D1)
        deallocate(D2)
 C
-       call
-     & sum345126(N1,N3,N1,N3,N1,N3,N0,N1,N0,N1,N0,N1,V3A,U2,-1.000)
-       call
-     & sum245136(N1,N3,N1,N3,N1,N3,N0,N1,N0,N1,N0,N1,V3A,U2,1.000)
-       call
-     & sum145236(N1,N3,N1,N3,N1,N3,N0,N1,N0,N1,N0,N1,V3A,U2,-1.000)
-       call
-     & sum346125(N1,N3,N1,N3,N1,N3,N0,N1,N0,N1,N0,N1,V3A,U2,1.000)
-       call
-     & sum246135(N1,N3,N1,N3,N1,N3,N0,N1,N0,N1,N0,N1,V3A,U2,-1.000)
-       call
-     & sum146235(N1,N3,N1,N3,N1,N3,N0,N1,N0,N1,N0,N1,V3A,U2,1.000)
-       call
-     & sum356124(N1,N3,N1,N3,N1,N3,N0,N1,N0,N1,N0,N1,V3A,U2,-1.000)
-       call
-     & sum256134(N1,N3,N1,N3,N1,N3,N0,N1,N0,N1,N0,N1,V3A,U2,1.000)
-       call
-     & sum156234(N1,N3,N1,N3,N1,N3,N0,N1,N0,N1,N0,N1,V3A,U2,-1.000)
+       call sum_stripe(6,shape(V3A),size(V3A),'345126',
+     & -1.000,V3A,U2)
+       call sum_stripe(6,shape(V3A),size(V3A),'245136',
+     & 1.000,V3A,U2)
+       call sum_stripe(6,shape(V3A),size(V3A),'145236',
+     & -1.000,V3A,U2)
+       call sum_stripe(6,shape(V3A),size(V3A),'346125',
+     & 1.000,V3A,U2)
+       call sum_stripe(6,shape(V3A),size(V3A),'246135',
+     & -1.000,V3A,U2)
+       call sum_stripe(6,shape(V3A),size(V3A),'146235',
+     & 1.000,V3A,U2)
+       call sum_stripe(6,shape(V3A),size(V3A),'356124',
+     & -1.000,V3A,U2)
+       call sum_stripe(6,shape(V3A),size(V3A),'256134',
+     & 1.000,V3A,U2)
+       call sum_stripe(6,shape(V3A),size(V3A),'156234',
+     & -1.000,V3A,U2)
        deallocate(U2)
 C
        end

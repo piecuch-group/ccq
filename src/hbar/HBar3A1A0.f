@@ -28,11 +28,10 @@ C
        real*8,allocatable::U1(:,:,:,:)
 C
        allocate(D1(N0+1:N1,N1+1:N3,N1+1:N3,N0+1:N1))
-       call reorder4123(N0,N3,N0,N3,N0,N3,N0,N3,
-     & N0,N1,N1,N3,N1,N3,N0,N1,IntR,D1)
+       call reorder_shift(4,shape(IntR),size(IntR),shape(D1),size(D1),
+     & (/N0-n0,N1-n0,N1-n0,N0-n0/),'4123',IntR,D1)
        allocate(B2(N0+1:N1,N1+1:N3))
-       call reorder21(N1,N3,N0,N1,
-     & N0,N1,N1,N3,t1A,B2)
+       call reorder_stripe(2,shape(t1A),size(t1A),'21',t1A,B2)
        allocate(U1(N1+1:N3,N1+1:N3,N1+1:N3,N0+1:N1))
        I1=K1*K3*K3
        I2=K3
@@ -41,8 +40,8 @@ C
        deallocate(D1)
        deallocate(B2)
 C
-       call
-     & sum3124(N1,N3,N1,N3,N1,N3,N0,N1,V3A1A,U1,-1.000)
+       call sum_stripe(4,shape(V3A1A),size(V3A1A),'3124',
+     & -1.000,V3A1A,U1)
        deallocate(U1)
 C
        end

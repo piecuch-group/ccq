@@ -93,7 +93,7 @@ contains
         ! Pass MurmurHash2 a multiple of 32-bits.
         ! Note that DET_SIZE must currently be 32 or 64 bits, so this is safe!
         ! The size parameter used in Murmurhash is in bytes...
-        nbytes = ceiling(real(N)/32)*4
+        nbytes = int(ceiling(real(N)/32)*4, c_int)
 
         ! Unfortunately it seems c_loc is not required to be pure by the
         ! F2003 standards! :-(
@@ -118,8 +118,6 @@ contains
         integer :: hash
         integer :: r
         integer :: i
-
-        integer :: b_idx
 
         exists = .true.
 
@@ -156,8 +154,6 @@ contains
         integer :: hash
         integer :: r
         integer :: i
-
-        integer :: b_idx
 
         string_len = size(s)
         hash = int(murmurhash_bit_string(s, string_len))
@@ -335,8 +331,6 @@ contains
         integer :: r
 
         integer :: h, b_idx
-
-        integer :: string_len
 
         h = this%djb2(k)
 

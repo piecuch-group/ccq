@@ -1,0 +1,13 @@
+# System information
+froz=0
+nel=8
+nvir=8
+onebody=h8_huzinaga_0.0001/onebody.inp
+twobody=h8_huzinaga_0.0001/twobody.inp
+
+# Calculation options
+rhf=.false.
+tol=1.0e-11
+max_iterations=60
+calc_type=stoch-CC
+keep_bin=.false.

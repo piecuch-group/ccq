@@ -258,9 +258,9 @@ contains
 
         ! From http://graphics.stanford.edu/~seander/bithacks.html.
 
-        t1 = ior(v, v - 1_i0) + 1
-        t2 = ishft(iand(t1,-t1)/iand(v,-v),-1) - 1
-        w = ior(t1, t2)
+        t1 = int(ior(v, v - 1_i0), i0) + 1_i0
+        t2 = int(ishft(iand(t1,-t1)/iand(v,-v),-1), i0) - 1_i0
+        w = int(ior(t1, t2), i0)
 
     end function bit_permutation
 
@@ -286,7 +286,7 @@ contains
         integer :: nbits_seen, ifield, nfound
         integer(i0) :: offset, field
 
-        integer, parameter :: field_size = ubound(bit_table_256, dim=1)
+        integer(i0), parameter :: field_size = ubound(bit_table_256, dim=1)
         integer, parameter :: nfields = i0_length/field_size
         integer(i0), parameter :: mask = 2**field_size - 1
 

@@ -1,0 +1,18 @@
+# System information
+froz=0
+nel=4
+nvir=4
+sym_file=h4_sto3g/sym.inp
+onebody=h4_sto3g/onebody.inp
+twobody=h4_sto3g/twobody.inp
+
+# Calculation options
+tol=1.0e-11
+diis_space=8
+max_iterations=80
+keep_bin=.false.
+shift=0.12
+ext_cor_file=h4_sto3g/fci_vec.dat
+
+# Calculation type
+calc_type=CADFCIQMC
