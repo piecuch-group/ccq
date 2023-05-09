@@ -1,7 +1,7 @@
 module cc_types
 
     ! This module holds the types defining all CC-related data.
-    ! For exmaple, T vector, L vector, Moments, ACC parameters, etc.
+    ! For example, T vector, L vector, Moments, ACC parameters, etc.
 
     use const, only: p, sp, int_32, i0
     use ext_cor_types, only: ext_cor_t

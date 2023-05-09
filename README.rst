@@ -1,10 +1,10 @@
 ccq Coupled-Cluster Program
 ===========================
 
-``ccq`` is a coupled-cluster (CC) software package capable of running calculations with up to
-quadruple excitations. Notable methods included are CCSDT, CCSDTQ, as well as
-their active-space counterparts, CCSDt, CCSDtq, and CCSDTq, and ACC-type
-methods. Also, externally corrected CC is available
+``ccq`` is a coupled-cluster (CC) software package capable of running
+calculations with up to quadruple excitations. Notable methods included are
+CCSDT, CCSDTQ, as well as their active-space counterparts, CCSDt, CCSDtq, and
+CCSDTq, and ACC-type methods. Also, externally corrected CC is available
 
 
 Building

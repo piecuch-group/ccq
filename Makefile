@@ -1,4 +1,4 @@
-# Brief Makefile for modern fortran projects
+# Brief Makefile for modern Fortran projects
 #
 # Inspired (almost the same as) in James Spencer's
 # http://github.com/jsspencer/generic_makefile
@@ -143,7 +143,7 @@ debug: FFLAGS = $(FFLAGS_DEBUG)
 debug: $(BIN_DIR)/$(PROGRAM)
 
 test:
-	cd $(TEST_DIR) && pytest -v --tb=line
+	cd $(TEST_DIR) && pytest -v --tb=line test_small.py
 
 # Dependencies
 # -------------------
