@@ -26,11 +26,11 @@ jobs:
 
       - name: Install fortran
         run: |
-          sudo apt install -y gfortran intel-mkl
+          sudo apt install -y gfortran intel-mkl uuid-dev make
 
       - name: Build ccq
         run: |
-          ln -s ./config/gfortran.mk config.mk
+          ln -s ./config/gfortran-github.mk config.mk
           make -j4
 
       - name: Test with pytest
