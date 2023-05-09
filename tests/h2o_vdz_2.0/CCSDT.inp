@@ -1,0 +1,19 @@
+# System information
+froz=0
+nel=10
+nvir=38
+onebody=h2o_vdz_2.0/onebody.inp
+twobody=h2o_vdz_2.0/twobody.inp
+
+# Calculation options
+keep_bin=.false.
+diis_space=6
+tol=1.0e-8
+max_iterations=60
+calc_type=CCSDT
+rhf=.true.
+num_threads=8
+
+# Active space options
+act_occ=2
+act_unocc=2

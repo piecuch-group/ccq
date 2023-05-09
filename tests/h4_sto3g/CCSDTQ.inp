@@ -1,0 +1,12 @@
+# System information
+froz=0
+nel=4
+nvir=4
+onebody=h4_sto3g/onebody.inp
+twobody=h4_sto3g/twobody.inp
+
+# Calculation options
+tol=1.0e-11
+max_iterations=60
+calc_type=CCSDTQ
+keep_bin=.false.

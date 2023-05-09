@@ -1,0 +1,19 @@
+# System information
+froz=0
+nel=6
+nvir=6
+sym_file=h6_sto6g_2.5/sym.inp
+onebody=h6_sto6g_2.5/onebody.inp
+twobody=h6_sto6g_2.5/twobody.inp
+
+# Calculation options
+rhf=.false.
+tol=1.0e-11
+diis_space=8
+max_iterations=60
+keep_bin=.false.
+shift=0.12
+ext_cor_file=h6_sto6g_2.5/ewalkers-01500
+
+# Calculation type
+calc_type=DCSD-MC

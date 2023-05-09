@@ -1,0 +1,18 @@
+# System information
+froz=0
+nel=10
+nvir=38
+sym_file=h2o_vdz_2.0/sym.inp
+onebody=h2o_vdz_2.0/onebody_ec.inp
+twobody=h2o_vdz_2.0/twobody_ec.inp
+
+# Calculation options
+rhf=.false.
+tol=1.0e-11
+diis_space=6
+max_iterations=100
+keep_bin=.false.
+ext_cor_file=h2o_vdz_2.0/ewalkers-01000
+
+# Calculation type
+calc_type=CADFCIQMC

@@ -1,0 +1,12 @@
+# System information
+froz=0
+nel=10
+nvir=16
+onebody=h2o_431g_1.5/onebody.inp
+twobody=h2o_431g_1.5/twobody.inp
+
+# Calculation options
+tol=1.0e-11
+max_iterations=60
+calc_type=CCSD
+keep_bin=.false.
