@@ -1,0 +1,38 @@
+name: Run tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest
+
+      - name: Install fortran
+        run: |
+          sudo apt install -y gfortran intel-mkl
+
+      - name: Build ccq
+        run: |
+          ln -s ./config/gfortran.mk config.mk
+          make -j4
+
+      - name: Test with pytest
+        run: |
+          make test
