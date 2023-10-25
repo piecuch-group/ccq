@@ -118,3 +118,23 @@ t2t2_t3:
 
 t2t3_t3:
    T_2 * T_3 projected on triples. Takes 5 values.
+
+Development Team
+----------------
+
+| Dr. J. Emiliano Deustua
+| COO and Co-founder, Examol
+| e-mail: edeustua@gmail.com
+|
+| Dr. Nicholas P. Bauman
+| Chemist, Chemical Physics Theory Team, Pacific Northwest National Laboratory
+|
+| Dr. Ilias Magoulas
+| Postdoctoral Research Fellow, Department of Chemistry, Emory University
+|
+| Dr. Jun Shen
+| Senior Research Associate, Department of Chemistry, Michigan State University
+|
+| Professor Piotr Piecuch
+| University Distinguished Professor and Michigan State University Foundation Professor, Department of Chemistry, Michigan State University  
+| Adjunct Professor, Department of Physics and Astronomy, Michigan State University
